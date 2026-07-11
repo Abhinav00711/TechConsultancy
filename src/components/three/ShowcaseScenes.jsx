@@ -1,8 +1,21 @@
-import { useRef, useMemo, useEffect, Suspense } from 'react'
+import { useRef, useMemo, useEffect, useState, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, Html } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { useInView } from 'framer-motion'
 import * as THREE from 'three'
+
+/* narrow screens get a pulled-back camera so labels stay inside the frame */
+function useCompact() {
+  const [compact, setCompact] = useState(() => window.matchMedia('(max-width: 700px)').matches)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 700px)')
+    const onChange = (e) => setCompact(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return compact
+}
 
 /* ═══════════════════ shared helpers ═══════════════════ */
 
@@ -791,11 +804,16 @@ function ApiScene({ active }) {
 const SCENES = { ai: AiScene, crm: CrmScene, erp: ErpScene, api: ApiScene }
 
 export default function ShowcaseCanvas({ scene }) {
+  const compact = useCompact()
+  const wrap = useRef(null)
+  const visible = useInView(wrap, { margin: '120px' })
   return (
-    <div className="showcase-canvas-inner">
+    <div className="showcase-canvas-inner" ref={wrap}>
       <Canvas
-        camera={{ position: [0, 0, 7], fov: 45 }}
+        key={compact ? 'compact' : 'wide'}
+        camera={{ position: [0, 0, compact ? 9 : 7], fov: 45 }}
         dpr={[1, 1.6]}
+        frameloop={visible ? 'always' : 'never'}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         <Suspense fallback={null}>

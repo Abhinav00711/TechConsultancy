@@ -2,6 +2,7 @@ import { useRef, useMemo, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+import { useInView } from 'framer-motion'
 import * as THREE from 'three'
 
 /* Central morphing orb with a wireframe shell */
@@ -169,13 +170,16 @@ function CameraRig() {
 }
 
 export default function HeroScene() {
+  const wrap = useRef(null)
+  const visible = useInView(wrap, { margin: '80px' })
   return (
-    <div className="hero-canvas">
+    <div className="hero-canvas" ref={wrap}>
       <Canvas
         camera={{ position: [0, 0, 9], fov: 45 }}
-      dpr={[1, 1.8]}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-    >
+        dpr={[1, 1.8]}
+        frameloop={visible ? 'always' : 'never'}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+      >
       <Suspense fallback={null}>
         <color attach="background" args={['#05060e']} />
         <fog attach="fog" args={['#05060e', 10, 26]} />
