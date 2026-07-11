@@ -1,0 +1,27 @@
+import { motion } from 'framer-motion'
+import Reveal from './ui/Reveal.jsx'
+
+export default function CtaBand() {
+  return (
+    <section className="cta-band">
+      <motion.div
+        className="cta-band-glow"
+        animate={{ opacity: [0.7, 1, 0.7] }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <div className="container" style={{ position: 'relative' }}>
+        <Reveal>
+          <h2>
+            Ready to <span className="gradient-text">10x</span> Your Business
+            <br />
+            With Technology?
+          </h2>
+          <p>Book a free discovery call. No sales pitch — just an honest technical conversation about your goals.</p>
+          <a href="#contact" className="btn btn-primary">
+            Book a Free Call <span aria-hidden>→</span>
+          </a>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
