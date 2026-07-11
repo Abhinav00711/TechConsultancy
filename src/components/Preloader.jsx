@@ -7,6 +7,8 @@ export default function Preloader({ done }) {
       {!done && (
         <motion.div
           className="preloader"
+          role="status"
+          aria-label="Loading"
           exit={{ opacity: 0, scale: 1.06 }}
           transition={{ duration: 0.6, ease: 'easeInOut' }}
         >

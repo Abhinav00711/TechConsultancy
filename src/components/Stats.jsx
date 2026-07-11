@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { useInView } from 'framer-motion'
+import { useInView, useReducedMotion } from 'framer-motion'
 import { stats } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 
 function Counter({ value, suffix }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
-  const [display, setDisplay] = useState(0)
+  const reducedMotion = useReducedMotion()
+  const [display, setDisplay] = useState(reducedMotion ? value : 0)
 
   useEffect(() => {
-    if (!inView) return
+    if (!inView || reducedMotion) return
     const duration = 1800
     const start = performance.now()
     let raf
@@ -21,19 +22,26 @@ function Counter({ value, suffix }) {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [inView, value])
+  }, [inView, value, reducedMotion])
 
   return (
     <span ref={ref} className="stat-value gradient-text">
-      {display}
-      {suffix}
+      {/* Announce the final value; hide the counting animation from AT */}
+      <span className="sr-only">
+        {value}
+        {suffix}
+      </span>
+      <span aria-hidden="true">
+        {reducedMotion ? value : display}
+        {suffix}
+      </span>
     </span>
   )
 }
 
 export default function Stats() {
   return (
-    <section className="stats-band">
+    <section className="stats-band" aria-label="Our commitments">
       <div className="container">
         <div className="stats-grid">
           {stats.map((s, i) => (

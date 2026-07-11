@@ -7,10 +7,20 @@ export const site = {
   // [PLACEHOLDER] — swap for your real brand name
   name: 'TwinByte',
   suffix: 'Technologies',
-  tagline: 'Two brothers. One mission. Infinite possibilities.',
-  email: 'hello@twinbyte.tech', // [PLACEHOLDER]
-  phone: '+91 98765 43210', // [PLACEHOLDER]
+  tagline: 'Two brothers. One mission: technology that moves your business.',
+  email: 'hello@twinbyte.tech', // [PLACEHOLDER] — must be a real, monitored inbox before launch
+  // Phone intentionally omitted until a real number exists — add it here and it
+  // will appear in the contact section and footer automatically.
+  phone: '',
   location: 'Mumbai, India · Serving clients worldwide', // [PLACEHOLDER]
+  // Contact-form endpoint (e.g. Formspree: https://formspree.io/f/xxxxxxx).
+  // Leave empty to fall back to a prefilled email draft — no lead is ever lost.
+  formEndpoint: '',
+  // Only socials with a real URL are rendered. Fill these in as profiles exist.
+  socials: [
+    // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
+    // { label: 'GitHub', icon: 'github', url: 'https://github.com/…' },
+  ],
 }
 
 export const nav = [
@@ -90,6 +100,7 @@ export const showcase = {
   title: 'Your Systems,',
   titleGradient: 'Visualised in 3D',
   sub: 'Interactive previews of what we build — watch the data flow. Every system below is something we design and ship for clients like you.',
+  kpiNote: 'Illustrative design targets — every engagement gets its own measurable goals.',
   items: [
     {
       id: 'ai',
@@ -128,7 +139,7 @@ export const showcase = {
       kpis: [
         { value: '+38%', label: 'conversion' },
         { value: '360°', label: 'customer view' },
-        { value: '0', label: 'leads lost' },
+        { value: '100%', label: 'lead capture' },
       ],
     },
     {
@@ -166,9 +177,9 @@ export const showcase = {
         'Monitoring, versioning & security baked in',
       ],
       kpis: [
-        { value: '99.9%', label: 'uptime' },
+        { value: '99.9%', label: 'uptime target' },
         { value: 'ms', label: 'latency' },
-        { value: '∞', label: 'integrations' },
+        { value: '100%', label: 'documented' },
       ],
     },
   ],
@@ -190,13 +201,8 @@ export const about = {
       initials: 'AR',
       accent: '#22d3ee',
     },
-    {
-      name: '[Brother’s Name]', // [PLACEHOLDER]
-      role: 'Co-Founder · Strategy & Growth', // [PLACEHOLDER]
-      bio: 'Bridges business and technology. Leads client strategy, partnerships and growth.', // [PLACEHOLDER]
-      initials: 'BR',
-      accent: '#c084fc',
-    },
+    // Add the second founder here when their details are confirmed:
+    // { name: '…', role: 'Co-Founder · Strategy & Growth', bio: '…', initials: '…', accent: '#c084fc' },
   ],
   values: [
     { title: 'Ship Fast', text: 'Rapid iterations, weekly demos, no black boxes.' },
@@ -206,11 +212,12 @@ export const about = {
   ],
 }
 
+// Commitments we control — no invented track-record numbers.
 export const stats = [
-  { value: 50, suffix: '+', label: 'Projects Delivered' }, // [PLACEHOLDER]
-  { value: 30, suffix: '+', label: 'Happy Clients' }, // [PLACEHOLDER]
-  { value: 8, suffix: '+', label: 'Years Combined Experience' }, // [PLACEHOLDER]
-  { value: 99, suffix: '%', label: 'Client Retention' }, // [PLACEHOLDER]
+  { value: 100, suffix: '%', label: 'Code Ownership Handed Over' },
+  { value: 24, suffix: 'h', label: 'Maximum Response Time' },
+  { value: 7, suffix: '', label: 'Days to Your First Demo' },
+  { value: 0, suffix: '', label: 'Lock-in Contracts' },
 ]
 
 export const process = [
@@ -242,26 +249,38 @@ export const techStack = [
   'Docker', 'Kubernetes', 'GraphQL', 'FastAPI', 'Flutter', 'TensorFlow',
 ]
 
-export const testimonials = [
-  {
-    quote:
-      'They integrated AI into our sales workflow and cut manual data entry by 70%. The team feels like an extension of our own.',
-    name: 'Client Name', // [PLACEHOLDER]
-    role: 'CEO, Manufacturing Company', // [PLACEHOLDER]
-  },
-  {
-    quote:
-      'Our custom CRM replaced three separate tools. Faster, cheaper, and finally built around how we actually work.',
-    name: 'Client Name', // [PLACEHOLDER]
-    role: 'Founder, D2C Brand', // [PLACEHOLDER]
-  },
-  {
-    quote:
-      'The new website tripled our inbound leads in two months. The 3D experience makes us look like a company ten times our size.',
-    name: 'Client Name', // [PLACEHOLDER]
-    role: 'Director, Real Estate Group', // [PLACEHOLDER]
-  },
-]
+// Example engagements — clearly framed as the kind of work we take on.
+// Swap these for real, permissioned case studies / testimonials as they come in.
+export const work = {
+  tag: 'The Work We Take On',
+  title: 'Built Around',
+  titleGradient: 'Your Numbers',
+  sub: 'Example engagements that show how we scope a project: a concrete problem, a system, and a measurable target.',
+  note: 'Illustrative examples of typical engagements — your project gets its own goals and quote.',
+  items: [
+    {
+      tag: 'AI Integration · Manufacturing',
+      title: 'Sales-ops automation',
+      text: 'Quotes, purchase orders and emails parsed and entered into the ERP automatically — humans approve only the edge cases.',
+      target: 'Target: cut manual data entry by more than half.',
+      accent: '#22d3ee',
+    },
+    {
+      tag: 'Custom CRM · D2C Brand',
+      title: 'One pipeline instead of three tools',
+      text: 'A CRM shaped around the brand’s real sales stages, with WhatsApp, email and call tracking unified in one dashboard.',
+      target: 'Target: zero leads lost between tools, faster follow-ups.',
+      accent: '#818cf8',
+    },
+    {
+      tag: 'Web Development · Real Estate',
+      title: 'A site that sells the vision',
+      text: 'An immersive, fast marketing site with 3D walkthrough elements and conversion-focused enquiry flows.',
+      target: 'Target: measurably more qualified inbound leads.',
+      accent: '#f472b6',
+    },
+  ],
+}
 
 export const industries = [
   'FinTech', 'Healthcare', 'Retail & D2C', 'Manufacturing', 'Real Estate',

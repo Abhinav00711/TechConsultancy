@@ -1,2 +1,5 @@
 User-agent: *
 Allow: /
+
+# [PLACEHOLDER] replace twinbyte.tech with your real domain before launch
+Sitemap: https://twinbyte.tech/sitemap.xml

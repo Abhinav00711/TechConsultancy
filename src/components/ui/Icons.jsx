@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 /* Inline SVG icon set — stroke icons sized by the parent's font/color */
 const base = {
   fill: 'none',
@@ -10,20 +12,26 @@ const base = {
   viewBox: '0 0 24 24',
 }
 
-export const Logo = ({ size = 36 }) => (
-  <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-    <defs>
-      <linearGradient id="logo-g" x1="0" y1="0" x2="64" y2="64">
-        <stop offset="0" stopColor="#22d3ee" />
-        <stop offset="0.5" stopColor="#818cf8" />
-        <stop offset="1" stopColor="#c084fc" />
-      </linearGradient>
-    </defs>
-    <path d="M14 20 L32 10 L50 20 L50 44 L32 54 L14 44 Z" stroke="url(#logo-g)" strokeWidth="3.5" strokeLinejoin="round" />
-    <path d="M32 10 L32 54 M14 20 L50 44 M50 20 L14 44" stroke="url(#logo-g)" strokeWidth="1.5" opacity="0.55" />
-    <circle cx="32" cy="32" r="5" fill="url(#logo-g)" />
-  </svg>
-)
+export const Logo = ({ size = 36 }) => {
+  // Unique gradient id per instance — the logo renders in both navbar and
+  // footer, and duplicate SVG ids can break the gradient reference.
+  const id = useId()
+  const g = `url(#${id})`
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="64" y2="64">
+          <stop offset="0" stopColor="#22d3ee" />
+          <stop offset="0.5" stopColor="#818cf8" />
+          <stop offset="1" stopColor="#c084fc" />
+        </linearGradient>
+      </defs>
+      <path d="M14 20 L32 10 L50 20 L50 44 L32 54 L14 44 Z" stroke={g} strokeWidth="3.5" strokeLinejoin="round" />
+      <path d="M32 10 L32 54 M14 20 L50 44 M50 20 L14 44" stroke={g} strokeWidth="1.5" opacity="0.55" />
+      <circle cx="32" cy="32" r="5" fill={g} />
+    </svg>
+  )
+}
 
 const icons = {
   ai: (
@@ -116,5 +124,9 @@ const icons = {
 export default function Icon({ name, ...props }) {
   const el = icons[name]
   if (!el) return null
-  return <span style={{ display: 'inline-flex', alignItems: 'center' }} {...props}>{el}</span>
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center' }} aria-hidden="true" {...props}>
+      {el}
+    </span>
+  )
 }

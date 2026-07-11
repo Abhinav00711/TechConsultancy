@@ -3,18 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { faq } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 
-function FaqItem({ q, a, open, onToggle }) {
+function FaqItem({ id, q, a, open, onToggle }) {
   return (
     <div className={`faq-item glass ${open ? 'open' : ''}`}>
-      <button className="faq-q" onClick={onToggle} aria-expanded={open}>
+      <button className="faq-q" onClick={onToggle} aria-expanded={open} aria-controls={id}>
         <span>{q}</span>
-        <motion.span className="faq-icon" animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
+        <motion.span className="faq-icon" aria-hidden="true" animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
           +
         </motion.span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
+            id={id}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -45,7 +46,7 @@ export default function Faq() {
         <div className="faq-list">
           {faq.items.map((item, i) => (
             <Reveal key={item.q} delay={i * 0.06}>
-              <FaqItem {...item} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
+              <FaqItem {...item} id={`faq-a-${i}`} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
             </Reveal>
           ))}
         </div>

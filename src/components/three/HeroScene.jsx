@@ -2,8 +2,9 @@ import { useRef, useMemo, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
-import { useInView } from 'framer-motion'
+import { useInView, useReducedMotion } from 'framer-motion'
 import * as THREE from 'three'
+import { SceneErrorBoundary, guardContextLoss, isLowEnd } from './SceneShell.jsx'
 
 /* Central morphing orb with a wireframe shell */
 function CoreOrb() {
@@ -158,12 +159,11 @@ function ParticleField({ count = 1600 }) {
   )
 }
 
-/* Camera drifts gently toward the cursor */
+/* Camera drifts gently toward the cursor (frame-rate independent damping) */
 function CameraRig() {
-  const target = useRef(new THREE.Vector3(0, 0, 9))
-  useFrame(({ camera, pointer }) => {
-    target.current.set(pointer.x * 0.7, pointer.y * 0.45, 9)
-    camera.position.lerp(target.current, 0.045)
+  useFrame(({ camera, pointer }, dt) => {
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, pointer.x * 0.7, 2.7, dt)
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, pointer.y * 0.45, 2.7, dt)
     camera.lookAt(1.2, 0, 0)
   })
   return null
@@ -172,34 +172,46 @@ function CameraRig() {
 export default function HeroScene() {
   const wrap = useRef(null)
   const visible = useInView(wrap, { margin: '80px' })
+  const reducedMotion = useReducedMotion()
+  const lowEnd = useMemo(isLowEnd, [])
+
+  // Reduced motion: render a single static frame ('demand') instead of looping.
+  const frameloop = reducedMotion ? 'demand' : visible ? 'always' : 'never'
+
   return (
-    <div className="hero-canvas" ref={wrap}>
-      <Canvas
-        camera={{ position: [0, 0, 9], fov: 45 }}
-        dpr={[1, 1.8]}
-        frameloop={visible ? 'always' : 'never'}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      >
-      <Suspense fallback={null}>
-        <color attach="background" args={['#05060e']} />
-        <fog attach="fog" args={['#05060e', 10, 26]} />
-        <ambientLight intensity={0.35} />
-        <directionalLight position={[6, 6, 6]} intensity={1.2} color="#a5b4fc" />
-        <pointLight position={[-6, -3, 2]} intensity={22} color="#22d3ee" />
-        <pointLight position={[6, 3, -4]} intensity={26} color="#c084fc" />
+    <div className="hero-canvas" ref={wrap} aria-hidden="true">
+      <SceneErrorBoundary>
+        <Canvas
+          camera={{ position: [0, 0, 9], fov: 45 }}
+          dpr={[1, lowEnd ? 1.4 : 1.8]}
+          frameloop={frameloop}
+          onCreated={guardContextLoss}
+          // MSAA is wasted when everything renders through the composer
+          gl={{ antialias: lowEnd, alpha: true, powerPreference: 'high-performance' }}
+        >
+        <Suspense fallback={null}>
+          <color attach="background" args={['#05060e']} />
+          <fog attach="fog" args={['#05060e', 10, 26]} />
+          <ambientLight intensity={0.35} />
+          <directionalLight position={[6, 6, 6]} intensity={1.2} color="#a5b4fc" />
+          <pointLight position={[-6, -3, 2]} intensity={22} color="#22d3ee" />
+          <pointLight position={[6, 3, -4]} intensity={26} color="#c084fc" />
 
-        <CoreOrb />
-        <OrbitRings />
-        <Satellites />
-        <ParticleField />
-        <CameraRig />
+          <CoreOrb />
+          <OrbitRings />
+          <Satellites />
+          <ParticleField count={lowEnd ? 800 : 1600} />
+          {!reducedMotion && <CameraRig />}
 
-        <EffectComposer multisampling={0}>
-          <Bloom intensity={0.85} luminanceThreshold={0.18} luminanceSmoothing={0.9} mipmapBlur />
-          <Vignette eskil={false} offset={0.18} darkness={0.85} />
-        </EffectComposer>
-      </Suspense>
-      </Canvas>
+          {!lowEnd && (
+            <EffectComposer multisampling={0}>
+              <Bloom intensity={0.85} luminanceThreshold={0.18} luminanceSmoothing={0.9} mipmapBlur />
+              <Vignette eskil={false} offset={0.18} darkness={0.85} />
+            </EffectComposer>
+          )}
+        </Suspense>
+        </Canvas>
+      </SceneErrorBoundary>
     </div>
   )
 }

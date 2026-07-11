@@ -1,9 +1,10 @@
 import { useRef, useMemo, useEffect, useState, Suspense } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Float, Html } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { useInView } from 'framer-motion'
+import { useInView, useReducedMotion } from 'framer-motion'
 import * as THREE from 'three'
+import { SceneErrorBoundary, guardContextLoss, isLowEnd } from './SceneShell.jsx'
 
 /* narrow screens get a pulled-back camera so labels stay inside the frame */
 function useCompact() {
@@ -11,11 +12,29 @@ function useCompact() {
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 700px)')
     const onChange = (e) => setCompact(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
+    // Safari ≤13.4 has no add/removeEventListener on MediaQueryList
+    if (mq.addEventListener) mq.addEventListener('change', onChange)
+    else mq.addListener(onChange)
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', onChange)
+      else mq.removeListener(onChange)
+    }
   }, [])
   return compact
 }
+
+/* Shared GPU resources — these shapes repeat dozens of times across the four
+   always-mounted scenes; one geometry/material each instead of one per mesh. */
+const COIN_GEO = new THREE.CylinderGeometry(1, 1, 0.035, 24) // scaled per-coin
+const COIN_MAT = new THREE.MeshStandardMaterial({
+  color: '#fbbf24', emissive: '#b45309', emissiveIntensity: 0.25, metalness: 0.85, roughness: 0.3,
+})
+const HEAD_GEO = new THREE.SphereGeometry(0.085, 16, 16)
+const BODY_GEO = new THREE.CapsuleGeometry(0.075, 0.14, 4, 12)
+const PIN_GEO = new THREE.BoxGeometry(0.12, 0.045, 0.05)
+const PIN_MAT = new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.9, roughness: 0.3 })
+const TOOTH_GEO = new THREE.BoxGeometry(0.07, 0.055, 0.06)
+const STEEL_MAT = new THREE.MeshStandardMaterial({ color: '#94a3b8', metalness: 0.8, roughness: 0.35 })
 
 /* ═══════════════════ shared helpers ═══════════════════ */
 
@@ -24,17 +43,20 @@ function useCompact() {
    geometry/shaders — the swap is instant even on weak GPUs. */
 function Entrance({ children, active }) {
   const ref = useRef()
+  const reducedMotion = useReducedMotion()
   useEffect(() => {
-    if (active && ref.current) ref.current.scale.setScalar(0.05)
-  }, [active])
+    // With reduced motion the frameloop is 'demand', so the spring below never
+    // runs — jump straight to full scale instead of animating in.
+    if (active && ref.current) ref.current.scale.setScalar(reducedMotion ? 1 : 0.05)
+  }, [active, reducedMotion])
   useFrame(({ clock }, dt) => {
-    if (!ref.current || !active) return
+    if (!ref.current || !active || reducedMotion) return
     const s = THREE.MathUtils.damp(ref.current.scale.x, 1, 4.5, dt)
     ref.current.scale.setScalar(s)
     ref.current.rotation.y = Math.sin(clock.getElapsedTime() * 0.2) * 0.16
   })
   return (
-    <group ref={ref} visible={active} scale={0.05}>
+    <group ref={ref} visible={active} scale={reducedMotion ? 1 : 0.05}>
       {children}
     </group>
   )
@@ -61,12 +83,10 @@ function Label({ position, accent = '#22d3ee', strong, children }) {
 function Person({ position = [0, 0, 0], scale = 1, body = '#94a3b8', head = '#e2e8f0' }) {
   return (
     <group position={position} scale={scale}>
-      <mesh position={[0, 0.19, 0]}>
-        <sphereGeometry args={[0.085, 16, 16]} />
+      <mesh position={[0, 0.19, 0]} geometry={HEAD_GEO}>
         <meshStandardMaterial color={head} roughness={0.4} />
       </mesh>
-      <mesh position={[0, 0, 0]}>
-        <capsuleGeometry args={[0.075, 0.14, 4, 12]} />
+      <mesh position={[0, 0, 0]} geometry={BODY_GEO}>
         <meshStandardMaterial color={body} roughness={0.5} />
       </mesh>
     </group>
@@ -78,10 +98,13 @@ function CoinStack({ position = [0, 0, 0], count = 4, r = 0.13 }) {
   return (
     <group position={position}>
       {Array.from({ length: count }, (_, i) => (
-        <mesh key={i} position={[(i % 2) * 0.015, i * 0.042, ((i + 1) % 2) * 0.012]}>
-          <cylinderGeometry args={[r, r, 0.035, 24]} />
-          <meshStandardMaterial color="#fbbf24" emissive="#b45309" emissiveIntensity={0.25} metalness={0.85} roughness={0.3} />
-        </mesh>
+        <mesh
+          key={i}
+          position={[(i % 2) * 0.015, i * 0.042, ((i + 1) % 2) * 0.012]}
+          geometry={COIN_GEO}
+          material={COIN_MAT}
+          scale={[r, 1, r]}
+        />
       ))}
     </group>
   )
@@ -131,10 +154,11 @@ function Document({ position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) {
 
 /* ═══════════════════ AI WORKFLOW — docs → AI chip → completed actions ═══════════════════ */
 
-function AiChip() {
+function AiChip({ active }) {
   const die = useRef()
   useFrame(({ clock }) => {
-    if (die.current) die.current.material.emissiveIntensity = 0.7 + Math.sin(clock.getElapsedTime() * 3) * 0.35
+    if (!die.current || !active) return
+    die.current.material.emissiveIntensity = 0.7 + Math.sin(clock.getElapsedTime() * 3) * 0.35
   })
   const pins = useMemo(() => {
     const list = []
@@ -154,10 +178,7 @@ function AiChip() {
         <meshStandardMaterial color="#1e293b" metalness={0.6} roughness={0.35} />
       </mesh>
       {pins.map((p, i) => (
-        <mesh key={i} position={p.pos} rotation={p.rot}>
-          <boxGeometry args={[0.12, 0.045, 0.05]} />
-          <meshStandardMaterial color="#d4af37" metalness={0.9} roughness={0.3} />
-        </mesh>
+        <mesh key={i} position={p.pos} rotation={p.rot} geometry={PIN_GEO} material={PIN_MAT} />
       ))}
       <mesh ref={die} position={[0, 0, 0.075]}>
         <boxGeometry args={[0.46, 0.46, 0.05]} />
@@ -289,24 +310,24 @@ function AiScene({ active }) {
     <Entrance active={active}>
       {/* incoming documents */}
       {AI_IN.map((p, i) => (
-        <Float key={i} speed={1.6} rotationIntensity={0.25} floatIntensity={0.5}>
+        <Float key={i} enabled={active} speed={1.6} rotationIntensity={0.25} floatIntensity={0.5}>
           <Document position={p} rotation={[0, 0.35, i * 0.12 - 0.12]} scale={0.95} />
         </Float>
       ))}
 
       {/* the AI engine */}
-      <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.3}>
-        <AiChip />
+      <Float enabled={active} speed={1.2} rotationIntensity={0.15} floatIntensity={0.3}>
+        <AiChip active={active} />
       </Float>
 
       {/* completed business actions */}
-      <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5}>
+      <Float enabled={active} speed={1.8} rotationIntensity={0.2} floatIntensity={0.5}>
         <DoneBadge position={AI_OUT[0]} />
       </Float>
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+      <Float enabled={active} speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
         <TaskBoard position={AI_OUT[1]} />
       </Float>
-      <Float speed={1.7} rotationIntensity={0.2} floatIntensity={0.5}>
+      <Float enabled={active} speed={1.7} rotationIntensity={0.2} floatIntensity={0.5}>
         <BarChart position={[AI_OUT[2][0], AI_OUT[2][1] - 0.15, AI_OUT[2][2]]} />
       </Float>
 
@@ -472,24 +493,27 @@ function Pedestal({ color }) {
   )
 }
 
-function Gear({ position }) {
+function Gear({ position, active }) {
   const g = useRef()
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.z = clock.getElapsedTime() * 0.6
+    if (!g.current || !active) return
+    g.current.rotation.z = clock.getElapsedTime() * 0.6
   })
   return (
     <group ref={g} position={position} rotation={[0.35, 0, 0]}>
-      <mesh>
+      <mesh material={STEEL_MAT}>
         <torusGeometry args={[0.16, 0.055, 12, 24]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.35} />
       </mesh>
       {Array.from({ length: 8 }, (_, i) => {
         const a = (i / 8) * Math.PI * 2
         return (
-          <mesh key={i} position={[Math.cos(a) * 0.21, Math.sin(a) * 0.21, 0]} rotation={[0, 0, a]}>
-            <boxGeometry args={[0.07, 0.055, 0.06]} />
-            <meshStandardMaterial color="#94a3b8" metalness={0.8} roughness={0.35} />
-          </mesh>
+          <mesh
+            key={i}
+            position={[Math.cos(a) * 0.21, Math.sin(a) * 0.21, 0]}
+            rotation={[0, 0, a]}
+            geometry={TOOTH_GEO}
+            material={STEEL_MAT}
+          />
         )
       })}
       <mesh>
@@ -540,7 +564,7 @@ function CargoBoxes({ position }) {
   )
 }
 
-function ModuleDiorama({ index }) {
+function ModuleDiorama({ index, active }) {
   switch (index) {
     case 0:
       return (
@@ -561,14 +585,13 @@ function ModuleDiorama({ index }) {
     case 3:
       return <Target position={[0, 0.18, 0]} />
     case 4:
-      return <Gear position={[0, 0.2, 0]} />
+      return <Gear position={[0, 0.2, 0]} active={active} />
     default:
       return <BarChart position={[0, -0.02, 0]} />
   }
 }
 
 function ErpScene({ active }) {
-  const orbit = useRef()
   const core = useRef()
   const inst = useRef()
   const dummy = useMemo(() => new THREE.Object3D(), [])
@@ -638,7 +661,7 @@ function ErpScene({ active }) {
         <meshBasicMaterial color="#a5b4fc" wireframe transparent opacity={0.16} />
       </mesh>
 
-      <group ref={orbit}>
+      <group>
         <lineSegments>
           <bufferGeometry>
             <bufferAttribute attach="attributes-position" count={linePositions.length / 3} array={linePositions} itemSize={3} />
@@ -648,9 +671,9 @@ function ErpScene({ active }) {
 
         {ERP_MODULES.map((m, i) => (
           <group key={m.label} position={modulePos[i]} scale={1.15}>
-            <Float speed={1.6} rotationIntensity={0.12} floatIntensity={0.35}>
+            <Float enabled={active} speed={1.6} rotationIntensity={0.12} floatIntensity={0.35}>
               <Pedestal color={m.color} />
-              <ModuleDiorama index={i} />
+              <ModuleDiorama index={i} active={active} />
             </Float>
           </group>
         ))}
@@ -774,7 +797,7 @@ function ApiScene({ active }) {
 
       {API_SYSTEMS.map((s) => (
         <group key={s.label} position={s.pos}>
-          <Float speed={1.5} rotationIntensity={0.18} floatIntensity={0.35}>
+          <Float enabled={active} speed={1.5} rotationIntensity={0.18} floatIntensity={0.35}>
             <SystemNode color={s.color} />
           </Float>
         </group>
@@ -803,34 +826,57 @@ function ApiScene({ active }) {
 
 const SCENES = { ai: AiScene, crm: CrmScene, erp: ErpScene, api: ApiScene }
 
+/* Moves the camera in place on breakpoint changes — remounting the Canvas
+   would destroy the WebGL context and recompile every shader. */
+function ResponsiveCamera({ compact }) {
+  const camera = useThree((s) => s.camera)
+  useEffect(() => {
+    camera.position.z = compact ? 9 : 7
+    camera.updateProjectionMatrix()
+  }, [compact, camera])
+  return null
+}
+
 export default function ShowcaseCanvas({ scene }) {
   const compact = useCompact()
   const wrap = useRef(null)
   const visible = useInView(wrap, { margin: '120px' })
+  const reducedMotion = useReducedMotion()
+  const lowEnd = useMemo(isLowEnd, [])
+
+  // Reduced motion: a single static frame per tab switch instead of a loop.
+  const frameloop = reducedMotion ? 'demand' : visible ? 'always' : 'never'
+
   return (
     <div className="showcase-canvas-inner" ref={wrap}>
-      <Canvas
-        key={compact ? 'compact' : 'wide'}
-        camera={{ position: [0, 0, compact ? 9 : 7], fov: 45 }}
-        dpr={[1, 1.6]}
-        frameloop={visible ? 'always' : 'never'}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      >
-        <Suspense fallback={null}>
-          <ambientLight intensity={0.55} />
-          <directionalLight position={[5, 6, 5]} intensity={1.1} color="#e0e7ff" />
-          <pointLight position={[-5, -2, 3]} intensity={14} color="#22d3ee" />
-          <pointLight position={[5, 3, -3]} intensity={15} color="#c084fc" />
+      <SceneErrorBoundary>
+        <Canvas
+          camera={{ position: [0, 0, compact ? 9 : 7], fov: 45 }}
+          dpr={[1, lowEnd ? 1.3 : 1.6]}
+          frameloop={frameloop}
+          onCreated={guardContextLoss}
+          // MSAA is wasted when everything renders through the composer
+          gl={{ antialias: lowEnd, alpha: true, powerPreference: 'high-performance' }}
+        >
+          <Suspense fallback={null}>
+            <ResponsiveCamera compact={compact} />
+            <ambientLight intensity={0.55} />
+            <directionalLight position={[5, 6, 5]} intensity={1.1} color="#e0e7ff" />
+            <pointLight position={[-5, -2, 3]} intensity={14} color="#22d3ee" />
+            <pointLight position={[5, 3, -3]} intensity={15} color="#c084fc" />
 
-          {Object.entries(SCENES).map(([id, Scene]) => (
-            <Scene key={id} active={id === scene} />
-          ))}
+            {Object.entries(SCENES).map(([id, Scene]) => (
+              <Scene key={id} active={id === scene} />
+            ))}
 
-          <EffectComposer multisampling={0}>
-            <Bloom intensity={0.55} luminanceThreshold={0.35} luminanceSmoothing={0.85} mipmapBlur />
-          </EffectComposer>
-        </Suspense>
-      </Canvas>
+            {!lowEnd && (
+              <EffectComposer multisampling={0}>
+                <Bloom intensity={0.55} luminanceThreshold={0.35} luminanceSmoothing={0.85} mipmapBlur />
+              </EffectComposer>
+            )}
+          </Suspense>
+        </Canvas>
+      </SceneErrorBoundary>
     </div>
   )
 }

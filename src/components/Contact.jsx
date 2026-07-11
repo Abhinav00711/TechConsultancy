@@ -3,14 +3,41 @@ import { contact, site } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
+/* Form status: idle → sending → sent | error.
+   With site.formEndpoint set (e.g. Formspree), submissions POST there.
+   Without it, we open a prefilled email draft so no enquiry is ever lost. */
 export default function Contact() {
-  const [sent, setSent] = useState(false)
+  const [status, setStatus] = useState('idle')
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
-    // [PLACEHOLDER] — wire this up to your backend, Formspree, or email service.
-    setSent(true)
-    e.target.reset()
+    const form = e.target
+    const data = new FormData(form)
+    if (data.get('company')) return // honeypot — silently drop bots
+
+    if (!site.formEndpoint) {
+      const subject = encodeURIComponent(`Project enquiry — ${data.get('service') || 'General'}`)
+      const body = encodeURIComponent(
+        `Name: ${data.get('name')}\nEmail: ${data.get('email')}\nService: ${data.get('service')}\n\n${data.get('message')}`,
+      )
+      window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`
+      setStatus('sent')
+      return
+    }
+
+    setStatus('sending')
+    try {
+      const res = await fetch(site.formEndpoint, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: data,
+      })
+      if (!res.ok) throw new Error(`Form endpoint responded ${res.status}`)
+      setStatus('sent')
+      form.reset()
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (
@@ -26,7 +53,7 @@ export default function Contact() {
 
         <div className="contact-wrap">
           <Reveal className="contact-info" delay={0.1}>
-            <div className="contact-info-item glass">
+            <a className="contact-info-item glass" href={`mailto:${site.email}`}>
               <div className="contact-info-icon">
                 <Icon name="mail" />
               </div>
@@ -34,16 +61,18 @@ export default function Contact() {
                 <strong>Email Us</strong>
                 <span>{site.email}</span>
               </div>
-            </div>
-            <div className="contact-info-item glass">
-              <div className="contact-info-icon">
-                <Icon name="phone" />
-              </div>
-              <div>
-                <strong>Call Us</strong>
-                <span>{site.phone}</span>
-              </div>
-            </div>
+            </a>
+            {site.phone && (
+              <a className="contact-info-item glass" href={`tel:${site.phone.replace(/\s/g, '')}`}>
+                <div className="contact-info-icon">
+                  <Icon name="phone" />
+                </div>
+                <div>
+                  <strong>Call Us</strong>
+                  <span>{site.phone}</span>
+                </div>
+              </a>
+            )}
             <div className="contact-info-item glass">
               <div className="contact-info-icon">
                 <Icon name="pin" />
@@ -60,16 +89,16 @@ export default function Contact() {
               <div className="form-row">
                 <div className="form-field">
                   <label htmlFor="cf-name">Your Name</label>
-                  <input id="cf-name" name="name" type="text" placeholder="John Doe" required />
+                  <input id="cf-name" name="name" type="text" autoComplete="name" placeholder="Full name" required />
                 </div>
                 <div className="form-field">
                   <label htmlFor="cf-email">Email</label>
-                  <input id="cf-email" name="email" type="email" placeholder="john@company.com" required />
+                  <input id="cf-email" name="email" type="email" autoComplete="email" placeholder="you@company.com" required />
                 </div>
               </div>
               <div className="form-field">
                 <label htmlFor="cf-service">Service Needed</label>
-                <select id="cf-service" name="service" defaultValue="">
+                <select id="cf-service" name="service" defaultValue="" required>
                   <option value="" disabled>
                     Select a service…
                   </option>
@@ -86,13 +115,29 @@ export default function Contact() {
                 <label htmlFor="cf-message">Project Details</label>
                 <textarea id="cf-message" name="message" rows="5" placeholder="Tell us what you want to build…" required />
               </div>
-              {sent && (
-                <div className="form-success">
-                  ✓ Thanks! Your message is ready to send — connect this form to your email service to receive enquiries.
-                </div>
-              )}
-              <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center' }}>
-                Send Message <span aria-hidden>→</span>
+              {/* Honeypot — hidden from real users, catches naive bots */}
+              <div className="form-honeypot" aria-hidden="true">
+                <label htmlFor="cf-company">Company (leave blank)</label>
+                <input id="cf-company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+              </div>
+              <div role="status" aria-live="polite">
+                {status === 'sent' && (
+                  <div className="form-success">✓ Thanks! Your message is on its way — we’ll reply within 24 hours.</div>
+                )}
+                {status === 'error' && (
+                  <div className="form-error">
+                    Something went wrong sending your message. Please email us directly at{' '}
+                    <a href={`mailto:${site.email}`}>{site.email}</a>.
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{ justifyContent: 'center' }}
+                disabled={status === 'sending'}
+              >
+                {status === 'sending' ? 'Sending…' : 'Send Message'} <span aria-hidden>→</span>
               </button>
             </form>
           </Reveal>

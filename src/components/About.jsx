@@ -23,9 +23,9 @@ export default function About() {
             {about.founders.map((f, i) => (
               <Reveal key={f.name} delay={0.15 + i * 0.15}>
                 <div className="founder-card glass" style={{ '--accent': f.accent }}>
-                  <div className="founder-avatar">{f.initials}</div>
+                  <div className="founder-avatar" aria-hidden="true">{f.initials}</div>
                   <div>
-                    <h4>{f.name}</h4>
+                    <h3>{f.name}</h3>
                     <div className="founder-role">{f.role}</div>
                     <p>{f.bio}</p>
                   </div>
@@ -39,7 +39,7 @@ export default function About() {
           {about.values.map((v, i) => (
             <Reveal key={v.title} delay={i * 0.1}>
               <div className="value-card glass" style={{ height: '100%' }}>
-                <h4>{v.title}</h4>
+                <h3>{v.title}</h3>
                 <p>{v.text}</p>
               </div>
             </Reveal>
