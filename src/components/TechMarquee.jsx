@@ -1,9 +1,9 @@
-import { techStack } from '../data/content.js'
+import { techStack, industries } from '../data/content.js'
 
-export default function TechMarquee() {
+function Row({ items, reverse }) {
   const group = (key, hidden) => (
     <div key={key} aria-hidden={hidden} style={{ display: 'flex', gap: 56 }}>
-      {techStack.map((t) => (
+      {items.map((t) => (
         <span key={t} className="marquee-item">
           {t}
         </span>
@@ -11,11 +11,18 @@ export default function TechMarquee() {
     </div>
   )
   return (
+    <div className={`marquee-track ${reverse ? 'reverse' : ''}`}>
+      {group('a', false)}
+      {group('b', true)}
+    </div>
+  )
+}
+
+export default function TechMarquee() {
+  return (
     <div className="marquee-section">
-      <div className="marquee-track">
-        {group('a', false)}
-        {group('b', true)}
-      </div>
+      <Row items={techStack} />
+      <Row items={industries} reverse />
     </div>
   )
 }

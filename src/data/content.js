@@ -16,6 +16,7 @@ export const site = {
 export const nav = [
   { label: 'Home', href: '#home' },
   { label: 'Services', href: '#services' },
+  { label: 'Demos', href: '#demos' },
   { label: 'About', href: '#about' },
   { label: 'Process', href: '#process' },
   { label: 'Work', href: '#work' },
@@ -83,6 +84,95 @@ export const services = [
     accent: '#fbbf24',
   },
 ]
+
+export const showcase = {
+  tag: 'See It Live',
+  title: 'Your Systems,',
+  titleGradient: 'Visualised in 3D',
+  sub: 'Interactive previews of what we build — watch the data flow. Every system below is something we design and ship for clients like you.',
+  items: [
+    {
+      id: 'ai',
+      icon: 'ai',
+      label: 'AI Workflow',
+      title: 'AI That Works While You Sleep',
+      accent: '#22d3ee',
+      description:
+        'A live neural pipeline: your data flows in, intelligence flows out. We wire LLMs and machine learning into your daily operations — quietly automating the work your team shouldn’t be doing by hand.',
+      features: [
+        'Documents, emails & chats processed automatically',
+        'AI assistants trained on your business knowledge',
+        'Decisions routed to humans only when needed',
+        'Plugged into the tools you already use',
+      ],
+      kpis: [
+        { value: '−70%', label: 'manual work' },
+        { value: '24/7', label: 'always on' },
+        { value: '3×', label: 'faster decisions' },
+      ],
+    },
+    {
+      id: 'crm',
+      icon: 'crm',
+      label: 'CRM Pipeline',
+      title: 'Every Lead, Captured & Converted',
+      accent: '#818cf8',
+      description:
+        'Watch leads pour into the funnel and come out as customers. Our custom CRMs mirror your real sales stages — with automation nudging every deal forward so nothing slips through the cracks.',
+      features: [
+        'Pipeline stages built around how you sell',
+        'Auto follow-ups, reminders & lead scoring',
+        'WhatsApp, email & call tracking in one place',
+        'Dashboards your team will actually use',
+      ],
+      kpis: [
+        { value: '+38%', label: 'conversion' },
+        { value: '360°', label: 'customer view' },
+        { value: '0', label: 'leads lost' },
+      ],
+    },
+    {
+      id: 'erp',
+      icon: 'erp',
+      label: 'ERP Modules',
+      title: 'One Core. Every Department.',
+      accent: '#c084fc',
+      description:
+        'Finance, inventory, HR, sales and operations orbiting a single source of truth — data pulsing between modules in real time. No more spreadsheets fighting each other.',
+      features: [
+        'Modular: start small, add departments later',
+        'Live inventory, accounting & payroll sync',
+        'Role-based access & full audit trails',
+        'Real-time reports for owners & managers',
+      ],
+      kpis: [
+        { value: '1', label: 'source of truth' },
+        { value: '−45%', label: 'admin time' },
+        { value: 'Live', label: 'reporting' },
+      ],
+    },
+    {
+      id: 'api',
+      icon: 'api',
+      label: 'API Network',
+      title: 'Systems That Talk to Each Other',
+      accent: '#34d399',
+      description:
+        'Payments, logistics, marketplaces, government portals — packets of data racing between services on secure, documented highways. We build the connective tissue of your digital business.',
+      features: [
+        'REST & GraphQL APIs, documented end-to-end',
+        'Payment gateways, ERPs & marketplace sync',
+        'Event-driven flows that scale with traffic',
+        'Monitoring, versioning & security baked in',
+      ],
+      kpis: [
+        { value: '99.9%', label: 'uptime' },
+        { value: 'ms', label: 'latency' },
+        { value: '∞', label: 'integrations' },
+      ],
+    },
+  ],
+}
 
 export const about = {
   heading: 'Built by Brothers,',
@@ -172,6 +262,43 @@ export const testimonials = [
     role: 'Director, Real Estate Group', // [PLACEHOLDER]
   },
 ]
+
+export const industries = [
+  'FinTech', 'Healthcare', 'Retail & D2C', 'Manufacturing', 'Real Estate',
+  'Logistics', 'EdTech', 'Hospitality', 'Professional Services', 'SaaS Startups',
+]
+
+export const faq = {
+  tag: 'Questions',
+  title: 'Before You',
+  titleGradient: 'Ask',
+  items: [
+    {
+      q: 'How much does a project cost?',
+      a: 'It depends on scope — a high-converting website starts smaller, while custom CRMs and ERPs are larger builds. After a free discovery call you get a fixed, itemised quote. No hourly billing surprises, and we’ll always tell you the cheapest way to reach your goal.',
+    },
+    {
+      q: 'How long will my project take?',
+      a: 'Typical ranges: a website in 2–4 weeks, an MVP or CRM in 6–10 weeks, a full ERP rolled out in phases over 3–6 months. You see working software from week one — we demo progress every single week.',
+    },
+    {
+      q: 'Who owns the code and the IP?',
+      a: 'You do — 100%. Full source code, documentation, credentials and deployment access are handed over. No lock-in, no ransom. If you ever want another team to take over, they can.',
+    },
+    {
+      q: 'Do you support us after launch?',
+      a: 'Yes. Every project includes a free stabilisation period, and we offer monthly care plans covering monitoring, backups, security patches and small improvements — with clear SLAs.',
+    },
+    {
+      q: 'Can you work with the systems we already have?',
+      a: 'Almost always. We integrate with existing tools (Tally, Zoho, Shopify, SAP, payment gateways, WhatsApp and more) via APIs, and we’ll audit your current setup before recommending anything new.',
+    },
+    {
+      q: 'We’re not technical. Is that a problem?',
+      a: 'Not at all — most of our clients aren’t. We speak plain business language, translate every decision into cost and outcome, and show you clickable demos instead of jargon.',
+    },
+  ],
+}
 
 export const contact = {
   heading: 'Let’s Build Something',

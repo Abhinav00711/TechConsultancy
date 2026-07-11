@@ -7,8 +7,14 @@ An immersive 3D single-page website for a tech consultancy, built with React, Th
 ## ✨ Features
 
 - **3D hero scene** — morphing energy orb, orbiting glow rings, floating geometric satellites, a 1,600-particle starfield, cursor-parallax camera and cinematic bloom post-processing
-- **Motion everywhere** — staggered hero entrance, scroll-triggered reveals, animated stat counters, cursor-following 3D tilt cards with spotlight glow, infinite tech-stack marquee, animated preloader
-- **Complete sections** — Hero, Services (AI, CRM, ERP, Web, API, Cloud), About/Founders, Stats, Process, Testimonials, CTA, Contact form, Footer
+- **Interactive 3D demos ("See It Live")** — a tabbed showcase where each service is a living 3D visualisation:
+  - *AI Workflow*: a neural network with signal pulses racing between layers
+  - *CRM Pipeline*: a glowing sales funnel — leads spiral down and convert to gold customers
+  - *ERP Modules*: department cubes orbiting a unified core with data pulses on every link
+  - *API Network*: data packets travelling curved highways between service nodes
+  - Auto-advances every 8s (with progress indicator), pauses when the visitor picks a tab; scenes stay warm so switching is instant
+- **Motion everywhere** — scroll progress bar, staggered hero entrance, scroll-triggered reveals, animated stat counters, cursor-following 3D tilt cards with spotlight glow, dual counter-scrolling marquees (tech stack + industries), animated preloader
+- **Complete sections** — Hero, Services (AI, CRM, ERP, Web, API, Cloud), 3D Demos, About/Founders, Stats, Process, Testimonials, CTA, FAQ accordion, Contact form, Footer
 - **Responsive** — mobile menu, fluid type, stacked layouts; respects `prefers-reduced-motion`
 
 ## 🚀 Getting started
@@ -49,7 +55,8 @@ npm run build
 src/
 ├── data/content.js          ← ALL site text (edit this!)
 ├── components/
-│   ├── three/HeroScene.jsx  ← the 3D scene
+│   ├── three/HeroScene.jsx       ← hero 3D scene
+│   ├── three/ShowcaseScenes.jsx  ← AI / CRM / ERP / API demo scenes
 │   ├── ui/                  ← Reveal, TiltCard, Icons
 │   └── *.jsx                ← page sections
 ├── App.jsx

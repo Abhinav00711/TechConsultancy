@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import Preloader from './components/Preloader.jsx'
+import ScrollProgress from './components/ScrollProgress.jsx'
 import Navbar from './components/Navbar.jsx'
 import Hero from './components/Hero.jsx'
 import TechMarquee from './components/TechMarquee.jsx'
 import Services from './components/Services.jsx'
+import Showcase from './components/Showcase.jsx'
+import Faq from './components/Faq.jsx'
 import About from './components/About.jsx'
 import Stats from './components/Stats.jsx'
 import Process from './components/Process.jsx'
@@ -23,17 +26,20 @@ export default function App() {
   return (
     <>
       <Preloader done={loaded} />
+      <ScrollProgress />
       <div className="ambient" />
       <Navbar />
       <main>
         <Hero />
         <TechMarquee />
         <Services />
+        <Showcase />
         <About />
         <Stats />
         <Process />
         <Testimonials />
         <CtaBand />
+        <Faq />
         <Contact />
       </main>
       <Footer />
