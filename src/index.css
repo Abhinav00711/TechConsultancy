@@ -434,6 +434,28 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
 }
 @keyframes tab-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
+.scene-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: #dbe2ff;
+  padding: 5px 12px;
+  border-radius: 100px;
+  background: rgba(5, 6, 14, 0.78);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 12%, transparent);
+  backdrop-filter: blur(6px);
+}
+.scene-label.strong {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: #fff;
+  border-color: color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
 .showcase-content { display: flex; flex-direction: column; gap: 18px; }
 .showcase-content h3 { font-size: 1.55rem; }
 .showcase-content > p { color: var(--text-dim); font-size: 0.98rem; }
