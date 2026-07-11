@@ -800,6 +800,8 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   padding: 0;
 }
 .legal-dialog::backdrop { background: rgba(5, 6, 14, 0.75); backdrop-filter: blur(6px); }
+/* showModal() doesn't lock the page behind the dialog — do it here */
+body:has(dialog[open]) { overflow: hidden; }
 .legal-dialog-inner { padding: 36px 38px 42px; overflow-y: auto; max-height: 84vh; }
 .legal-dialog-head {
   display: flex; justify-content: space-between; align-items: center;

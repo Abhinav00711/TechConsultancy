@@ -3,9 +3,9 @@ import { contact, site } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
-/* Form status: idle → sending → sent | error.
+/* Form status: idle → sending → sent | draft | error.
    With site.formEndpoint set (e.g. Formspree), submissions POST there.
-   Without it, we open a prefilled email draft so no enquiry is ever lost. */
+   Without it, we open a prefilled email draft — and say so honestly. */
 export default function Contact() {
   const [status, setStatus] = useState('idle')
 
@@ -13,7 +13,12 @@ export default function Contact() {
     e.preventDefault()
     const form = e.target
     const data = new FormData(form)
-    if (data.get('company')) return // honeypot — silently drop bots
+    // Honeypot tripped: show success so a false-positive human isn't punished
+    // with a dead button, while bots learn nothing.
+    if (data.get('_gotcha')) {
+      setStatus('sent')
+      return
+    }
 
     if (!site.formEndpoint) {
       const subject = encodeURIComponent(`Project enquiry — ${data.get('service') || 'General'}`)
@@ -21,7 +26,8 @@ export default function Contact() {
         `Name: ${data.get('name')}\nEmail: ${data.get('email')}\nService: ${data.get('service')}\n\n${data.get('message')}`,
       )
       window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`
-      setStatus('sent')
+      // A mail draft is not a delivered message — don't claim it was sent.
+      setStatus('draft')
       return
     }
 
@@ -115,14 +121,21 @@ export default function Contact() {
                 <label htmlFor="cf-message">Project Details</label>
                 <textarea id="cf-message" name="message" rows="5" placeholder="Tell us what you want to build…" required />
               </div>
-              {/* Honeypot — hidden from real users, catches naive bots */}
+              {/* Honeypot — hidden from real users, catches naive bots.
+                  Named so browser address-autofill won't populate it. */}
               <div className="form-honeypot" aria-hidden="true">
-                <label htmlFor="cf-company">Company (leave blank)</label>
-                <input id="cf-company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+                <label htmlFor="cf-gotcha">Leave this field empty</label>
+                <input id="cf-gotcha" name="_gotcha" type="text" tabIndex={-1} autoComplete="off" />
               </div>
               <div role="status" aria-live="polite">
                 {status === 'sent' && (
                   <div className="form-success">✓ Thanks! Your message is on its way — we’ll reply within 24 hours.</div>
+                )}
+                {status === 'draft' && (
+                  <div className="form-success">
+                    ✓ Your email app should open with a pre-filled draft — press send there to deliver it. If nothing
+                    opened, email us directly at <a href={`mailto:${site.email}`}>{site.email}</a>.
+                  </div>
                 )}
                 {status === 'error' && (
                   <div className="form-error">

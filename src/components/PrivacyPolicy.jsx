@@ -5,6 +5,7 @@ import { site } from '../data/content.js'
    and backdrop for free. Opened from the footer via ref.open(). */
 const PrivacyPolicy = forwardRef(function PrivacyPolicy(_, ref) {
   const dialogRef = useRef(null)
+  const downOnBackdrop = useRef(false)
 
   useImperativeHandle(ref, () => ({
     open: () => dialogRef.current?.showModal(),
@@ -17,9 +18,13 @@ const PrivacyPolicy = forwardRef(function PrivacyPolicy(_, ref) {
       ref={dialogRef}
       className="legal-dialog"
       aria-labelledby="privacy-title"
+      onPointerDown={(e) => {
+        downOnBackdrop.current = e.target === dialogRef.current
+      }}
       onClick={(e) => {
-        // Click on the backdrop (the dialog element itself) closes it
-        if (e.target === dialogRef.current) close()
+        // Close only when the interaction both started and ended on the
+        // backdrop — selecting text and releasing outside must not close it.
+        if (e.target === dialogRef.current && downOnBackdrop.current) close()
       }}
     >
       <div className="legal-dialog-inner">

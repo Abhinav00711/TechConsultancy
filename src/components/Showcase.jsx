@@ -65,7 +65,12 @@ export default function Showcase() {
             style={{ '--accent': item.accent }}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
-            onFocusCapture={() => setHovering(true)}
+            onFocusCapture={(e) => {
+              // Focus on the Play/Pause control itself must not freeze rotation,
+              // or pressing Play appears to do nothing until focus leaves.
+              if (e.target.closest('.showcase-autoplay')) return
+              setHovering(true)
+            }}
             onBlurCapture={(e) => {
               if (!e.currentTarget.contains(e.relatedTarget)) setHovering(false)
             }}
@@ -97,16 +102,15 @@ export default function Showcase() {
                     >
                       <Icon name={s.icon} style={{ transform: 'scale(0.62)', display: 'inline-flex' }} />
                       {s.label}
-                      {i === active && auto && !hovering && <span key={active} className="tab-progress" />}
+                      {i === active && auto && !hovering && onScreen && (
+                        <span key={`${active}-${onScreen}`} className="tab-progress" />
+                      )}
                     </button>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  className="showcase-autoplay"
-                  aria-pressed={!auto}
-                  onClick={() => setAuto((v) => !v)}
-                >
+                {/* Label swaps to describe the action, like a media play/pause
+                    button — no aria-pressed, which would conflict with it. */}
+                <button type="button" className="showcase-autoplay" onClick={() => setAuto((v) => !v)}>
                   {auto ? '❚❚ Pause' : '▶ Play'}
                   <span className="sr-only"> automatic demo rotation</span>
                 </button>
