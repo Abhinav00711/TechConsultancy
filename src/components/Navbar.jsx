@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { site, nav } from '../data/content.js'
 import { Logo } from './ui/Icons.jsx'
+import ThemeToggle from './ui/ThemeToggle.jsx'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -63,22 +64,26 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <a href="#contact" className="btn btn-primary nav-cta">
-            Get a Quote
-          </a>
+          <div className="navbar-actions">
+            <ThemeToggle />
 
-          <button
-            ref={burgerRef}
-            className={`nav-burger ${open ? 'open' : ''}`}
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen((v) => !v)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
+            <a href="#contact" className="btn btn-primary nav-cta">
+              Get a Quote
+            </a>
+
+            <button
+              ref={burgerRef}
+              className={`nav-burger ${open ? 'open' : ''}`}
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              onClick={() => setOpen((v) => !v)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
         </div>
       </motion.header>
 

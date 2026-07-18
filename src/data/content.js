@@ -4,15 +4,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const site = {
-  // [PLACEHOLDER] — swap for your real brand name
-  name: 'TwinByte',
-  suffix: 'Technologies',
-  tagline: 'Two brothers. One mission: technology that moves your business.',
-  email: 'hello@twinbyte.tech', // [PLACEHOLDER] — must be a real, monitored inbox before launch
+  name: 'Revora',
+  suffix: 'Consultancy',
+  tagline: 'Technology that moves your business forward.',
+  email: 'rathiabhishek26@gmail.com',
   // Phone intentionally omitted until a real number exists — add it here and it
   // will appear in the contact section and footer automatically.
   phone: '',
-  location: 'Mumbai, India · Serving clients worldwide', // [PLACEHOLDER]
+  location: 'Mumbai, India · Serving clients worldwide',
   // Contact-form endpoint (e.g. Formspree: https://formspree.io/f/xxxxxxx).
   // Leave empty to fall back to a prefilled email draft — no lead is ever lost.
   formEndpoint: '',
@@ -26,7 +25,6 @@ export const site = {
 export const nav = [
   { label: 'Home', href: '#home' },
   { label: 'Services', href: '#services' },
-  { label: 'Demos', href: '#demos' },
   { label: 'About', href: '#about' },
   { label: 'Process', href: '#process' },
   { label: 'Work', href: '#work' },
@@ -44,165 +42,168 @@ export const hero = {
   ctaSecondary: 'Explore Services',
 }
 
+// Section meta for the merged "Services + Live Demos" section.
+export const explorer = {
+  tag: 'Services · Live Demos',
+  title: 'What We Build,',
+  titleGradient: 'Shown Live',
+  sub: 'Six core services, each paired with an interactive preview of the kind of system we ship. Pick a service — see what you get, then watch it work.',
+  kpiNote: 'Illustrative design targets — every engagement gets its own measurable goals.',
+}
+
+// Merged services + live-demo data. Each item pairs a service description
+// with the interactive scene it powers in the "Services + Live Demos" section.
 export const services = [
   {
+    id: 'ai',
     icon: 'ai',
     title: 'AI Integration',
-    description:
-      'Embed intelligence into your business — LLM-powered assistants, workflow automation, predictive analytics and computer vision, tailored to your operations.',
-    points: ['LLM & Chatbot Solutions', 'Process Automation', 'Predictive Analytics', 'AI Strategy & Audits'],
+    headline: 'AI That Works While You Sleep',
+    sceneLabel: 'AI Workflow',
     accent: '#22d3ee',
+    description:
+      'Embed intelligence into your operations — LLM-powered assistants, workflow automation and predictive analytics that quietly take over the work your team shouldn’t be doing by hand.',
+    points: [
+      'LLM assistants trained on your business knowledge',
+      'Documents, emails & chats processed automatically',
+      'Predictive analytics & AI strategy audits',
+      'Decisions routed to humans only when needed',
+    ],
+    kpis: [
+      { value: '−70%', label: 'manual work' },
+      { value: '24/7', label: 'always on' },
+      { value: '3×', label: 'faster decisions' },
+    ],
   },
   {
+    id: 'crm',
     icon: 'crm',
     title: 'Custom CRM Systems',
-    description:
-      'Customer relationship platforms built around the way you actually sell — pipelines, automation, insights and integrations that off-the-shelf tools can’t match.',
-    points: ['Sales Pipeline Automation', '360° Customer View', 'Marketing Integrations', 'Custom Dashboards'],
+    headline: 'Every Lead, Captured & Converted',
+    sceneLabel: 'CRM Pipeline',
     accent: '#818cf8',
+    description:
+      'Customer platforms built around the way you actually sell — watch leads pour into the funnel and come out as customers, with automation nudging every deal forward so nothing slips through the cracks.',
+    points: [
+      'Pipeline stages built around how you sell',
+      'Auto follow-ups, reminders & lead scoring',
+      'WhatsApp, email & call tracking in one place',
+      'Dashboards your team will actually use',
+    ],
+    kpis: [
+      { value: '+38%', label: 'conversion' },
+      { value: '360°', label: 'customer view' },
+      { value: '100%', label: 'lead capture' },
+    ],
   },
   {
+    id: 'erp',
     icon: 'erp',
     title: 'ERP Solutions',
-    description:
-      'Unify finance, inventory, HR and operations into a single source of truth. Modular ERPs that grow with your organisation instead of holding it back.',
-    points: ['Inventory & Supply Chain', 'Finance & Accounting', 'HR & Payroll Modules', 'Real-time Reporting'],
+    headline: 'One Core. Every Department.',
+    sceneLabel: 'ERP Modules',
     accent: '#c084fc',
+    description:
+      'Finance, inventory, HR and operations orbiting a single source of truth — data pulsing between modules in real time, instead of spreadsheets fighting each other.',
+    points: [
+      'Modular: start small, add departments later',
+      'Live inventory, accounting & payroll sync',
+      'Role-based access & full audit trails',
+      'Real-time reports for owners & managers',
+    ],
+    kpis: [
+      { value: '1', label: 'source of truth' },
+      { value: '−45%', label: 'admin time' },
+      { value: 'Live', label: 'reporting' },
+    ],
   },
   {
+    id: 'web',
     icon: 'web',
     title: 'Web Development',
-    description:
-      'High-performance websites and web apps with immersive 3D experiences, blazing speed and conversion-focused design — from landing pages to full platforms.',
-    points: ['3D & Interactive Sites', 'E-commerce Platforms', 'Progressive Web Apps', 'SEO & Performance'],
+    headline: 'Experiences That Convert',
+    sceneLabel: 'Live Web Build',
     accent: '#f472b6',
+    description:
+      'High-performance websites and web apps — immersive 3D experiences, blazing speed and conversion-focused design, from landing pages to full platforms. The site you’re on right now is our own demo.',
+    points: [
+      '3D & interactive marketing sites',
+      'E-commerce & progressive web apps',
+      'Conversion-focused UX and copy',
+      'SEO & Core Web Vitals built in',
+    ],
+    kpis: [
+      { value: '<1s', label: 'load target' },
+      { value: '3D', label: 'immersive UX' },
+      { value: 'SEO', label: 'built in' },
+    ],
   },
   {
+    id: 'api',
     icon: 'api',
     title: 'API Development',
-    description:
-      'Robust, secure and documented APIs that connect your systems, partners and products — REST, GraphQL and event-driven architectures done right.',
-    points: ['REST & GraphQL APIs', 'Third-party Integrations', 'Microservices', 'API Security & Docs'],
+    headline: 'Systems That Talk to Each Other',
+    sceneLabel: 'API Network',
     accent: '#34d399',
+    description:
+      'Payments, logistics, marketplaces, government portals — packets of data racing between services on secure, documented highways. We build the connective tissue of your digital business.',
+    points: [
+      'REST & GraphQL APIs, documented end-to-end',
+      'Payment gateways, ERPs & marketplace sync',
+      'Event-driven microservices that scale',
+      'Monitoring, versioning & security baked in',
+    ],
+    kpis: [
+      { value: '99.9%', label: 'uptime target' },
+      { value: 'ms', label: 'latency' },
+      { value: '100%', label: 'documented' },
+    ],
   },
   {
+    id: 'cloud',
     icon: 'cloud',
     title: 'Cloud & DevOps',
-    description:
-      'Ship faster and sleep better. Cloud architecture, CI/CD pipelines, containerisation and monitoring that keep your product fast, safe and always on.',
-    points: ['Cloud Architecture', 'CI/CD Pipelines', 'Kubernetes & Docker', '24/7 Monitoring'],
+    headline: 'Ship Faster. Sleep Better.',
+    sceneLabel: 'Deploy Pipeline',
     accent: '#fbbf24',
+    description:
+      'Cloud architecture, CI/CD pipelines and containerised deployments that keep your product fast, safe and always on — releases go out in minutes, not weekends.',
+    points: [
+      'Cloud architecture on AWS & Azure',
+      'CI/CD pipelines & zero-downtime deploys',
+      'Kubernetes & Docker done right',
+      '24/7 monitoring, backups & alerts',
+    ],
+    kpis: [
+      { value: '99.9%', label: 'uptime target' },
+      { value: 'min', label: 'to deploy' },
+      { value: '24/7', label: 'monitoring' },
+    ],
   },
 ]
 
-export const showcase = {
-  tag: 'See It Live',
-  title: 'Your Systems,',
-  titleGradient: 'Visualised in 3D',
-  sub: 'Interactive previews of what we build — watch the data flow. Every system below is something we design and ship for clients like you.',
-  kpiNote: 'Illustrative design targets — every engagement gets its own measurable goals.',
-  items: [
-    {
-      id: 'ai',
-      icon: 'ai',
-      label: 'AI Workflow',
-      title: 'AI That Works While You Sleep',
-      accent: '#22d3ee',
-      description:
-        'A live neural pipeline: your data flows in, intelligence flows out. We wire LLMs and machine learning into your daily operations — quietly automating the work your team shouldn’t be doing by hand.',
-      features: [
-        'Documents, emails & chats processed automatically',
-        'AI assistants trained on your business knowledge',
-        'Decisions routed to humans only when needed',
-        'Plugged into the tools you already use',
-      ],
-      kpis: [
-        { value: '−70%', label: 'manual work' },
-        { value: '24/7', label: 'always on' },
-        { value: '3×', label: 'faster decisions' },
-      ],
-    },
-    {
-      id: 'crm',
-      icon: 'crm',
-      label: 'CRM Pipeline',
-      title: 'Every Lead, Captured & Converted',
-      accent: '#818cf8',
-      description:
-        'Watch leads pour into the funnel and come out as customers. Our custom CRMs mirror your real sales stages — with automation nudging every deal forward so nothing slips through the cracks.',
-      features: [
-        'Pipeline stages built around how you sell',
-        'Auto follow-ups, reminders & lead scoring',
-        'WhatsApp, email & call tracking in one place',
-        'Dashboards your team will actually use',
-      ],
-      kpis: [
-        { value: '+38%', label: 'conversion' },
-        { value: '360°', label: 'customer view' },
-        { value: '100%', label: 'lead capture' },
-      ],
-    },
-    {
-      id: 'erp',
-      icon: 'erp',
-      label: 'ERP Modules',
-      title: 'One Core. Every Department.',
-      accent: '#c084fc',
-      description:
-        'Finance, inventory, HR, sales and operations orbiting a single source of truth — data pulsing between modules in real time. No more spreadsheets fighting each other.',
-      features: [
-        'Modular: start small, add departments later',
-        'Live inventory, accounting & payroll sync',
-        'Role-based access & full audit trails',
-        'Real-time reports for owners & managers',
-      ],
-      kpis: [
-        { value: '1', label: 'source of truth' },
-        { value: '−45%', label: 'admin time' },
-        { value: 'Live', label: 'reporting' },
-      ],
-    },
-    {
-      id: 'api',
-      icon: 'api',
-      label: 'API Network',
-      title: 'Systems That Talk to Each Other',
-      accent: '#34d399',
-      description:
-        'Payments, logistics, marketplaces, government portals — packets of data racing between services on secure, documented highways. We build the connective tissue of your digital business.',
-      features: [
-        'REST & GraphQL APIs, documented end-to-end',
-        'Payment gateways, ERPs & marketplace sync',
-        'Event-driven flows that scale with traffic',
-        'Monitoring, versioning & security baked in',
-      ],
-      kpis: [
-        { value: '99.9%', label: 'uptime target' },
-        { value: 'ms', label: 'latency' },
-        { value: '100%', label: 'documented' },
-      ],
-    },
-  ],
-}
-
 export const about = {
-  heading: 'Built by Brothers,',
-  headingGradient: 'Driven by Code',
+  heading: 'Engineering Meets',
+  headingGradient: 'Business Strategy',
   paragraphs: [
-    // [PLACEHOLDER] — refine this story with your real background
-    'TwinByte Technologies was founded by two brothers who share one obsession: using technology to solve real business problems. What started as late-night coding sessions has grown into a full-service tech consultancy.',
-    'We combine deep engineering expertise with genuine business understanding. No jargon, no bloat — just software that works, ships on time, and moves your numbers.',
+    'Revora Consultancy pairs deep engineering capability with sharp product thinking. We design, build and scale the systems — AI, CRM, ERP, web platforms and APIs — that give ambitious businesses a measurable advantage.',
+    'Every engagement is led directly by our founders: one owns the technology, the other owns the outcome. No layers of account managers, no hand-offs — senior people stay accountable for your result from kickoff to launch.',
   ],
   founders: [
     {
       name: 'Abhinav Rathi',
-      role: 'Co-Founder · Technology & Engineering', // [PLACEHOLDER]
-      bio: 'Architect of scalable systems. Leads engineering, AI solutions and product delivery.', // [PLACEHOLDER]
-      initials: 'AR',
+      role: 'Co-Founder · Technology & Engineering',
+      bio: 'Leads architecture, engineering and technical delivery — from AI integrations to full-scale platforms. Every technical decision on your project runs through him.',
+      initials: 'AV',
       accent: '#22d3ee',
     },
-    // Add the second founder here when their details are confirmed:
-    // { name: '…', role: 'Co-Founder · Strategy & Growth', bio: '…', initials: '…', accent: '#c084fc' },
+    {
+      name: 'Abhishek Rathi',
+      role: 'Co-Founder · Product & Strategy',
+      bio: 'MBA from the Indian School of Business and a product manager by profession. Leads product strategy, client partnerships and delivery operations — making sure what we build moves your numbers.',
+      initials: 'AB',
+      accent: '#c084fc',
+    },
   ],
   values: [
     { title: 'Ship Fast', text: 'Rapid iterations, weekly demos, no black boxes.' },

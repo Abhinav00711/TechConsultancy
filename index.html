@@ -6,50 +6,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="TwinByte Technologies — AI integration, custom software (CRM, ERP), web & API development. We engineer digital advantage for ambitious businesses."
+      content="Revora Consultancy — AI integration, custom software (CRM, ERP), web & API development. We engineer digital advantage for ambitious businesses."
     />
     <meta name="theme-color" content="#05060e" />
-    <title>TwinByte Technologies — AI &amp; Custom Software Consultancy</title>
-    <!-- [PLACEHOLDER] canonical — replace twinbyte.tech with your real domain -->
-    <link rel="canonical" href="https://twinbyte.tech/" />
+    <script>
+      // Set theme before first paint to avoid a flash of the wrong theme
+      ;(function () {
+        var t
+        try { t = localStorage.getItem('theme') } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+        }
+        document.documentElement.dataset.theme = t
+        var m = document.querySelector('meta[name="theme-color"]')
+        if (m) m.setAttribute('content', t === 'light' ? '#f6f7fc' : '#05060e')
+      })()
+    </script>
+    <title>Revora Consultancy — AI, Custom Software &amp; Cloud</title>
+    <link rel="canonical" href="https://revora.co.in/" />
 
-    <!-- [PLACEHOLDER] Social sharing — replace twinbyte.tech with your real domain -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="TwinByte Technologies" />
-    <meta property="og:title" content="TwinByte Technologies — AI & Custom Software Consultancy" />
+    <meta property="og:site_name" content="Revora Consultancy" />
+    <meta property="og:title" content="Revora Consultancy — AI, Custom Software & Cloud" />
     <meta
       property="og:description"
       content="AI integration, custom CRMs & ERPs, web and API development — we engineer digital advantage for ambitious businesses."
     />
-    <meta property="og:url" content="https://twinbyte.tech/" />
-    <meta property="og:image" content="https://twinbyte.tech/og-image.png" />
+    <meta property="og:url" content="https://revora.co.in/" />
+    <meta property="og:image" content="https://revora.co.in/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TwinByte Technologies — AI & Custom Software Consultancy" />
+    <meta name="twitter:title" content="Revora Consultancy — AI, Custom Software & Cloud" />
     <meta
       name="twitter:description"
       content="AI integration, custom CRMs & ERPs, web and API development — we engineer digital advantage for ambitious businesses."
     />
-    <meta name="twitter:image" content="https://twinbyte.tech/og-image.png" />
+    <meta name="twitter:image" content="https://revora.co.in/og-image.png" />
 
-    <!-- Structured data for search engines. [PLACEHOLDER] values marked below -->
+    <!-- Structured data for search engines. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
-        "name": "TwinByte Technologies",
+        "name": "Revora Consultancy",
         "description": "AI integration, custom software (CRM, ERP), web and API development consultancy.",
-        "url": "https://twinbyte.tech/",
-        "image": "https://twinbyte.tech/og-image.png",
-        "email": "hello@twinbyte.tech",
+        "url": "https://revora.co.in/",
+        "image": "https://revora.co.in/og-image.png",
+        "email": "rathiabhishek26@gmail.com",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Mumbai",
           "addressCountry": "IN"
         },
         "founder": [
-          { "@type": "Person", "name": "Abhinav Rathi" }
+          { "@type": "Person", "name": "Abhinav Rathi" },
+          { "@type": "Person", "name": "Abhishek Rathi" }
         ],
         "knowsAbout": [
           "AI Integration",
