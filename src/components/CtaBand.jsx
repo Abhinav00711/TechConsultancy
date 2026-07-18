@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { site } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 
 export default function CtaBand() {
@@ -18,9 +19,15 @@ export default function CtaBand() {
             to Work for Your Business?
           </h2>
           <p>Book a free discovery call. No sales pitch — just an honest technical conversation about your goals.</p>
-          <a href="#contact" className="btn btn-primary">
-            Book a Free Call <span aria-hidden>→</span>
-          </a>
+          {site.bookingUrl ? (
+            <a href={site.bookingUrl} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+              Book a Free Call <span aria-hidden>→</span>
+            </a>
+          ) : (
+            <a href="#contact" className="btn btn-primary">
+              Book a Free Call <span aria-hidden>→</span>
+            </a>
+          )}
         </Reveal>
       </div>
     </section>

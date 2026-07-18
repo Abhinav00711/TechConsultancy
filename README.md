@@ -37,18 +37,33 @@ Everything marked `[PLACEHOLDER]` should be replaced with your real details:
 - Phone, location and `site.socials` (only socials with a real URL are rendered)
 - The `work` example-engagement cards — swap for real, permissioned case studies as they come in
 
-## 📬 Contact form
+## 📬 Contact & conversion channels
 
-Set `site.formEndpoint` in `src/data/content.js` to a [Formspree](https://formspree.io) / [Web3Forms](https://web3forms.com) endpoint and submissions POST there (with a honeypot and success/error states). While it's empty, submitting opens a prefilled email draft to `site.email` instead — no enquiry is ever silently lost.
+- **Form** — set `site.formEndpoint` in `src/data/content.js` to a [Formspree](https://formspree.io) / [Web3Forms](https://web3forms.com) endpoint and submissions POST there (with a honeypot and success/error states). While it's empty, submitting opens a prefilled email draft to `site.email` instead — no enquiry is ever silently lost.
+- **WhatsApp** — `site.whatsapp` (digits-only international number) powers a floating click-to-chat button, a contact card and "faster reply" links in the form states. Empty it to hide every WhatsApp entry point.
+- **Booking** — set `site.bookingUrl` to a [Cal.com](https://cal.com) / Calendly link and the site switches to a "Book a Free Discovery Call" flow: hero primary CTA, CTA band button and a booking card in the contact section. While empty, those buttons fall back to the contact form. Booking a slot directly [roughly doubles inbound conversion](https://www.chilipiper.com/post/form-conversion-rate-benchmark-report) vs. a bare form.
 
-## ✅ Before you launch
+## 🕷 Prerendering (SEO & AI search)
 
-1. Replace every `[PLACEHOLDER]` in `src/data/content.js`, `index.html`, `public/robots.txt` and `public/sitemap.xml` (brand, domain, email, location).
-2. Confirm the email address is real and monitored — the site promises a 24-hour reply.
-3. Set `site.formEndpoint` so form submissions arrive in your inbox.
-4. Add real social profile URLs to `site.socials` (LinkedIn and GitHub matter most for a consultancy).
-5. Keep the stats band honest — it currently lists commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
-6. Compress `public/og-image.png` under ~100 KB for fast link unfurls.
+`npm run build` runs Vite, then `scripts/prerender.mjs` loads the built site in headless Chromium and writes the fully rendered HTML into `dist/index.html`. Crawlers that don't execute JavaScript (GPTBot, ClaudeBot, PerplexityBot, many others) see the complete content, headings, FAQ and structured data instead of an empty `<div id="root">` — without it the site is invisible to AI answer engines.
+
+- Locally it uses the system Chromium/Chrome; if none is found it warns and keeps the plain SPA build.
+- In CI (`deploy.yml`) `PRERENDER_STRICT=1` makes a missing browser fail the deploy rather than silently publishing the empty shell.
+- `npm run build:spa` skips prerendering.
+- Structured data shipped: `ProfessionalService` (with full Kolkata address + phone) in `index.html`, and an auto-generated `FAQPage` schema derived from the FAQ content in `src/data/content.js`.
+
+## ✅ Before you launch (the unblock checklist)
+
+Everything below needs an account/profile only you can create — each one un-hides features that are already built:
+
+1. **Form endpoint** — create a free [Formspree](https://formspree.io)/[Web3Forms](https://web3forms.com) form and paste the URL into `site.formEndpoint`. Until then, mobile visitors without a mail app effectively can't submit the form.
+2. **Booking link** — create a free [Cal.com](https://cal.com) event ("30-min discovery call") and paste it into `site.bookingUrl` to switch the site to the higher-converting book-a-call flow.
+3. **Branded email** — you own `revora.co.in`; a `hello@revora.co.in` mailbox (Zoho Mail free tier) replaces the Gmail address in `site.email` + `index.html`. Big trust upgrade for the money (free).
+4. **LinkedIn** — create the company page and add it (plus founder GitHub) to `site.socials`; also add the URLs to the `sameAs` field of the JSON-LD in `index.html`.
+5. **WhatsApp** — confirm `site.whatsapp` is the number you actually answer (ideally a WhatsApp Business profile with the Revora name/logo).
+6. **Analytics** — sign up for a cookieless analytics service (Cloudflare Web Analytics / Plausible / Umami) and add its snippet to `index.html`, keeping the "no cookies" promise intact. Without it there is no visibility into which CTAs convert.
+7. **Google Business Profile** (Kolkata address) and **Clutch/GoodFirms** profiles — free listings where Indian SMEs actually search for agencies.
+8. Keep the stats band honest — it lists commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
 
 ## 🌐 Deploying (GitHub Pages)
 

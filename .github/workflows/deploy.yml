@@ -26,7 +26,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # PRERENDER_STRICT: the deploy must fail rather than silently publish an
+      # empty SPA shell — scripts/prerender.mjs uses the runner's Chrome.
       - run: npm run build
+        env:
+          PRERENDER_STRICT: '1'
       - uses: actions/configure-pages@v5
         with:
           # Enables GitHub Pages for the repo on first run (source: GitHub Actions)

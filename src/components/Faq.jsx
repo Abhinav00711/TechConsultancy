@@ -30,11 +30,24 @@ function FaqItem({ id, q, a, open, onToggle }) {
   )
 }
 
+/* FAQPage structured data, generated from the same faq content the visitors
+   see — keeps search engines and AI answer engines in sync with the page. */
+const faqJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.items.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+})
+
 export default function Faq() {
   const [open, setOpen] = useState(0)
 
   return (
     <section id="faq" className="section" style={{ paddingTop: 0 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqJsonLd }} />
       <div className="container">
         <Reveal>
           <span className="section-tag">{faq.tag}</span>

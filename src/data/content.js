@@ -9,16 +9,28 @@ export const site = {
   tagline: 'Technology that moves your business forward.',
   email: 'rathiabhishek26@gmail.com',
   phone: '+91 9654724365',
+  // WhatsApp number in international digits-only form (used for wa.me links).
+  // Leave empty to hide every WhatsApp entry point.
+  whatsapp: '919654724365',
+  whatsappMessage: 'Hi Revora — I’d like to discuss a project.',
   location: 'P38, India Exchange Place, Arun Chambers, 5th Floor, Kolkata, WB 700001, India',
   // Contact-form endpoint (e.g. Formspree: https://formspree.io/f/xxxxxxx).
   // Leave empty to fall back to a prefilled email draft — no lead is ever lost.
   formEndpoint: '',
+  // Scheduling link (e.g. https://cal.com/revora/discovery or Calendly).
+  // Leave empty to hide the "book a call" buttons until the account exists.
+  bookingUrl: '',
   // Only socials with a real URL are rendered. Fill these in as profiles exist.
   socials: [
     // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
     // { label: 'GitHub', icon: 'github', url: 'https://github.com/…' },
   ],
 }
+
+// Ready-to-use wa.me link derived from the fields above ('' when disabled).
+site.whatsappLink = site.whatsapp
+  ? `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(site.whatsappMessage)}`
+  : ''
 
 export const nav = [
   { label: 'Home', href: '#home' },
@@ -37,7 +49,17 @@ export const hero = {
   subtitle:
     'From AI integration to enterprise-grade CRMs, ERPs, websites and APIs — we design, build and scale the technology that puts you ahead of the curve.',
   ctaPrimary: 'Start Your Project',
+  // Used instead of ctaPrimary when site.bookingUrl is set — a scheduled call
+  // is lower-friction than "start a project" for a first-time visitor.
+  ctaBooking: 'Book a Free Discovery Call',
   ctaSecondary: 'Explore Services',
+  // Risk-reversal strip under the CTAs — commitments we control, not claims.
+  assurances: [
+    'Free discovery call & roadmap',
+    'First demo in 7 days',
+    '100% code ownership',
+    'Zero lock-in',
+  ],
 }
 
 // Section meta for the merged "Services + Live Demos" section.
