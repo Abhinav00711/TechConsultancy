@@ -9,6 +9,19 @@
       content="Revora Consultancy — AI integration, custom software (CRM, ERP), web & API development. We engineer digital advantage for ambitious businesses."
     />
     <meta name="theme-color" content="#05060e" />
+    <script>
+      // Set theme before first paint to avoid a flash of the wrong theme
+      ;(function () {
+        var t
+        try { t = localStorage.getItem('theme') } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+        }
+        document.documentElement.dataset.theme = t
+        var m = document.querySelector('meta[name="theme-color"]')
+        if (m) m.setAttribute('content', t === 'light' ? '#f6f7fc' : '#05060e')
+      })()
+    </script>
     <title>Revora Consultancy — AI, Custom Software &amp; Cloud</title>
     <link rel="canonical" href="https://revora.co.in/" />
 
