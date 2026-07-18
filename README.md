@@ -58,7 +58,7 @@ Everything below needs an account/profile only you can create — each one un-hi
 
 1. ~~**Form endpoint**~~ — ✅ done, submissions POST to Formspree (free tier: 50/month; the mailto fallback still exists if the cap is ever hit).
 2. ~~**Booking link**~~ — ✅ done, "Book a Free Discovery Call" links to Cal.com.
-3. **Branded email** — a `hello@revora.co.in` mailbox to replace the Gmail address in `site.email` + `index.html`. Options: Zoho Mail (cheapest paid tier if the free plan is gone in your region), or free forwarding via [ImprovMX](https://improvmx.com)/Cloudflare Email Routing with Gmail "send-as" for replies. Update the Formspree notification address too when this happens.
+3. ~~**Branded email**~~ — ✅ done, `consulting@revora.co.in` (Cloudflare Email Routing → Gmail). Still pending: Gmail "send mail as" so replies come from the branded address, and updating the Formspree notification address in its dashboard.
 4. **LinkedIn** — create the company page and add it (plus founder GitHub) to `site.socials`; also add the URLs to the `sameAs` field of the JSON-LD in `index.html`.
 5. **WhatsApp** — confirm `site.whatsapp` is the number you actually answer (ideally a WhatsApp Business profile with the Revora name/logo).
 6. ~~**Analytics**~~ — ✅ done, Cloudflare Web Analytics (cookieless) is in `index.html` and disclosed in the privacy policy; the prerender script blocks the beacon so CI builds don't count as visits.

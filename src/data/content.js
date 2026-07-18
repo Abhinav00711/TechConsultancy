@@ -7,7 +7,7 @@ export const site = {
   name: 'Revora',
   suffix: 'Consultancy',
   tagline: 'Technology that moves your business forward.',
-  email: 'rathiabhishek26@gmail.com',
+  email: 'consulting@revora.co.in',
   phone: '+91 9654724365',
   // WhatsApp number in international digits-only form (used for wa.me links).
   // Leave empty to hide every WhatsApp entry point.
