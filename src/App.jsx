@@ -14,10 +14,14 @@ import Work from './components/Work.jsx'
 import CtaBand from './components/CtaBand.jsx'
 import Contact from './components/Contact.jsx'
 import Footer from './components/Footer.jsx'
+import WhatsAppFab from './components/WhatsAppFab.jsx'
 
 function Site() {
   const reducedMotion = useReducedMotion()
-  const [loaded, setLoaded] = useState(reducedMotion)
+  // Skip the preloader when the page was prerendered — the visitor already
+  // sees full content, so covering it with a loading screen would be a step
+  // backwards. (window.__PRERENDERED__ is injected by scripts/prerender.mjs.)
+  const [loaded, setLoaded] = useState(() => reducedMotion || Boolean(window.__PRERENDERED__))
 
   useEffect(() => {
     if (loaded) return
@@ -57,6 +61,7 @@ function Site() {
         <Contact />
       </main>
       <Footer />
+      <WhatsAppFab />
     </>
   )
 }

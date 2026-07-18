@@ -91,6 +91,18 @@ const icons = {
       <circle cx="12" cy="10" r="2.6" />
     </svg>
   ),
+  whatsapp: (
+    <svg {...base}>
+      <path d="M12 3a9 9 0 0 0-7.6 13.8L3 21l4.4-1.3A9 9 0 1 0 12 3z" />
+      <path d="M9.2 8.6c.5 2.6 3.6 5.7 6.2 6.2l1.2-1.9-2.2-1.1-.9.9a6.7 6.7 0 0 1-2-2l.9-.9-1.1-2.2-2.1 1z" />
+    </svg>
+  ),
+  calendar: (
+    <svg {...base}>
+      <rect x="3" y="5" width="18" height="16" rx="2.5" />
+      <path d="M3 9.5h18M8 3v4M16 3v4" />
+    </svg>
+  ),
   linkedin: (
     <svg {...base} strokeWidth={1.5} width={20} height={20}>
       <rect x="3" y="3" width="18" height="18" rx="3" />

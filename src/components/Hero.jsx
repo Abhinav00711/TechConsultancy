@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
-import { hero } from '../data/content.js'
+import { hero, site } from '../data/content.js'
 
 const HeroScene = lazy(() => import('./three/HeroScene.jsx'))
 
@@ -39,13 +39,25 @@ export default function Hero() {
         </motion.p>
 
         <motion.div className="hero-ctas" variants={item}>
-          <a href="#contact" className="btn btn-primary">
-            {hero.ctaPrimary} <span aria-hidden>→</span>
-          </a>
+          {site.bookingUrl ? (
+            <a href={site.bookingUrl} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+              {hero.ctaBooking} <span aria-hidden>→</span>
+            </a>
+          ) : (
+            <a href="#contact" className="btn btn-primary">
+              {hero.ctaPrimary} <span aria-hidden>→</span>
+            </a>
+          )}
           <a href="#services" className="btn btn-ghost">
             {hero.ctaSecondary}
           </a>
         </motion.div>
+
+        <motion.ul className="hero-assurances" variants={item}>
+          {hero.assurances.map((a) => (
+            <li key={a}>{a}</li>
+          ))}
+        </motion.ul>
       </motion.div>
 
       <motion.div

@@ -59,6 +59,38 @@ export default function Contact() {
 
         <div className="contact-wrap">
           <Reveal className="contact-info" delay={0.1}>
+            {site.bookingUrl && (
+              <a
+                className="contact-info-item glass contact-info-booking"
+                href={site.bookingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="contact-info-icon">
+                  <Icon name="calendar" />
+                </div>
+                <div>
+                  <strong>Book a Free Discovery Call</strong>
+                  <span>Pick a slot that suits you — 30 minutes, no obligation</span>
+                </div>
+              </a>
+            )}
+            {site.whatsappLink && (
+              <a
+                className="contact-info-item glass"
+                href={site.whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="contact-info-icon">
+                  <Icon name="whatsapp" />
+                </div>
+                <div>
+                  <strong>WhatsApp Us</strong>
+                  <span>Fastest way to reach us — just say hi</span>
+                </div>
+              </a>
+            )}
             <a className="contact-info-item glass" href={`mailto:${site.email}`}>
               <div className="contact-info-icon">
                 <Icon name="mail" />
@@ -129,7 +161,15 @@ export default function Contact() {
               </div>
               <div role="status" aria-live="polite">
                 {status === 'sent' && (
-                  <div className="form-success">✓ Thanks! Your message is on its way — we’ll reply within 24 hours.</div>
+                  <div className="form-success">
+                    ✓ Thanks! Your message is on its way — we’ll reply within 24 hours.
+                    {site.whatsappLink && (
+                      <>
+                        {' '}
+                        In a hurry? <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">WhatsApp us</a> for a faster reply.
+                      </>
+                    )}
+                  </div>
                 )}
                 {status === 'draft' && (
                   <div className="form-success">
@@ -140,7 +180,13 @@ export default function Contact() {
                 {status === 'error' && (
                   <div className="form-error">
                     Something went wrong sending your message. Please email us directly at{' '}
-                    <a href={`mailto:${site.email}`}>{site.email}</a>.
+                    <a href={`mailto:${site.email}`}>{site.email}</a>
+                    {site.whatsappLink && (
+                      <>
+                        {' '}or <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">message us on WhatsApp</a>
+                      </>
+                    )}
+                    .
                   </div>
                 )}
               </div>
@@ -152,6 +198,15 @@ export default function Contact() {
               >
                 {status === 'sending' ? 'Sending…' : 'Send Message'} <span aria-hidden>→</span>
               </button>
+              {site.whatsappLink && (
+                <p className="form-alt-channel">
+                  Prefer chat?{' '}
+                  <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">
+                    Message us on WhatsApp
+                  </a>{' '}
+                  — it’s the fastest way to get a reply.
+                </p>
+              )}
             </form>
           </Reveal>
         </div>
