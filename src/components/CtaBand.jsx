@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { site } from '../data/content.js'
+import { site, ctaBand } from '../data/content.js'
+import { track, bookingHref } from '../lib/analytics.js'
 import Reveal from './ui/Reveal.jsx'
 
 export default function CtaBand() {
@@ -18,16 +19,28 @@ export default function CtaBand() {
             <br />
             to Work for Your Business?
           </h2>
-          <p>Book a free discovery call. No sales pitch — just an honest technical conversation about your goals.</p>
+          <p>{ctaBand.sub}</p>
           {site.bookingUrl ? (
-            <a href={site.bookingUrl} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
-              Book a Free Call <span aria-hidden>→</span>
+            <a
+              href={bookingHref('cta-band')}
+              className="btn btn-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track('Booking Click', { placement: 'cta-band' })}
+            >
+              {ctaBand.button} <span aria-hidden>→</span>
             </a>
           ) : (
             <a href="#contact" className="btn btn-primary">
-              Book a Free Call <span aria-hidden>→</span>
+              {ctaBand.button} <span aria-hidden>→</span>
             </a>
           )}
+          <p className="cta-reassurance">{ctaBand.reassurance}</p>
+          <ul className="cta-guarantees">
+            {ctaBand.guarantees.map((g) => (
+              <li key={g}>{g}</li>
+            ))}
+          </ul>
         </Reveal>
       </div>
     </section>

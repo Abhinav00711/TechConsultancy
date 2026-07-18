@@ -13,35 +13,35 @@ const MoonIcon = (
   </svg>
 )
 
-/* Reads/writes document.documentElement.dataset.theme directly — the
-   inline head script already resolved it before first paint, this just
-   mirrors that into state and flips it on click. */
+/* The inline head script already resolved the theme before first paint; this
+   mirrors it into state after mount and flips it on click. Two-pass on
+   purpose: the first render always assumes 'dark' (what the prerendered
+   snapshot was captured with) so hydration adopts the DOM without a
+   mismatch, then the effect syncs to the visitor's real theme. */
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState(
-    () => document.documentElement.dataset.theme === 'light' ? 'light' : 'dark',
-  )
+  const [theme, setTheme] = useState('dark')
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
+    if (document.documentElement.dataset.theme === 'light') setTheme('light')
+  }, [])
+
+  const next = theme === 'light' ? 'dark' : 'light'
+
+  const toggle = () => {
+    setTheme(next)
+    document.documentElement.dataset.theme = next
     try {
-      localStorage.setItem('theme', theme)
+      localStorage.setItem('theme', next)
     } catch (e) {
       // localStorage unavailable (private mode / disabled) — theme still
       // applies for this page view, it just won't persist
     }
     const m = document.querySelector('meta[name="theme-color"]')
-    if (m) m.setAttribute('content', theme === 'light' ? '#f6f7fc' : '#05060e')
-  }, [theme])
-
-  const next = theme === 'light' ? 'dark' : 'light'
+    if (m) m.setAttribute('content', next === 'light' ? '#f6f7fc' : '#05060e')
+  }
 
   return (
-    <button
-      type="button"
-      className="theme-toggle"
-      aria-label={`Switch to ${next} theme`}
-      onClick={() => setTheme(next)}
-    >
+    <button type="button" className="theme-toggle" aria-label={`Switch to ${next} theme`} onClick={toggle}>
       {theme === 'light' ? MoonIcon : SunIcon}
     </button>
   )

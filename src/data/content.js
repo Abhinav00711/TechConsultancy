@@ -12,7 +12,9 @@ export const site = {
   // WhatsApp number in international digits-only form (used for wa.me links).
   // Leave empty to hide every WhatsApp entry point.
   whatsapp: '919654724365',
-  whatsappMessage: 'Hi Revora — I’d like to discuss a project.',
+  // Self-qualifying template — the blanks nudge the sender into describing
+  // their business and problem, so conversations don't start with a bare "hi".
+  whatsappMessage: 'Hi Revora — I’d like to discuss a project. My business: ___. What I want to solve: ___',
   location: 'P38, India Exchange Place, Arun Chambers, 5th Floor, Kolkata, WB 700001, India',
   // Contact-form endpoint (Formspree). If ever emptied, the form falls back
   // to a prefilled email draft — no lead is ever lost.
@@ -26,32 +28,39 @@ export const site = {
   ],
 }
 
-// Ready-to-use wa.me link derived from the fields above ('' when disabled).
-site.whatsappLink = site.whatsapp
-  ? `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(site.whatsappMessage)}`
-  : ''
+// wa.me link builder — pass a custom message for per-service entry points
+// (the message doubles as free attribution: it tells us which section sent
+// the enquiry). Returns '' when WhatsApp is disabled.
+export const waLink = (message = site.whatsappMessage) =>
+  site.whatsapp ? `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}` : ''
 
+// Ready-to-use default link derived from the fields above ('' when disabled).
+site.whatsappLink = waLink()
+
+// Matches the section order in App.jsx (the logo already links home).
 export const nav = [
-  { label: 'Home', href: '#home' },
   { label: 'Services', href: '#services' },
   { label: 'About', href: '#about' },
-  { label: 'Process', href: '#process' },
   { label: 'Work', href: '#work' },
+  { label: 'Process', href: '#process' },
+  { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ]
 
 export const hero = {
-  badge: 'AI · Software · Cloud — Consultancy',
-  titleTop: 'We Engineer',
-  titleGradient: 'Digital Advantage',
-  titleBottom: 'For Your Business',
+  badge: 'Founder-Led Tech Consultancy · Kolkata, India',
+  titleTop: 'Software That',
+  titleGradient: 'Pays For Itself',
+  titleBottom: 'Built By Founders',
   subtitle:
-    'From AI integration to enterprise-grade CRMs, ERPs, websites and APIs — we design, build and scale the technology that puts you ahead of the curve.',
+    'AI integration, custom CRMs, ERPs, websites and APIs for growing Indian businesses — designed and built directly by our founders, with a fixed itemised quote, your first demo in 7 days and 100% code ownership.',
   ctaPrimary: 'Start Your Project',
   // Used instead of ctaPrimary when site.bookingUrl is set — a scheduled call
   // is lower-friction than "start a project" for a first-time visitor.
   ctaBooking: 'Book a Free Discovery Call',
-  ctaSecondary: 'Explore Services',
+  // Mid-funnel alternative for visitors not ready to talk: scrolls to the
+  // contact form, which promises a written roadmap within 48h — no call needed.
+  ctaSecondary: 'Get a Free Project Roadmap',
   // Risk-reversal strip under the CTAs — commitments we control, not claims.
   assurances: [
     'Free discovery call & roadmap',
@@ -77,6 +86,9 @@ export const services = [
     id: 'ai',
     icon: 'ai',
     title: 'AI Integration',
+    short: 'AI',
+    cta: 'Discuss an AI project',
+    formOption: 'AI Integration',
     headline: 'AI That Works While You Sleep',
     sceneLabel: 'AI Workflow',
     accent: '#22d3ee',
@@ -98,6 +110,9 @@ export const services = [
     id: 'crm',
     icon: 'crm',
     title: 'Custom CRM Systems',
+    short: 'CRM',
+    cta: 'Discuss a CRM project',
+    formOption: 'Custom CRM',
     headline: 'Every Lead, Captured & Converted',
     sceneLabel: 'CRM Pipeline',
     accent: '#818cf8',
@@ -119,6 +134,9 @@ export const services = [
     id: 'erp',
     icon: 'erp',
     title: 'ERP Solutions',
+    short: 'ERP',
+    cta: 'Discuss an ERP project',
+    formOption: 'ERP Solution',
     headline: 'One Core. Every Department.',
     sceneLabel: 'ERP Modules',
     accent: '#c084fc',
@@ -140,6 +158,9 @@ export const services = [
     id: 'web',
     icon: 'web',
     title: 'Web Development',
+    short: 'Web',
+    cta: 'Discuss a website project',
+    formOption: 'Web Development',
     headline: 'Experiences That Convert',
     sceneLabel: 'Live Web Build',
     accent: '#f472b6',
@@ -161,6 +182,9 @@ export const services = [
     id: 'api',
     icon: 'api',
     title: 'API Development',
+    short: 'API',
+    cta: 'Discuss an API project',
+    formOption: 'API Development',
     headline: 'Systems That Talk to Each Other',
     sceneLabel: 'API Network',
     accent: '#34d399',
@@ -182,6 +206,9 @@ export const services = [
     id: 'cloud',
     icon: 'cloud',
     title: 'Cloud & DevOps',
+    short: 'Cloud',
+    cta: 'Discuss cloud & DevOps',
+    formOption: 'Cloud & DevOps',
     headline: 'Ship Faster. Sleep Better.',
     sceneLabel: 'Deploy Pipeline',
     accent: '#fbbf24',
@@ -206,7 +233,7 @@ export const about = {
   headingGradient: 'Business Strategy',
   paragraphs: [
     'Revora Consultancy pairs deep engineering capability with sharp product thinking. We design, build and scale the systems — AI, CRM, ERP, web platforms and APIs — that give ambitious businesses a measurable advantage.',
-    'Every engagement is led directly by our founders: one owns the technology, the other owns the outcome. No layers of account managers, no hand-offs — senior people stay accountable for your result from kickoff to launch.',
+    'Based in Kolkata and working with clients across India, every engagement is led directly by our founders: one owns the technology, the other owns the outcome. No layers of account managers, no hand-offs — senior people stay accountable for your result from kickoff to launch.',
   ],
   founders: [
     {
@@ -275,14 +302,24 @@ export const work = {
   tag: 'The Work We Take On',
   title: 'Built Around',
   titleGradient: 'Your Numbers',
-  sub: 'Example engagements that show how we scope a project: a concrete problem, a system, and a measurable target.',
-  note: 'Illustrative examples of typical engagements — your project gets its own goals and quote.',
+  sub: 'How we scope a project: a concrete problem, a system, phased delivery and a measurable target. The first card is real — you’re looking at it.',
+  note: 'The first card is our own verifiable work; the others are illustrative examples of typical engagements — your project gets its own goals and quote.',
   items: [
+    {
+      // Real, verifiable proof — the site itself. Keep this card first.
+      tag: 'Web Development · Our Own Site',
+      title: 'This website — our live case study',
+      text: 'The site you’re on is our own build: interactive 3D scenes, prerendered HTML so search and AI crawlers see everything, self-hosted fonts and cookieless analytics.',
+      target: 'Verifiable: run Lighthouse on this page or view the source — what we sell is what we ship.',
+      scope: 'How we scoped it: design & 3D concept (week 1) → build & content (weeks 2–3) → SEO, performance & launch (week 4).',
+      accent: '#f472b6',
+    },
     {
       tag: 'AI Integration · Manufacturing',
       title: 'Sales-ops automation',
       text: 'Quotes, purchase orders and emails parsed and entered into the ERP automatically — humans approve only the edge cases.',
       target: 'Target: cut manual data entry by more than half.',
+      scope: 'How we’d scope it: workflow audit & data mapping (week 1) → parsing + ERP integration (weeks 2–5) → approval flows, testing & rollout (weeks 6–8).',
       accent: '#22d3ee',
     },
     {
@@ -290,14 +327,8 @@ export const work = {
       title: 'One pipeline instead of three tools',
       text: 'A CRM shaped around the brand’s real sales stages, with WhatsApp, email and call tracking unified in one dashboard.',
       target: 'Target: zero leads lost between tools, faster follow-ups.',
+      scope: 'How we’d scope it: sales-process mapping (week 1) → pipeline + WhatsApp & email integrations (weeks 2–5) → dashboards, training & handover (weeks 6–7).',
       accent: '#818cf8',
-    },
-    {
-      tag: 'Web Development · Real Estate',
-      title: 'A site that sells the vision',
-      text: 'An immersive, fast marketing site with 3D walkthrough elements and conversion-focused enquiry flows.',
-      target: 'Target: measurably more qualified inbound leads.',
-      accent: '#f472b6',
     },
   ],
 }
@@ -336,11 +367,44 @@ export const faq = {
       q: 'We’re not technical. Is that a problem?',
       a: 'Not at all — most of our clients aren’t. We speak plain business language, translate every decision into cost and outcome, and show you clickable demos instead of jargon.',
     },
+    {
+      q: 'Do we actually need AI?',
+      a: 'Honestly — sometimes no. Many businesses get more value from a clean CRM, one well-placed automation or a faster website than from a big AI project. On the discovery call we’ll tell you which is true for you, even when the answer is “not yet” — recommending the cheapest path to your goal is how we earn the bigger project later.',
+    },
+    {
+      q: 'What’s the smallest way to start?',
+      a: 'A small fixed-price pilot: we pick one painful workflow, automate or rebuild it in about two weeks, and you keep everything we build. You judge our speed, communication and quality on something low-risk before committing to a bigger build.',
+    },
+    {
+      q: 'Why choose you over a freelancer or a big agency?',
+      a: 'You get the two founders — an engineer and an ISB-trained product manager — working on your project directly. Freelancers can be cheap but can also disappear; big agencies hand your project to juniors behind layers of account managers. We’re senior people, accountable by name, at SMB-friendly pricing.',
+    },
+    {
+      q: 'Is our business data safe with you?',
+      a: 'Yes. We sign an NDA before you share anything sensitive, we build on your accounts and infrastructure — so access stays yours to grant and revoke — and every credential is handed over at launch. Your data never becomes our leverage.',
+    },
+    {
+      q: 'How do payments work?',
+      a: 'Milestone-based. The fixed quote is split across project milestones, so you pay as working software is delivered and demoed — never one large lump sum upfront. The exact split is agreed in the quote before we start.',
+    },
   ],
+}
+
+// CTA band copy + the guarantees strip — the FAQ's strongest risk-reversal
+// promises, promoted to sit right next to the ask.
+export const ctaBand = {
+  sub: 'Book a free discovery call. No sales pitch — just an honest technical conversation about your goals.',
+  button: 'Book a Free Discovery Call',
+  reassurance:
+    'Every call ends with a written summary of what we’d build and roughly what it would cost — yours to keep, whoever you build with.',
+  guarantees: ['Fixed itemised quote', 'First demo in 7 days', '100% code ownership', 'Zero lock-in'],
 }
 
 export const contact = {
   heading: 'Let’s Build Something',
   headingGradient: 'Extraordinary',
   text: 'Tell us about your project — a quick call is free, and so is the first roadmap. We reply within 24 hours.',
+  // Mid-funnel promise shown above the form — the "no call required" path.
+  formNote:
+    'Not ready for a call? Just describe your problem in a few lines. Within 48 hours you get a one-page roadmap: recommended system, phases, timeline and a ballpark range — no call required.',
 }

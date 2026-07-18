@@ -17,7 +17,7 @@ An immersive 3D single-page website for a tech consultancy, built with React, Th
 - **Complete sections** — Hero, Services (AI, CRM, ERP, Web, API, Cloud), 3D Demos, About/Founders, Stats, Process, Example Engagements, CTA, FAQ accordion, Contact form, Footer with privacy policy
 - **Responsive** — mobile menu, fluid type, stacked layouts
 - **Accessible** — skip link, visible focus styles, ARIA tabs with keyboard support and a pause control for auto-rotation, `prefers-reduced-motion` honoured by Framer Motion *and* both WebGL canvases (static frame instead of perpetual animation)
-- **Resilient & private** — WebGL error boundary with a static fallback, context-loss guard, self-hosted fonts (zero third-party requests), no cookies, no trackers
+- **Resilient & private** — WebGL error boundary with a static fallback, context-loss guard, self-hosted fonts (no font CDN requests), no cookies, no cross-site trackers (analytics is cookieless Cloudflare Web Analytics, disclosed in the privacy policy)
 
 ## 🚀 Getting started
 

@@ -1,4 +1,5 @@
 import { site } from '../data/content.js'
+import { track } from '../lib/analytics.js'
 import Icon from './ui/Icons.jsx'
 
 /* Floating WhatsApp click-to-chat button — renders only when site.whatsapp
@@ -12,6 +13,7 @@ export default function WhatsAppFab() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on WhatsApp"
+      onClick={() => track('WhatsApp Click', { placement: 'fab' })}
     >
       <Icon name="whatsapp" />
       <span className="whatsapp-fab-label">WhatsApp us</span>

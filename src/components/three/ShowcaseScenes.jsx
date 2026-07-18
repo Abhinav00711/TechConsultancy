@@ -1105,9 +1105,13 @@ export default function ShowcaseCanvas({ scene }) {
             <pointLight position={[-5, -2, 3]} intensity={14} color="#22d3ee" />
             <pointLight position={[5, 3, -3]} intensity={15} color="#c084fc" />
 
-            {Object.entries(SCENES).map(([id, Scene]) => (
-              <Scene key={id} active={id === scene} />
-            ))}
+            {/* Desktop keeps all scenes warm so tab switches are instant;
+                compact viewports mount only the active scene — phones pay a
+                permanent memory/battery tax for warm scenes they may never
+                switch to. */}
+            {Object.entries(SCENES).map(([id, Scene]) =>
+              compact && id !== scene ? null : <Scene key={id} active={id === scene} />,
+            )}
 
             {!lowEnd && (
               <EffectComposer multisampling={0}>

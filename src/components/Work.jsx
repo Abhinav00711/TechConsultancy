@@ -23,6 +23,7 @@ export default function Work() {
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
                 <p className="work-target">{item.target}</p>
+                {item.scope && <p className="work-scope">{item.scope}</p>}
               </article>
             </Reveal>
           ))}

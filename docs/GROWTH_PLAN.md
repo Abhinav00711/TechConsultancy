@@ -1,5 +1,24 @@
 # Revora — Client Acquisition & Engagement Plan
 
+> **Status (18 Jul 2026):** every item that needed only code/copy is DONE and
+> live in this branch — 1.4, 1.5 (form bands only), 1.7, 1.8, 1.9, 2.1, 2.3,
+> 2.4 (site side), 2.6, 2.7 (plumbing: `track()` events + Cal `?ref=` +
+> hidden page/referrer field — an event script like Plausible still needs an
+> account), 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14, plus stage 1 of 3.3 and
+> the sitemap/README fixes. Bonus: hydration is now actually clean (text-node
+> separators in the prerender + deterministic SVG ids + dark-scheme snapshot).
+>
+> **Still needs the founders (blocked on accounts/assets/decisions):**
+> 1.1 LinkedIn/GitHub profiles · 1.2 socials URLs + founder photos ·
+> 1.3 Google Business Profile · 1.6 Cal.com slug + questions · 1.10 Search
+> Console/Bing verification files · real ₹ pricing bands in the FAQ answer ·
+> 2.2 lead-magnet PDF content · 2.5 pilot pricing · the analytics account for
+> 2.7 · everything in Phase 3 that involves selling or publishing.
+>
+> **Founder review requested:** the five new FAQ answers state commitments
+> (NDA by default, milestone payments, ~2-week fixed-price pilot) — edit
+> `src/data/content.js` if any of these shouldn't be promised yet.
+
 **Date:** 18 July 2026
 **Method:** Four independent expert reviews of the live codebase — a conversion/growth
 strategist, a UX & brand designer, a technical SEO/performance engineer, and a client
