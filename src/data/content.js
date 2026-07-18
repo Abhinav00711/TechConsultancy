@@ -8,10 +8,8 @@ export const site = {
   suffix: 'Consultancy',
   tagline: 'Technology that moves your business forward.',
   email: 'rathiabhishek26@gmail.com',
-  // Phone intentionally omitted until a real number exists — add it here and it
-  // will appear in the contact section and footer automatically.
-  phone: '',
-  location: 'Mumbai, India · Serving clients worldwide',
+  phone: '+91 9654724365',
+  location: 'P38, India Exchange Place, Arun Chambers, 5th Floor, Kolkata, WB 700001, India',
   // Contact-form endpoint (e.g. Formspree: https://formspree.io/f/xxxxxxx).
   // Leave empty to fall back to a prefilled email draft — no lead is ever lost.
   formEndpoint: '',
