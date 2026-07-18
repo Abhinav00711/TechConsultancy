@@ -56,12 +56,12 @@ Everything marked `[PLACEHOLDER]` should be replaced with your real details:
 
 Everything below needs an account/profile only you can create — each one un-hides features that are already built:
 
-1. **Form endpoint** — create a free [Formspree](https://formspree.io)/[Web3Forms](https://web3forms.com) form and paste the URL into `site.formEndpoint`. Until then, mobile visitors without a mail app effectively can't submit the form.
-2. **Booking link** — create a free [Cal.com](https://cal.com) event ("30-min discovery call") and paste it into `site.bookingUrl` to switch the site to the higher-converting book-a-call flow.
-3. **Branded email** — you own `revora.co.in`; a `hello@revora.co.in` mailbox (Zoho Mail free tier) replaces the Gmail address in `site.email` + `index.html`. Big trust upgrade for the money (free).
+1. ~~**Form endpoint**~~ — ✅ done, submissions POST to Formspree (free tier: 50/month; the mailto fallback still exists if the cap is ever hit).
+2. ~~**Booking link**~~ — ✅ done, "Book a Free Discovery Call" links to Cal.com.
+3. **Branded email** — a `hello@revora.co.in` mailbox to replace the Gmail address in `site.email` + `index.html`. Options: Zoho Mail (cheapest paid tier if the free plan is gone in your region), or free forwarding via [ImprovMX](https://improvmx.com)/Cloudflare Email Routing with Gmail "send-as" for replies. Update the Formspree notification address too when this happens.
 4. **LinkedIn** — create the company page and add it (plus founder GitHub) to `site.socials`; also add the URLs to the `sameAs` field of the JSON-LD in `index.html`.
 5. **WhatsApp** — confirm `site.whatsapp` is the number you actually answer (ideally a WhatsApp Business profile with the Revora name/logo).
-6. **Analytics** — sign up for a cookieless analytics service (Cloudflare Web Analytics / Plausible / Umami) and add its snippet to `index.html`, keeping the "no cookies" promise intact. Without it there is no visibility into which CTAs convert.
+6. ~~**Analytics**~~ — ✅ done, Cloudflare Web Analytics (cookieless) is in `index.html` and disclosed in the privacy policy; the prerender script blocks the beacon so CI builds don't count as visits.
 7. **Google Business Profile** (Kolkata address) and **Clutch/GoodFirms** profiles — free listings where Indian SMEs actually search for agencies.
 8. Keep the stats band honest — it lists commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
 

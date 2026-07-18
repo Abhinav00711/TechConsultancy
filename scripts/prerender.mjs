@@ -77,6 +77,8 @@ try {
   // Reduced motion → sections render in their final, fully visible state
   // instead of mid-animation (the site honours prefers-reduced-motion).
   await page.emulateMedia({ reducedMotion: 'reduce' })
+  // Don't let build machines register pageviews in the site's analytics.
+  await page.route('**://static.cloudflareinsights.com/**', (route) => route.abort())
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'networkidle' })
 
   // Scroll through the whole page so every whileInView reveal has fired,

@@ -51,11 +51,19 @@ const PrivacyPolicy = forwardRef(function PrivacyPolicy(_, ref) {
 
         <h3>What we don’t do</h3>
         <ul>
-          <li>No advertising or analytics trackers run on this site.</li>
+          <li>No advertising trackers, cross-site tracking or fingerprinting run on this site.</li>
           <li>No cookies are set by this site.</li>
-          <li>Fonts and all other assets are served from our own domain — your visit is not shared with third-party CDNs.</li>
+          <li>Fonts and all other page assets are served from our own domain, not third-party font CDNs.</li>
           <li>We never sell or share your contact details with third parties.</li>
         </ul>
+
+        <h3>Analytics</h3>
+        <p>
+          We use Cloudflare Web Analytics to understand, in aggregate, how this site is used — pages viewed,
+          referrers and country-level location. It is cookieless, does not build visitor profiles and does not
+          follow you to other websites. Loading the measurement script means Cloudflare processes standard
+          technical data (such as your IP address) to deliver it, as described in Cloudflare’s privacy policy.
+        </p>
 
         <h3>Data retention &amp; your rights</h3>
         <p>
