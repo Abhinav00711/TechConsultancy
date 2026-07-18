@@ -14,12 +14,11 @@ export const site = {
   whatsapp: '919654724365',
   whatsappMessage: 'Hi Revora — I’d like to discuss a project.',
   location: 'P38, India Exchange Place, Arun Chambers, 5th Floor, Kolkata, WB 700001, India',
-  // Contact-form endpoint (e.g. Formspree: https://formspree.io/f/xxxxxxx).
-  // Leave empty to fall back to a prefilled email draft — no lead is ever lost.
-  formEndpoint: '',
-  // Scheduling link (e.g. https://cal.com/revora/discovery or Calendly).
-  // Leave empty to hide the "book a call" buttons until the account exists.
-  bookingUrl: '',
+  // Contact-form endpoint (Formspree). If ever emptied, the form falls back
+  // to a prefilled email draft — no lead is ever lost.
+  formEndpoint: 'https://formspree.io/f/xgogkaoo',
+  // Scheduling link — powers the "Book a Free Discovery Call" flow.
+  bookingUrl: 'https://cal.com/abhishek-rathi-gjf6hp',
   // Only socials with a real URL are rendered. Fill these in as profiles exist.
   socials: [
     // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
