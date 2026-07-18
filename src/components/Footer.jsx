@@ -71,7 +71,7 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <span>© {year} {site.name} {site.suffix}. All rights reserved.</span>
-          <span>Crafted with precision — and a lot of coffee ☕</span>
+          <span>Engineered with precision in India.</span>
         </div>
       </div>
       <PrivacyPolicy ref={privacyRef} />

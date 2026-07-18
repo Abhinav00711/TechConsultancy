@@ -1,4 +1,4 @@
-# TwinByte Technologies — 3D Consultancy Website
+# Revora Consultancy — 3D Consultancy Website
 
 An immersive 3D single-page website for a tech consultancy, built with React, Three.js (react-three-fiber) and Framer Motion.
 
@@ -33,9 +33,8 @@ npm run preview  # preview the production build
 **All text lives in one file: [`src/data/content.js`](src/data/content.js).**
 Everything marked `[PLACEHOLDER]` should be replaced with your real details:
 
-- Company name (currently the placeholder "TwinByte") — also update `index.html` title/description
-- Second founder's card (a commented-out template is in `about.founders`)
-- Email, phone, location and `site.socials` (only socials with a real URL are rendered)
+- Company name (currently "Revora Consultancy") — also update `index.html` title/description
+- Phone, location and `site.socials` (only socials with a real URL are rendered)
 - The `work` example-engagement cards — swap for real, permissioned case studies as they come in
 
 ## 📬 Contact form
@@ -51,14 +50,21 @@ Set `site.formEndpoint` in `src/data/content.js` to a [Formspree](https://formsp
 5. Keep the stats band honest — it currently lists commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
 6. Compress `public/og-image.png` under ~100 KB for fast link unfurls.
 
-## 🌐 Deploying
+## 🌐 Deploying (GitHub Pages)
 
-The build output (`dist/`) is fully static — deploy free on [Vercel](https://vercel.com), [Netlify](https://netlify.com) or GitHub Pages:
+Deployment is automated: every push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which builds the site and publishes `dist/` to GitHub Pages. The first run enables Pages automatically (source: *GitHub Actions*); the site then lives at `https://abhinav00711.github.io/TechConsultancy/`. You can also trigger a deploy manually from the repo's **Actions** tab.
 
-```bash
-npm run build
-# then drag-and-drop dist/ into Netlify, or `vercel deploy`
-```
+### Connecting the custom domain (revora.co.in)
+
+When you're ready to go live on the real domain:
+
+1. **GoDaddy DNS** (My Products → revora.co.in → Manage DNS) — add these records:
+   - Four `A` records for host `@` pointing to GitHub Pages' IPs:
+     `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - One `CNAME` record for host `www` pointing to `abhinav00711.github.io`
+   - Delete any conflicting GoDaddy "domain parking" `A`/`CNAME` records for `@`/`www`.
+2. **GitHub** — repo → Settings → Pages → *Custom domain* → enter `revora.co.in`, save, and tick **Enforce HTTPS** once the DNS check passes (can take up to an hour). GitHub commits a `CNAME` file to the deployment automatically.
+3. The build already uses relative asset paths (`base: './'` in `vite.config.js`), so the same build works on both the github.io URL and the custom domain — no code change needed.
 
 ## 🗂 Structure
 
