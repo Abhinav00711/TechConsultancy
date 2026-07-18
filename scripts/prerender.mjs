@@ -97,9 +97,20 @@ try {
   // Flag the snapshot so the app skips the preloader on hydration.
   html = html.replace('<head>', '<head><script>window.__PRERENDERED__=true</script>')
 
+  // Vite injects <link rel="modulepreload"> tags for lazy-loaded chunks with
+  // absolute URLs, so the snapshot ends up pointing at this local server.
+  // Shipping those makes every visitor's browser request 127.0.0.1, which
+  // Chrome 142+ surfaces as a scary "access other apps and services on this
+  // device" (Local Network Access) permission prompt. Rewrite them to the
+  // same relative form as the rest of the build (base: './').
+  html = html.replaceAll(`http://127.0.0.1:${port}/`, './')
+
   // Sanity check before overwriting anything.
   if (!html.includes('id="root"') || !/faq|FAQPage/i.test(html)) {
     throw new Error('prerendered HTML is missing expected content — aborting without overwriting dist/index.html')
+  }
+  if (/127\.0\.0\.1|\blocalhost\b/.test(html)) {
+    throw new Error('prerendered HTML still references a local address — aborting without overwriting dist/index.html')
   }
   await writeFile(join(dist, 'index.html'), html)
   console.log(`prerender: wrote dist/index.html (${(html.length / 1024).toFixed(0)} KB) using ${executablePath}`)
