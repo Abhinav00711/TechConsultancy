@@ -822,9 +822,249 @@ function ApiScene({ active }) {
   )
 }
 
+/* ═══════════════════ WEB — a browser window assembling itself ═══════════════════ */
+
+function BrowserChrome() {
+  return (
+    <group position={[0, 0.62, -0.02]}>
+      <mesh>
+        <boxGeometry args={[2.2, 0.22, 0.02]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.5} />
+      </mesh>
+      {[-0.94, -0.84, -0.74].map((x, i) => (
+        <mesh key={i} position={[x, 0, 0.02]}>
+          <sphereGeometry args={[0.035, 12, 12]} />
+          <meshStandardMaterial
+            color={i === 0 ? '#f472b6' : i === 1 ? '#fbbf24' : '#34d399'}
+            emissive={i === 0 ? '#f472b6' : i === 1 ? '#fbbf24' : '#34d399'}
+            emissiveIntensity={0.6}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+const WEB_BLOCKS = [
+  { pos: [0, 0.2, 0], size: [1.9, 0.55], color: '#f472b6', delay: 0 }, // hero
+  { pos: [-0.62, -0.42, 0], size: [0.85, 0.5], color: '#ec4899', delay: 0.33 },
+  { pos: [0.32, -0.42, 0], size: [0.85, 0.5], color: '#fb7185', delay: 0.66 },
+]
+const WEB_CYCLE = 3.6 // seconds per full assemble → hold → reset loop
+
+function WebScene({ active }) {
+  const win = useRef()
+  const blockRefs = useRef([])
+  const cursor = useRef()
+  const reducedMotion = useReducedMotion()
+
+  useFrame(({ clock }, dt) => {
+    if (!active) return
+    const t = clock.getElapsedTime()
+    if (win.current) win.current.position.y = Math.sin(t * 0.6) * 0.05
+
+    if (reducedMotion) {
+      // Static, fully-assembled frame — no looping build animation.
+      blockRefs.current.forEach((m) => {
+        if (m) m.scale.setScalar(1)
+      })
+      return
+    }
+
+    const phase = t % WEB_CYCLE
+    WEB_BLOCKS.forEach((b, i) => {
+      const m = blockRefs.current[i]
+      if (!m) return
+      const target = phase > b.delay ? 1 : 0
+      const s = THREE.MathUtils.damp(m.scale.x, target, 6, dt)
+      m.scale.set(s, s, 1)
+    })
+
+    // cursor "places" the next block, then loops back to the start
+    if (cursor.current) {
+      const activeIdx = Math.min(WEB_BLOCKS.length - 1, Math.floor(phase / 0.33))
+      const target = WEB_BLOCKS[Math.min(activeIdx + 1, WEB_BLOCKS.length - 1)]
+      const cx = THREE.MathUtils.damp(cursor.current.position.x, target.pos[0], 5, dt)
+      const cy = THREE.MathUtils.damp(cursor.current.position.y, target.pos[1] + 0.3, 5, dt)
+      cursor.current.position.set(cx, cy, 0.1)
+    }
+  })
+
+  return (
+    <Entrance active={active}>
+      <group ref={win}>
+        {/* window panel + glow */}
+        <mesh>
+          <boxGeometry args={[2.2, 1.5, 0.03]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.45} metalness={0.2} />
+        </mesh>
+        <mesh scale={1.04} position={[0, 0, -0.02]}>
+          <boxGeometry args={[2.2, 1.5, 0.02]} />
+          <meshBasicMaterial color="#f472b6" transparent opacity={0.1} />
+        </mesh>
+        <BrowserChrome />
+
+        {WEB_BLOCKS.map((b, i) => (
+          <mesh
+            key={i}
+            ref={(el) => (blockRefs.current[i] = el)}
+            position={[b.pos[0], b.pos[1], 0.02]}
+            scale={reducedMotion ? 1 : 0}
+          >
+            <boxGeometry args={[b.size[0], b.size[1], 0.025]} />
+            <meshStandardMaterial color={b.color} emissive={b.color} emissiveIntensity={0.3} roughness={0.4} />
+          </mesh>
+        ))}
+
+        {!reducedMotion && (
+          <mesh ref={cursor} position={[0, 0.5, 0.1]}>
+            <sphereGeometry args={[0.045, 12, 12]} />
+            <meshStandardMaterial color="#fff" emissive="#f472b6" emissiveIntensity={0.9} />
+          </mesh>
+        )}
+      </group>
+
+      {active && (
+        <>
+          <Label position={[0, 1.15, 0]} accent="#f472b6" strong>Your Website</Label>
+          <Label position={[-0.62, -1.05, 0]} accent="#ec4899">Design</Label>
+          <Label position={[0.32, -1.05, 0]} accent="#fb7185">Ship</Label>
+        </>
+      )}
+    </Entrance>
+  )
+}
+
+/* ═══════════════════ CLOUD — deploy pipeline into a container cloud ═══════════════════ */
+
+const CLOUD_CONTAINERS = [
+  { color: '#fbbf24', tilt: 0.25, r: 1.15, speed: 0.35, phase: 0 },
+  { color: '#f59e0b', tilt: -0.35, r: 1.3, speed: 0.28, phase: 1.6 },
+  { color: '#fde68a', tilt: 0.12, r: 1.0, speed: 0.42, phase: 3.4 },
+  { color: '#d97706', tilt: -0.18, r: 1.22, speed: 0.32, phase: 5.0 },
+]
+
+function CloudCore() {
+  return (
+    <group>
+      <mesh>
+        <icosahedronGeometry args={[0.62, 1]} />
+        <meshStandardMaterial color="#78350f" emissive="#fbbf24" emissiveIntensity={0.45} roughness={0.35} metalness={0.3} flatShading />
+      </mesh>
+      {[
+        [0.42, 0.1, 0.1],
+        [-0.4, -0.05, -0.15],
+        [0.05, 0.35, -0.2],
+      ].map((p, i) => (
+        <mesh key={i} position={p} scale={0.42}>
+          <sphereGeometry args={[0.62, 14, 14]} />
+          <meshStandardMaterial color="#92400e" emissive="#fbbf24" emissiveIntensity={0.3} roughness={0.4} transparent opacity={0.85} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function CloudScene({ active }) {
+  const core = useRef()
+  const containerRefs = useRef([])
+  const ring = useRef()
+  const commit = useRef()
+  const buildBox = useRef()
+  const curve = useMemo(
+    () =>
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-2.1, -1.6, 0),
+        new THREE.Vector3(-1.1, -1.1, 0.2),
+        new THREE.Vector3(-0.55, -0.55, 0.1),
+        new THREE.Vector3(-0.1, 0.05, 0),
+      ]),
+    [],
+  )
+  const v = useMemo(() => new THREE.Vector3(), [])
+  const commitT = useRef(0)
+
+  useFrame(({ clock }, dt) => {
+    if (!active) return
+    const t = clock.getElapsedTime()
+    if (core.current) {
+      core.current.rotation.y = t * 0.25
+      core.current.position.y = Math.sin(t * 0.5) * 0.06
+    }
+    containerRefs.current.forEach((m, i) => {
+      if (!m) return
+      const c = CLOUD_CONTAINERS[i]
+      const a = t * c.speed + c.phase
+      m.position.set(Math.cos(a) * c.r, Math.sin(a) * c.r * 0.35 + Math.sin(c.tilt) * 0.3, Math.sin(a) * c.r * 0.5)
+      m.rotation.set(a * 0.6, a * 0.4, 0)
+    })
+    if (ring.current) {
+      const pulse = 0.85 + Math.sin(t * 1.4) * 0.1
+      ring.current.scale.set(pulse, 1, pulse)
+      ring.current.material.opacity = 0.35 + Math.sin(t * 1.4) * 0.15
+    }
+    // commit dot travels from bottom-left, through the build box, into the core, loops
+    commitT.current += dt * 0.35
+    if (commitT.current > 1) commitT.current = 0
+    if (commit.current) {
+      curve.getPoint(Math.min(commitT.current, 1), v)
+      commit.current.position.copy(v)
+      commit.current.visible = commitT.current < 0.82
+    }
+    if (buildBox.current) {
+      const near = commitT.current > 0.35 && commitT.current < 0.7
+      const s = THREE.MathUtils.damp(buildBox.current.scale.x, near ? 1.15 : 1, 6, dt)
+      buildBox.current.scale.setScalar(s)
+    }
+  })
+
+  return (
+    <Entrance active={active}>
+      <group position={[0.5, 0.3, 0]}>
+        <group ref={core}>
+          <CloudCore />
+        </group>
+
+        {CLOUD_CONTAINERS.map((c, i) => (
+          <mesh key={i} ref={(el) => (containerRefs.current[i] = el)}>
+            <boxGeometry args={[0.22, 0.22, 0.22]} />
+            <meshStandardMaterial color={c.color} emissive={c.color} emissiveIntensity={0.4} roughness={0.4} metalness={0.2} />
+          </mesh>
+        ))}
+
+        <mesh ref={ring} rotation={[Math.PI / 2, 0, 0]} position={[0, -0.9, 0]}>
+          <torusGeometry args={[0.75, 0.02, 12, 48]} />
+          <meshBasicMaterial color="#fbbf24" transparent opacity={0.4} />
+        </mesh>
+      </group>
+
+      {/* CI/CD flow: commit → build → cloud */}
+      <mesh ref={buildBox} position={[-0.6, -1.05, 0.1]}>
+        <boxGeometry args={[0.34, 0.24, 0.05]} />
+        <meshStandardMaterial color="#334155" emissive="#fbbf24" emissiveIntensity={0.25} roughness={0.4} />
+      </mesh>
+      <mesh>
+        <tubeGeometry args={[curve, 40, 0.012, 6, false]} />
+        <meshBasicMaterial color="#fbbf24" transparent opacity={0.3} />
+      </mesh>
+      <mesh ref={commit} position={[-2.1, -1.6, 0]}>
+        <sphereGeometry args={[0.05, 10, 10]} />
+        <meshBasicMaterial color="#fde68a" toneMapped={false} />
+      </mesh>
+
+      {active && (
+        <>
+          <Label position={[0.5, 1.35, 0]} accent="#fbbf24" strong>Cloud Deploy</Label>
+          <Label position={[-0.6, -1.35, 0]} accent="#f59e0b">CI/CD</Label>
+        </>
+      )}
+    </Entrance>
+  )
+}
+
 /* ═══════════════════ shared canvas ═══════════════════ */
 
-const SCENES = { ai: AiScene, crm: CrmScene, erp: ErpScene, api: ApiScene }
+const SCENES = { ai: AiScene, crm: CrmScene, erp: ErpScene, web: WebScene, api: ApiScene, cloud: CloudScene }
 
 /* Moves the camera in place on breakpoint changes — remounting the Canvas
    would destroy the WebGL context and recompile every shader. */
