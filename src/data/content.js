@@ -242,9 +242,9 @@ export const about = {
       bio: 'Leads architecture, engineering and technical delivery — from AI integrations to full-scale platforms. Every technical decision on your project runs through him.',
       initials: 'AV',
       linkedin: 'https://www.linkedin.com/in/rathiabhinav01',
-      // Drop the image at public/founders/abhinav-rathi.jpg and set
-      // photo: '/founders/abhinav-rathi.jpg' — until then the initials render.
-      photo: '',
+      // Relative path (no leading slash) so it works both on the custom
+      // domain and on a github.io/<repo>/ project URL, like base './'.
+      photo: 'founders/abhinav-rathi.jpg',
       accent: '#22d3ee',
     },
     {
@@ -253,9 +253,7 @@ export const about = {
       bio: 'MBA from the Indian School of Business and a product manager by profession. Leads product strategy, client partnerships and delivery operations — making sure what we build moves your numbers.',
       initials: 'AB',
       linkedin: 'https://www.linkedin.com/in/rathiabhishek26',
-      // Drop the image at public/founders/abhishek-rathi.jpg and set
-      // photo: '/founders/abhishek-rathi.jpg' — until then the initials render.
-      photo: '',
+      photo: 'founders/abhishek-rathi.jpg',
       accent: '#c084fc',
     },
   ],
