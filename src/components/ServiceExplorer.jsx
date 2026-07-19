@@ -42,6 +42,23 @@ export default function ServiceExplorer() {
     if (!reducedMotion && !touch) setAuto(true)
   }, [reducedMotion])
 
+  // Deep links: #services-crm (footer, ads, LinkedIn posts…) lands on that
+  // exact slide. No element carries these ids, so we do the scrolling too.
+  useEffect(() => {
+    const apply = () => {
+      const m = /^#services-([a-z]+)$/.exec(window.location.hash)
+      if (!m) return
+      const i = services.findIndex((s) => s.id === m[1])
+      if (i === -1) return
+      setDirection(1)
+      setActive(i)
+      document.getElementById('services')?.scrollIntoView()
+    }
+    apply()
+    window.addEventListener('hashchange', apply)
+    return () => window.removeEventListener('hashchange', apply)
+  }, [])
+
   const go = (dir) => {
     setDirection(dir)
     setActive((i) => (i + dir + services.length) % services.length)
@@ -91,6 +108,29 @@ export default function ServiceExplorer() {
           <p className="section-sub">{explorer.sub}</p>
         </Reveal>
 
+        {/* Scannable overview — B2B buyers scan in parallel; the carousel
+            discloses serially. One glance shows all six, one tap opens one. */}
+        <Reveal delay={0.1}>
+          <div className="services-overview">
+            {services.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                className={`services-overview-tile glass ${i === active ? 'active' : ''}`}
+                style={{ '--accent': s.accent }}
+                onClick={() => {
+                  jump(i)
+                  wrapRef.current?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest' })
+                }}
+              >
+                <Icon name={s.icon} />
+                <strong>{s.title}</strong>
+                <span>{s.headline}</span>
+              </button>
+            ))}
+          </div>
+        </Reveal>
+
         <Reveal delay={0.15}>
           <div
             className="showcase glass"
@@ -99,6 +139,9 @@ export default function ServiceExplorer() {
             role="group"
             aria-roledescription="carousel"
             aria-label="Services with live demos"
+            // Focusable so the arrow-key navigation is actually reachable
+            // (and visibly advertised via the focus ring in index.css).
+            tabIndex={0}
             onKeyDown={onCarouselKeyDown}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
@@ -139,6 +182,7 @@ export default function ServiceExplorer() {
                       type="button"
                       className={`showcase-tab ${i === active ? 'active' : ''}`}
                       style={{ '--accent': s.accent }}
+                      title={s.title}
                       aria-label={`Go to ${s.title}`}
                       aria-current={i === active ? 'true' : undefined}
                       onClick={() => jump(i)}

@@ -1,5 +1,16 @@
 # Revora — Nine-Expert Panel Review (Round 2)
 
+> **Status (19 Jul 2026):** all non-blocking (code-only) items are implemented on
+> this branch — Q4 (prerender reveal-flash fix + halved hero/navbar delays),
+> Q7 (contact heading, hero subtitle, 48h note on the roadmap CTA, FAQ title),
+> M2 (six-tile service overview grid + `#services-<id>` deep links, incl. footer),
+> M3 (`/privacy/` as a real prerendered URL + sitemap entry; footer modal → link),
+> M6 partial (Space Grotesk 600 dropped after usage audit; carousel focusable with
+> visible ring; tab chips carry full-name tooltips), plus build-time sitemap
+> `lastmod` stamping. Still needing founders: Q1 analytics account, Q2 Cal.com
+> branding, Q3 ₹ bands, Q5/Q6 LinkedIn/GBP/Search Console, M1 pilot pricing,
+> M5 founding-client pilots, and everything in §7.
+
 **Date:** 19 July 2026
 **Method:** Nine independent specialist reviews of the live codebase (every component,
 `content.js`, `index.html`, `scripts/prerender.mjs`, build pipeline), followed by a

@@ -1,39 +1,31 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { useEffect } from 'react'
 import { site } from '../data/content.js'
+import { Logo } from './ui/Icons.jsx'
 
-/* Privacy policy in a native <dialog> — gets focus trapping, Escape-to-close
-   and backdrop for free. Opened from the footer via ref.open(). */
-const PrivacyPolicy = forwardRef(function PrivacyPolicy(_, ref) {
-  const dialogRef = useRef(null)
-  const downOnBackdrop = useRef(false)
-
-  useImperativeHandle(ref, () => ({
-    open: () => dialogRef.current?.showModal(),
-  }))
-
-  const close = () => dialogRef.current?.close()
+/* Standalone privacy-policy page, served at /privacy/ (prerendered by
+   scripts/prerender.mjs). A real URL — not a modal — because Google Business
+   Profile, WhatsApp Business and Formspree all ask for a privacy-policy link.
+   Relative hrefs ("../") so it works on both revora.co.in/privacy/ and a
+   github.io/<repo>/privacy/ project URL. */
+export default function PrivacyPolicy() {
+  useEffect(() => {
+    document.title = `Privacy Policy — ${site.name} ${site.suffix}`
+    const canonical = document.querySelector('link[rel="canonical"]')
+    if (canonical) canonical.setAttribute('href', 'https://revora.co.in/privacy/')
+  }, [])
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="legal-dialog"
-      aria-labelledby="privacy-title"
-      onPointerDown={(e) => {
-        downOnBackdrop.current = e.target === dialogRef.current
-      }}
-      onClick={(e) => {
-        // Close only when the interaction both started and ended on the
-        // backdrop — selecting text and releasing outside must not close it.
-        if (e.target === dialogRef.current && downOnBackdrop.current) close()
-      }}
-    >
-      <div className="legal-dialog-inner">
-        <div className="legal-dialog-head">
-          <h2 id="privacy-title">Privacy Policy</h2>
-          <button type="button" className="legal-close" onClick={close} aria-label="Close privacy policy">
-            ✕
-          </button>
-        </div>
+    <main className="legal-page">
+      <div className="container">
+        <a href="../" className="nav-logo">
+          <Logo gradientId="logo-grad-legal" />
+          <span>
+            {site.name}
+            <span className="gradient-text">.</span>
+          </span>
+        </a>
+
+        <h1>Privacy Policy</h1>
 
         <p>
           {/* Single template string — adjacent JSX text expressions hydrate
@@ -80,9 +72,11 @@ const PrivacyPolicy = forwardRef(function PrivacyPolicy(_, ref) {
         </p>
 
         <p className="legal-updated">Last updated: July 2026</p>
-      </div>
-    </dialog>
-  )
-})
 
-export default PrivacyPolicy
+        <p>
+          <a className="btn btn-ghost" href="../">← Back to the site</a>
+        </p>
+      </div>
+    </main>
+  )
+}

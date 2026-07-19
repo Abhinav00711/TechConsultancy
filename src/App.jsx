@@ -15,6 +15,7 @@ import CtaBand from './components/CtaBand.jsx'
 import Contact from './components/Contact.jsx'
 import Footer from './components/Footer.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
+import PrivacyPolicy from './components/PrivacyPolicy.jsx'
 
 function Site() {
   const reducedMotion = useReducedMotion()
@@ -68,6 +69,9 @@ function Site() {
 }
 
 export default function App() {
+  // /privacy/ is a real prerendered URL (GBP, WhatsApp Business and Formspree
+  // all require one) — everything else renders the single-page site.
+  if (/\/privacy\/?$/.test(window.location.pathname)) return <PrivacyPolicy />
   return (
     <MotionConfig reducedMotion="user">
       <Site />

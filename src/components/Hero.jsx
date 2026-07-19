@@ -8,12 +8,17 @@ const HeroScene = lazy(() => import('./three/HeroScene.jsx'))
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.14, delayChildren: 0.5 } },
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.25 } },
 }
 const item = {
   hidden: { opacity: 0, y: 40 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.21, 0.6, 0.35, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.21, 0.6, 0.35, 1] } },
 }
+
+// On a prerendered page the visitor already sees the finished hero — mounting
+// at opacity 0 and re-animating would make painted content vanish and fade
+// back in. initial={false} tells framer-motion to render the final state.
+const prerendered = typeof window !== 'undefined' && Boolean(window.__PRERENDERED__)
 
 export default function Hero() {
   // The 3D scene mounts after first paint (idle), and never on constrained
@@ -46,7 +51,7 @@ export default function Hero() {
       )}
       <div className="hero-vignette" />
 
-      <motion.div className="hero-content container" variants={container} initial="hidden" animate="show">
+      <motion.div className="hero-content container" variants={container} initial={prerendered ? false : 'hidden'} animate="show">
         <motion.div variants={item}>
           <span className="hero-badge">{hero.badge}</span>
         </motion.div>
@@ -84,6 +89,12 @@ export default function Hero() {
           </a>
         </motion.div>
 
+        {hero.ctaSecondaryNote && (
+          <motion.p className="hero-cta-note" variants={item}>
+            {hero.ctaSecondaryNote}
+          </motion.p>
+        )}
+
         <motion.ul className="hero-assurances" variants={item}>
           {hero.assurances.map((a) => (
             <li key={a}>{a}</li>
@@ -93,7 +104,7 @@ export default function Hero() {
 
       <motion.div
         className="hero-scroll"
-        initial={{ opacity: 0 }}
+        initial={prerendered ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1 }}
       >

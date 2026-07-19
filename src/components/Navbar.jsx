@@ -80,9 +80,10 @@ export default function Navbar() {
     <>
       <motion.header
         className={`navbar ${scrolled ? 'scrolled' : ''}`}
-        initial={{ y: -80, opacity: 0 }}
+        // Prerendered pages already show the navbar — don't hide and replay it.
+        initial={window.__PRERENDERED__ ? false : { y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.4, ease: [0.21, 0.6, 0.35, 1] }}
+        transition={{ duration: 0.8, delay: 0.2, ease: [0.21, 0.6, 0.35, 1] }}
       >
         <div className="container navbar-inner">
           <a href="#home" className="nav-logo">
