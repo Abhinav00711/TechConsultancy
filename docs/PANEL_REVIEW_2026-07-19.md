@@ -10,9 +10,11 @@
 > `lastmod` stamping. **Q1 is now DONE too** — Umami Cloud is installed
 > (script in `index.html`, `track()` routed to `umami.track`, prerender blocks
 > it, privacy policy discloses it), so every CTA/form/WhatsApp event is being
-> measured. Still needing founders: Q2 Cal.com branding, Q3 ₹ bands, Q5/Q6
-> LinkedIn/GBP/Search Console, M1 pilot pricing, M5 founding-client pilots,
-> and the rest of §7.
+> measured. **Q2 slug is DONE** — booking now points at the branded
+> `cal.com/revora-consultancy/discovery` (still worth adding on the Cal side:
+> logo, 3–4 qualifying questions, the 48h-roadmap confirmation note, and a
+> 15-minute variant). Still needing founders: Q3 ₹ bands, Q5/Q6 LinkedIn/GBP/
+> Search Console, M1 pilot pricing, M5 founding-client pilots, and the rest of §7.
 
 **Date:** 19 July 2026
 **Method:** Nine independent specialist reviews of the live codebase (every component,

@@ -20,7 +20,7 @@ export const site = {
   // to a prefilled email draft — no lead is ever lost.
   formEndpoint: 'https://formspree.io/f/xgogkaoo',
   // Scheduling link — powers the "Book a Free Discovery Call" flow.
-  bookingUrl: 'https://cal.com/abhishek-rathi-gjf6hp',
+  bookingUrl: 'https://cal.com/revora-consultancy/discovery',
   // Only socials with a real URL are rendered. Fill these in as profiles exist.
   socials: [
     // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
