@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Page not found — Revora Consultancy</title>
+    <meta name="theme-color" content="#05060e" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg: #05060e;
+        --text: #eef0ff;
+        --text-dim: #9aa0c3;
+        --border: rgba(255, 255, 255, 0.16);
+        --gradient: linear-gradient(100deg, #22d3ee 0%, #818cf8 45%, #c084fc 80%, #f472b6 100%);
+      }
+      body {
+        min-height: 100vh;
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: 32px;
+        text-align: center;
+        color: var(--text);
+        background:
+          radial-gradient(ellipse 50% 45% at 68% 35%, rgba(129, 140, 248, 0.22), transparent),
+          radial-gradient(ellipse 40% 40% at 28% 70%, rgba(34, 211, 238, 0.12), transparent),
+          var(--bg);
+        font-family: 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .code {
+        font-size: clamp(4.5rem, 18vw, 9rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      h1 {
+        margin-top: 18px;
+        font-size: clamp(1.4rem, 4vw, 2rem);
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 16px auto 0;
+        max-width: 460px;
+        color: var(--text-dim);
+        font-size: 1.02rem;
+      }
+      .actions {
+        margin-top: 36px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 15px 32px;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      }
+      .btn-primary {
+        background: var(--gradient);
+        color: #05060e;
+        box-shadow: 0 8px 32px rgba(129, 140, 248, 0.35);
+      }
+      .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(129, 140, 248, 0.55); }
+      .btn-ghost {
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .btn-ghost:hover { transform: translateY(-3px); border-color: #22d3ee; }
+      @media (prefers-reduced-motion: reduce) { .btn:hover { transform: none; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="code">404</div>
+      <h1>This page took a wrong turn.</h1>
+      <p>
+        The page you're looking for doesn't exist or has moved. Let's get you
+        back to something useful.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Back to home</a>
+        <a class="btn btn-ghost" href="/#contact">Talk to us</a>
+      </div>
+    </main>
+  </body>
+</html>
