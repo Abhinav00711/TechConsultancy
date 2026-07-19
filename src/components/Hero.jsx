@@ -101,16 +101,6 @@ export default function Hero() {
           ))}
         </motion.ul>
       </motion.div>
-
-      <motion.div
-        className="hero-scroll"
-        initial={prerendered ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-      >
-        <span>Scroll</span>
-        <div className="hero-scroll-line" />
-      </motion.div>
     </section>
   )
 }

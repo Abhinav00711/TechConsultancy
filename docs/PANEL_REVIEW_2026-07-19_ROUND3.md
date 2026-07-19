@@ -1,5 +1,19 @@
 # Revora — Nine-Expert Panel Review (Round 3)
 
+> **Status update (19 Jul 2026):** the non-blocking (code-only) items from this
+> round are now implemented on this branch —
+> **Q6** (hero "Scroll" indicator removed; the assurance chips are kept — trimming
+> trust signals is a founder judgment, not a safe unilateral change),
+> **M6 partial** (font weights 8 → 7: the now-single-use Space Grotesk 700 dropped
+> and its one consumer — the hero ✓ glyph — reassigned; reaching ≤6 would require a
+> visible design call on `section-title` 700 or `process-step` 600, left to you),
+> plus a batch of self-identified polish: a branded **`public/404.html`** (required
+> once service routes ship on GitHub Pages), **social-card alt text**
+> (`og:image:alt` / `twitter:image:alt`), **`og:locale=en_IN`**, and
+> **DNS-prefetch** hints for the two analytics origins. Verified with a strict
+> prerender build (`PRERENDER_STRICT=1 npm run build`). Everything else below is
+> founder-owned — see §7.
+
 **Date:** 19 July 2026 (same-day follow-up to Round 2, after PR #7 merged)
 **Method:** Nine independent specialist reviews of the *current* live codebase —
 every component, `content.js`, `index.html`, `scripts/prerender.mjs`,
