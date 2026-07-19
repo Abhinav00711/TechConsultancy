@@ -13,7 +13,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <a href="#home" className="nav-logo">
-              <Logo />
+              <Logo gradientId="logo-grad-footer" />
               <span>
                 {site.name}
                 <span className="gradient-text">.</span>
@@ -70,7 +70,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <span>© {year} {site.name} {site.suffix}. All rights reserved.</span>
+          <span>{`© ${year} ${site.name} ${site.suffix}. All rights reserved.`}</span>
           <span>Engineered with precision in India.</span>
         </div>
       </div>

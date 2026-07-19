@@ -54,8 +54,9 @@ function Site() {
         <ServiceExplorer />
         <About />
         <Stats />
-        <Process />
+        {/* Proof before process — show what we build before how we build it. */}
         <Work />
+        <Process />
         <CtaBand />
         <Faq />
         <Contact />

@@ -1,8 +1,27 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { site, nav } from '../data/content.js'
+import { track, bookingHref } from '../lib/analytics.js'
 import { Logo } from './ui/Icons.jsx'
 import ThemeToggle from './ui/ThemeToggle.jsx'
+
+/* One primary verb everywhere: the free call. The quote-form ask lives in
+   the contact section itself. */
+function NavCta({ className, style, onDone }) {
+  const onClick = () => {
+    track('Booking Click', { placement: 'nav' })
+    onDone?.()
+  }
+  return site.bookingUrl ? (
+    <a href={bookingHref('nav')} className={className} style={style} target="_blank" rel="noopener noreferrer" onClick={onClick}>
+      Book a Free Call
+    </a>
+  ) : (
+    <a href="#contact" className={className} style={style} onClick={onDone}>
+      Get a Quote
+    </a>
+  )
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -16,8 +35,9 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // While the mobile menu is open: lock body scroll, close on Escape
-  // (returning focus to the burger) and on any tap outside the menu.
+  // While the mobile menu is open: lock body scroll, trap Tab inside the
+  // menu (burger + links), close on Escape (returning focus to the burger)
+  // and on any tap outside the menu.
   useEffect(() => {
     if (!open) return
     document.body.style.overflow = 'hidden'
@@ -25,6 +45,23 @@ export default function Navbar() {
       if (e.key === 'Escape') {
         setOpen(false)
         burgerRef.current?.focus()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const menu = document.getElementById('mobile-menu')
+      if (!menu) return
+      const focusables = [burgerRef.current, ...menu.querySelectorAll('a')].filter(Boolean)
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      } else if (!focusables.includes(document.activeElement)) {
+        e.preventDefault()
+        first.focus()
       }
     }
     const onPointerDown = (e) => {
@@ -49,7 +86,7 @@ export default function Navbar() {
       >
         <div className="container navbar-inner">
           <a href="#home" className="nav-logo">
-            <Logo />
+            <Logo gradientId="logo-grad-nav" />
             <span>
               {site.name}
               <span className="gradient-text">.</span>
@@ -67,9 +104,7 @@ export default function Navbar() {
           <div className="navbar-actions">
             <ThemeToggle />
 
-            <a href="#contact" className="btn btn-primary nav-cta">
-              Get a Quote
-            </a>
+            <NavCta className="btn btn-primary nav-cta" />
 
             <button
               ref={burgerRef}
@@ -102,9 +137,7 @@ export default function Navbar() {
                 {item.label}
               </a>
             ))}
-            <a href="#contact" className="btn btn-primary" style={{ marginTop: 12, justifyContent: 'center' }} onClick={() => setOpen(false)}>
-              Get a Quote
-            </a>
+            <NavCta className="btn btn-primary" style={{ marginTop: 12, justifyContent: 'center' }} onDone={() => setOpen(false)} />
           </motion.nav>
         )}
       </AnimatePresence>

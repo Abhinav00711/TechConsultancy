@@ -76,7 +76,16 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   // Reduced motion → sections render in their final, fully visible state
   // instead of mid-animation (the site honours prefers-reduced-motion).
-  await page.emulateMedia({ reducedMotion: 'reduce' })
+  // Dark colour scheme → the snapshot matches the app's first client render
+  // (ThemeToggle assumes dark until it syncs), so hydration stays clean.
+  await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+  // Tell the app it's being prerendered: WebGL scenes stay unmounted so the
+  // snapshot carries the static gradient fallbacks. That keeps the HTML
+  // smaller and — crucially — identical to the app's initial client render,
+  // letting hydrateRoot adopt the DOM without mismatches (src/main.jsx).
+  await page.addInitScript(() => {
+    window.__PRERENDERING__ = true
+  })
   // Don't let build machines register pageviews in the site's analytics.
   await page.route('**://static.cloudflareinsights.com/**', (route) => route.abort())
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'networkidle' })
@@ -92,6 +101,29 @@ try {
     window.scrollTo(0, 0)
   })
   await page.waitForTimeout(600)
+
+  // JSX like `{expr} <span>` or `{' '}` renders ADJACENT text nodes, which
+  // HTML serialisation would merge into one — and merged text can never match
+  // React's hydration walk, which expects the original node boundaries.
+  // Real SSR solves this with empty comment separators (which hydration
+  // skips); insert the same markers here before capturing.
+  await page.evaluate(() => {
+    const walk = (el) => {
+      for (const child of [...el.childNodes]) {
+        if (child.nodeType === Node.ELEMENT_NODE) walk(child)
+      }
+      let n = el.firstChild
+      while (n) {
+        const next = n.nextSibling
+        if (n.nodeType === Node.TEXT_NODE && next && next.nodeType === Node.TEXT_NODE) {
+          el.insertBefore(document.createComment(''), next)
+        }
+        n = next
+      }
+    }
+    const root = document.getElementById('root')
+    if (root) walk(root)
+  })
 
   let html = await page.content()
   // Flag the snapshot so the app skips the preloader on hydration.

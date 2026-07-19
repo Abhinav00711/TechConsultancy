@@ -36,9 +36,9 @@ const PrivacyPolicy = forwardRef(function PrivacyPolicy(_, ref) {
         </div>
 
         <p>
-          <strong>
-            {site.name} {site.suffix}
-          </strong>{' '}
+          {/* Single template string — adjacent JSX text expressions hydrate
+              as separate text nodes and mismatch the prerendered snapshot. */}
+          <strong>{`${site.name} ${site.suffix}`}</strong>{' '}
           respects your privacy. This page explains what data this website handles and how.
         </p>
 

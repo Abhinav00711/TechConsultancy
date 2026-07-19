@@ -1,5 +1,6 @@
 import { about } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
+import Icon from './ui/Icons.jsx'
 
 export default function About() {
   return (
@@ -23,9 +24,28 @@ export default function About() {
             {about.founders.map((f, i) => (
               <Reveal key={f.name} delay={0.15 + i * 0.15}>
                 <div className="founder-card glass" style={{ '--accent': f.accent }}>
-                  <div className="founder-avatar" aria-hidden="true">{f.initials}</div>
+                  {f.photo ? (
+                    <div className="founder-avatar">
+                      <img src={f.photo} alt={`Portrait of ${f.name}`} loading="lazy" width="78" height="78" />
+                    </div>
+                  ) : (
+                    <div className="founder-avatar" aria-hidden="true">{f.initials}</div>
+                  )}
                   <div>
-                    <h3>{f.name}</h3>
+                    <h3>
+                      {f.name}
+                      {f.linkedin && (
+                        <a
+                          className="founder-linkedin"
+                          href={f.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${f.name} on LinkedIn`}
+                        >
+                          <Icon name="linkedin" />
+                        </a>
+                      )}
+                    </h3>
                     <div className="founder-role">{f.role}</div>
                     <p>{f.bio}</p>
                   </div>

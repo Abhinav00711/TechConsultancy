@@ -1,6 +1,8 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion'
-import { explorer, services } from '../data/content.js'
+import { explorer, services, site, waLink } from '../data/content.js'
+import { isConstrained } from '../lib/perf.js'
+import { track } from '../lib/analytics.js'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
@@ -14,15 +16,31 @@ const variants = {
   exit: (dir) => ({ opacity: 0, x: dir * -44, transition: { duration: 0.2 } }),
 }
 
+/* Tells the contact form which service to preselect when a per-slide CTA is
+   clicked — Contact.jsx listens for this event. */
+function prefillService(option) {
+  window.dispatchEvent(new CustomEvent('revora:service', { detail: option }))
+}
+
 export default function ServiceExplorer() {
   const [active, setActive] = useState(0)
   const [direction, setDirection] = useState(1)
   const reducedMotion = useReducedMotion()
-  const [auto, setAuto] = useState(!reducedMotion)
+  // Auto-rotation starts OFF and is enabled after mount, desktop-only: on
+  // touch screens there's no hover to pause it, so the text would be yanked
+  // away mid-read every 8 seconds. (Starting false also keeps the first
+  // render identical to the prerendered snapshot for clean hydration.)
+  const [auto, setAuto] = useState(false)
   const [hovering, setHovering] = useState(false)
   const wrapRef = useRef(null)
   const inView = useInView(wrapRef, { once: true, margin: '300px' })
   const onScreen = useInView(wrapRef, { margin: '120px' })
+  const constrained = useMemo(isConstrained, [])
+
+  useEffect(() => {
+    const touch = window.matchMedia('(hover: none)').matches
+    if (!reducedMotion && !touch) setAuto(true)
+  }, [reducedMotion])
 
   const go = (dir) => {
     setDirection(dir)
@@ -60,10 +78,10 @@ export default function ServiceExplorer() {
   }
 
   const item = services[active]
+  const rotating = auto && !hovering && onScreen
 
   return (
     <section id="services" className="section">
-      <span id="demos" style={{ position: 'absolute', top: 0 }} aria-hidden="true" />
       <div className="container">
         <Reveal>
           <span className="section-tag">{explorer.tag}</span>
@@ -87,7 +105,7 @@ export default function ServiceExplorer() {
             onFocusCapture={(e) => {
               // Focus on the carousel controls themselves must not freeze rotation,
               // or interacting with them appears to do nothing until focus leaves.
-              if (e.target.closest('.showcase-autoplay, .carousel-arrow, .carousel-dot')) return
+              if (e.target.closest('.showcase-autoplay, .carousel-arrow, .showcase-tab')) return
               setHovering(true)
             }}
             onBlurCapture={(e) => {
@@ -95,8 +113,10 @@ export default function ServiceExplorer() {
             }}
           >
             <div className="showcase-canvas" aria-hidden="true">
-              {inView && (
-                <Suspense fallback={null}>
+              {window.__PRERENDERING__ || constrained || !inView ? (
+                <div className="canvas-fallback" />
+              ) : (
+                <Suspense fallback={<div className="canvas-fallback" />}>
                   <ShowcaseCanvas scene={item.id} />
                 </Suspense>
               )}
@@ -110,19 +130,22 @@ export default function ServiceExplorer() {
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
                 </button>
-                <div className="carousel-dots">
+                {/* Labeled tabs instead of anonymous dots — every service is
+                    scannable and reachable in one glance/tap. */}
+                <div className="showcase-tabs">
                   {services.map((s, i) => (
                     <button
                       key={s.id}
                       type="button"
-                      className={`carousel-dot ${i === active ? 'active' : ''} ${i === active && !(auto && !hovering && onScreen) ? 'static' : ''}`}
+                      className={`showcase-tab ${i === active ? 'active' : ''}`}
                       style={{ '--accent': s.accent }}
                       aria-label={`Go to ${s.title}`}
                       aria-current={i === active ? 'true' : undefined}
                       onClick={() => jump(i)}
                     >
-                      {i === active && auto && !hovering && onScreen && (
-                        <span key={`${active}-${onScreen}`} className="dot-progress" />
+                      {s.short}
+                      {i === active && rotating && (
+                        <span key={`${active}-${onScreen}`} className="tab-progress" aria-hidden="true" />
                       )}
                     </button>
                   ))}
@@ -132,8 +155,11 @@ export default function ServiceExplorer() {
                     <path d="M9 18l6-6-6-6" />
                   </svg>
                 </button>
+                {/* Single template string on purpose: adjacent JSX text
+                    expressions hydrate as separate text nodes, which never
+                    match the prerendered snapshot's merged text node. */}
                 <span className="carousel-count" aria-hidden="true">
-                  {String(active + 1).padStart(2, '0')} / {String(services.length).padStart(2, '0')}
+                  {`${String(active + 1).padStart(2, '0')} / ${String(services.length).padStart(2, '0')}`}
                 </span>
                 {/* Label swaps to describe the action, like a media play/pause
                     button — no aria-pressed, which would conflict with it. */}
@@ -143,48 +169,77 @@ export default function ServiceExplorer() {
                 </button>
               </div>
 
-              <AnimatePresence mode="wait" custom={direction}>
-                <motion.div
-                  key={item.id}
-                  className="showcase-content"
-                  role="group"
-                  aria-roledescription="slide"
-                  aria-label={`${active + 1} of ${services.length}: ${item.title}`}
-                  custom={direction}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  drag="x"
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.12}
-                  onDragEnd={(e, info) => {
-                    if (info.offset.x < -70) go(1)
-                    else if (info.offset.x > 70) go(-1)
-                  }}
-                >
-                  <div className="carousel-eyebrow">
-                    <Icon name={item.icon} style={{ transform: 'scale(0.7)', display: 'inline-flex' }} />
-                    {item.title}
-                  </div>
-                  <h3>{item.headline}</h3>
-                  <p>{item.description}</p>
-                  <ul className="service-points" style={{ '--accent': item.accent }}>
-                    {item.points.map((p) => (
-                      <li key={p}>{p}</li>
-                    ))}
-                  </ul>
-                  <div className="showcase-kpis">
-                    {item.kpis.map((k) => (
-                      <div key={k.label} className="kpi-chip">
-                        <strong>{k.value}</strong>
-                        <span>{k.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="kpi-note">{explorer.kpiNote}</p>
-                </motion.div>
-              </AnimatePresence>
+              {/* aria-live so screen-reader users hear slide changes instead
+                  of content silently swapping under them. */}
+              <div aria-live="polite">
+                <AnimatePresence mode="wait" custom={direction}>
+                  <motion.div
+                    key={item.id}
+                    className="showcase-content"
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${active + 1} of ${services.length}: ${item.title}`}
+                    custom={direction}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.12}
+                    onDragEnd={(e, info) => {
+                      if (info.offset.x < -70) go(1)
+                      else if (info.offset.x > 70) go(-1)
+                    }}
+                  >
+                    <div className="carousel-eyebrow">
+                      <Icon name={item.icon} style={{ transform: 'scale(0.7)', display: 'inline-flex' }} />
+                      {item.title}
+                    </div>
+                    <h3>{item.headline}</h3>
+                    <p>{item.description}</p>
+                    <ul className="service-points" style={{ '--accent': item.accent }}>
+                      {item.points.map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
+                    </ul>
+                    <div className="showcase-kpis">
+                      {item.kpis.map((k) => (
+                        <div key={k.label} className="kpi-chip">
+                          <strong>{k.value}</strong>
+                          <span>{k.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="kpi-note">{explorer.kpiNote}</p>
+                    {/* Every slide ends where a buyer's finger already is —
+                        on a button, prefilled with this service. */}
+                    <div className="showcase-actions">
+                      <a
+                        href="#contact"
+                        className="btn btn-primary showcase-cta"
+                        onClick={() => {
+                          prefillService(item.formOption)
+                          track('Service CTA Click', { service: item.title })
+                        }}
+                      >
+                        {item.cta} <span aria-hidden>→</span>
+                      </a>
+                      {site.whatsapp && (
+                        <a
+                          className="showcase-wa"
+                          href={waLink(`Hi Revora — I’m interested in ${item.title}. My business: ___. What I want to solve: ___`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => track('WhatsApp Click', { placement: `service-${item.id}` })}
+                        >
+                          {`or WhatsApp us about ${item.short}`}
+                        </a>
+                      )}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </Reveal>

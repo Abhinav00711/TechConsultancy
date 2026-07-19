@@ -1,6 +1,8 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { hero, site } from '../data/content.js'
+import { isConstrained } from '../lib/perf.js'
+import { track, bookingHref } from '../lib/analytics.js'
 
 const HeroScene = lazy(() => import('./three/HeroScene.jsx'))
 
@@ -14,11 +16,34 @@ const item = {
 }
 
 export default function Hero() {
+  // The 3D scene mounts after first paint (idle), and never on constrained
+  // devices/connections — the text and CTAs must win the race to the screen,
+  // not ~280 KB gzip of three.js. Starting false also matches the prerendered
+  // snapshot (scenes are skipped there), so hydration adopts the DOM cleanly.
+  const [showScene, setShowScene] = useState(false)
+
+  useEffect(() => {
+    if (window.__PRERENDERING__ || isConstrained()) return
+    const start = () => setShowScene(true)
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(start, { timeout: 2500 })
+      return () => cancelIdleCallback(id)
+    }
+    const t = setTimeout(start, 350)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <section id="home" className="hero">
-      <Suspense fallback={null}>
-        <HeroScene />
-      </Suspense>
+      {showScene ? (
+        <Suspense fallback={<div className="hero-canvas" aria-hidden="true"><div className="canvas-fallback" /></div>}>
+          <HeroScene />
+        </Suspense>
+      ) : (
+        <div className="hero-canvas" aria-hidden="true">
+          <div className="canvas-fallback" />
+        </div>
+      )}
       <div className="hero-vignette" />
 
       <motion.div className="hero-content container" variants={container} initial="hidden" animate="show">
@@ -40,7 +65,13 @@ export default function Hero() {
 
         <motion.div className="hero-ctas" variants={item}>
           {site.bookingUrl ? (
-            <a href={site.bookingUrl} className="btn btn-primary" target="_blank" rel="noopener noreferrer">
+            <a
+              href={bookingHref('hero')}
+              className="btn btn-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track('Booking Click', { placement: 'hero' })}
+            >
               {hero.ctaBooking} <span aria-hidden>→</span>
             </a>
           ) : (
@@ -48,7 +79,7 @@ export default function Hero() {
               {hero.ctaPrimary} <span aria-hidden>→</span>
             </a>
           )}
-          <a href="#services" className="btn btn-ghost">
+          <a href="#contact" className="btn btn-ghost" onClick={() => track('Roadmap CTA Click', { placement: 'hero' })}>
             {hero.ctaSecondary}
           </a>
         </motion.div>

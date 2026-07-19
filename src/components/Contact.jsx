@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { contact, site } from '../data/content.js'
+import { track, bookingHref } from '../lib/analytics.js'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
@@ -8,6 +9,22 @@ import Icon from './ui/Icons.jsx'
    Without it, we open a prefilled email draft — and say so honestly. */
 export default function Contact() {
   const [status, setStatus] = useState('idle')
+  // Controlled so the per-service CTAs in the showcase can preselect it.
+  const [service, setService] = useState('')
+  // Page URL (with any utm_* params) + referrer, captured after mount and
+  // submitted as a hidden field — tells us which channel produced each lead.
+  const [pageContext, setPageContext] = useState('')
+
+  useEffect(() => {
+    const onPrefill = (e) => setService(e.detail)
+    window.addEventListener('revora:service', onPrefill)
+    return () => window.removeEventListener('revora:service', onPrefill)
+  }, [])
+
+  useEffect(() => {
+    const ref = document.referrer ? ` | referrer: ${document.referrer}` : ''
+    setPageContext(`${window.location.href}${ref}`)
+  }, [])
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -23,7 +40,7 @@ export default function Contact() {
     if (!site.formEndpoint) {
       const subject = encodeURIComponent(`Project enquiry — ${data.get('service') || 'General'}`)
       const body = encodeURIComponent(
-        `Name: ${data.get('name')}\nEmail: ${data.get('email')}\nService: ${data.get('service')}\n\n${data.get('message')}`,
+        `Name: ${data.get('name')}\nEmail: ${data.get('email')}\nPhone/WhatsApp: ${data.get('phone') || '—'}\nService: ${data.get('service')}\nBudget: ${data.get('budget') || '—'}\nTimeline: ${data.get('timeline') || '—'}\n\n${data.get('message')}`,
       )
       window.location.href = `mailto:${site.email}?subject=${subject}&body=${body}`
       // A mail draft is not a delivered message — don't claim it was sent.
@@ -40,7 +57,9 @@ export default function Contact() {
       })
       if (!res.ok) throw new Error(`Form endpoint responded ${res.status}`)
       setStatus('sent')
+      track('Form Submit', { service: String(data.get('service') || '') })
       form.reset()
+      setService('')
     } catch {
       setStatus('error')
     }
@@ -62,9 +81,10 @@ export default function Contact() {
             {site.bookingUrl && (
               <a
                 className="contact-info-item glass contact-info-booking"
-                href={site.bookingUrl}
+                href={bookingHref('contact')}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => track('Booking Click', { placement: 'contact' })}
               >
                 <div className="contact-info-icon">
                   <Icon name="calendar" />
@@ -81,6 +101,7 @@ export default function Contact() {
                 href={site.whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => track('WhatsApp Click', { placement: 'contact' })}
               >
                 <div className="contact-info-icon">
                   <Icon name="whatsapp" />
@@ -124,6 +145,7 @@ export default function Contact() {
 
           <Reveal delay={0.2}>
             <form className="contact-form glass" onSubmit={onSubmit}>
+              {contact.formNote && <p className="form-note">{contact.formNote}</p>}
               <div className="form-row">
                 <div className="form-field">
                   <label htmlFor="cf-name">Your Name</label>
@@ -134,25 +156,63 @@ export default function Contact() {
                   <input id="cf-email" name="email" type="email" autoComplete="email" placeholder="you@company.com" required />
                 </div>
               </div>
-              <div className="form-field">
-                <label htmlFor="cf-service">Service Needed</label>
-                <select id="cf-service" name="service" defaultValue="" required>
-                  <option value="" disabled>
-                    Select a service…
-                  </option>
-                  <option>AI Integration</option>
-                  <option>Custom CRM</option>
-                  <option>ERP Solution</option>
-                  <option>Web Development</option>
-                  <option>API Development</option>
-                  <option>Cloud & DevOps</option>
-                  <option>Not sure yet — let’s talk</option>
-                </select>
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="cf-phone">Phone / WhatsApp (optional)</label>
+                  <input id="cf-phone" name="phone" type="tel" autoComplete="tel" placeholder="+91 …" />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="cf-service">Service Needed</label>
+                  <select id="cf-service" name="service" value={service} onChange={(e) => setService(e.target.value)} required>
+                    <option value="" disabled>
+                      Select a service…
+                    </option>
+                    <option>AI Integration</option>
+                    <option>Custom CRM</option>
+                    <option>ERP Solution</option>
+                    <option>Web Development</option>
+                    <option>API Development</option>
+                    <option>Cloud & DevOps</option>
+                    <option>Not sure yet — let’s talk</option>
+                  </select>
+                </div>
+              </div>
+              {/* Optional qualifiers — they protect founder time and make the
+                  first reply specific instead of generic. Kept optional so
+                  they never block a lead. */}
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="cf-budget">Rough Budget (optional)</label>
+                  <select id="cf-budget" name="budget" defaultValue="">
+                    <option value="">Prefer not to say</option>
+                    <option>Under ₹1 lakh</option>
+                    <option>₹1–5 lakh</option>
+                    <option>₹5–15 lakh</option>
+                    <option>₹15 lakh+</option>
+                    <option>Not sure yet</option>
+                  </select>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="cf-timeline">Timeline (optional)</label>
+                  <select id="cf-timeline" name="timeline" defaultValue="">
+                    <option value="">Select…</option>
+                    <option>As soon as possible</option>
+                    <option>This quarter</option>
+                    <option>Just exploring for now</option>
+                  </select>
+                </div>
               </div>
               <div className="form-field">
                 <label htmlFor="cf-message">Project Details</label>
-                <textarea id="cf-message" name="message" rows="5" placeholder="Tell us what you want to build…" required />
+                <textarea id="cf-message" name="message" rows="5" placeholder="Tell us what you want to build, or describe the problem in 3 lines…" required />
               </div>
+              <div className="form-field">
+                <label htmlFor="cf-source">How did you find us? (optional)</label>
+                <input id="cf-source" name="source" type="text" placeholder="Google, LinkedIn, a referral…" />
+              </div>
+              {/* Attribution context — invisible to the visitor, gold for
+                  knowing which channel produced the lead. */}
+              <input type="hidden" name="page" value={pageContext} />
               {/* Honeypot — hidden from real users, catches naive bots.
                   Named so browser address-autofill won't populate it. */}
               <div className="form-honeypot" aria-hidden="true">
@@ -201,7 +261,7 @@ export default function Contact() {
               {site.whatsappLink && (
                 <p className="form-alt-channel">
                   Prefer chat?{' '}
-                  <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">
+                  <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer" onClick={() => track('WhatsApp Click', { placement: 'form-footer' })}>
                     Message us on WhatsApp
                   </a>{' '}
                   — it’s the fastest way to get a reply.

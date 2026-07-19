@@ -1,5 +1,3 @@
-import { useId } from 'react'
-
 /* Inline SVG icon set — stroke icons sized by the parent's font/color */
 const base = {
   fill: 'none',
@@ -12,10 +10,11 @@ const base = {
   viewBox: '0 0 24 24',
 }
 
-export const Logo = ({ size = 36 }) => {
-  // Unique gradient id per instance — the logo renders in both navbar and
-  // footer, and duplicate SVG ids can break the gradient reference.
-  const id = useId()
+export const Logo = ({ size = 36, gradientId = 'logo-grad' }) => {
+  // Deterministic gradient id (unique per usage site via the prop) — useId
+  // would break hydration, since the prerendered snapshot is produced by a
+  // client render whose ids can never match hydrateRoot's tree-based ids.
+  const id = gradientId
   const g = `url(#${id})`
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
