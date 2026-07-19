@@ -1,11 +1,8 @@
-import { useRef } from 'react'
 import { site, services } from '../data/content.js'
 import Icon, { Logo } from './ui/Icons.jsx'
-import PrivacyPolicy from './PrivacyPolicy.jsx'
 
 export default function Footer() {
   const year = new Date().getFullYear()
-  const privacyRef = useRef(null)
 
   return (
     <footer className="footer">
@@ -36,7 +33,9 @@ export default function Footer() {
             <ul>
               {services.map((s) => (
                 <li key={s.title}>
-                  <a href="#services">{s.title}</a>
+                  {/* Deep link — ServiceExplorer listens for #services-<id>
+                      and opens that exact slide. */}
+                  <a href={`#services-${s.id}`}>{s.title}</a>
                 </li>
               ))}
             </ul>
@@ -50,9 +49,9 @@ export default function Footer() {
               <li><a href="#work">Our Work</a></li>
               <li><a href="#contact">Contact</a></li>
               <li>
-                <button type="button" className="footer-link-btn" onClick={() => privacyRef.current?.open()}>
-                  Privacy Policy
-                </button>
+                {/* Relative so it resolves on both the custom domain and a
+                    github.io/<repo>/ project URL. */}
+                <a href="privacy/">Privacy Policy</a>
               </li>
             </ul>
           </div>
@@ -74,7 +73,6 @@ export default function Footer() {
           <span>Engineered with precision in India.</span>
         </div>
       </div>
-      <PrivacyPolicy ref={privacyRef} />
     </footer>
   )
 }

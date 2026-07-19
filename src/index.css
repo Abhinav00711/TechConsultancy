@@ -396,6 +396,12 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   text-shadow: 0 2px 20px rgba(5, 6, 14, 0.9);
 }
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 44px; }
+/* The roadmap promise, visible at the button instead of only at the form */
+.hero-cta-note {
+  margin-top: 12px;
+  color: var(--text-dim); font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
 
 /* Risk-reversal strip — the commitments that de-risk getting in touch */
 .hero-assurances {
@@ -523,6 +529,41 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   content: '▹'; color: var(--accent-ink); font-size: 0.9rem;
 }
 
+/* ─────────────── Services overview (scannable six-tile grid) ─────────────── */
+.services-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 44px;
+}
+.services-overview-tile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: 18px 20px;
+  text-align: left;
+  border-radius: 18px;
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+.services-overview-tile:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 14px 40px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.services-overview-tile.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.services-overview-tile svg { color: var(--accent); }
+.services-overview-tile strong {
+  font-family: var(--font-display); font-weight: 600; font-size: 0.98rem;
+}
+.services-overview-tile span { color: var(--text-dim); font-size: 0.82rem; }
+@media (max-width: 900px) {
+  .services-overview { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 540px) {
+  .services-overview { grid-template-columns: 1fr; gap: 10px; }
+  .services-overview-tile span { display: none; }
+}
+
 /* ───────────────────────── Showcase (3D demos) ───────────────────────── */
 .showcase {
   display: grid;
@@ -532,6 +573,11 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   transition: border-color 0.5s ease, box-shadow 0.5s ease;
   border-color: color-mix(in srgb, var(--accent) 25%, transparent);
   box-shadow: 0 30px 80px color-mix(in srgb, var(--accent) 7%, transparent);
+}
+/* The carousel is keyboard-operable (arrows, Home/End) — advertise it */
+.showcase:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 3px;
 }
 .showcase-canvas {
   position: relative;
@@ -996,12 +1042,6 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
 }
 .footer-brand p { color: var(--text-dim); font-size: 0.93rem; margin-top: 16px; max-width: 300px; }
 .footer-heading { font-size: 0.95rem; margin-bottom: 18px; }
-.footer-link-btn {
-  background: none; border: none; padding: 0;
-  color: var(--text-dim); font-size: 0.92rem; font-family: var(--font-body);
-  transition: color 0.25s ease;
-}
-.footer-link-btn:hover { color: var(--cyan); }
 .footer ul { list-style: none; display: grid; gap: 11px; }
 .footer ul a { color: var(--text-dim); font-size: 0.92rem; transition: color 0.25s ease; }
 .footer ul a:hover { color: var(--cyan); }
@@ -1026,39 +1066,17 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   box-shadow: 0 8px 24px rgba(34, 211, 238, 0.15);
 }
 
-/* ───────────────────────── Legal dialog ───────────────────────── */
-.legal-dialog {
-  margin: auto;
-  max-width: min(680px, 92vw);
-  max-height: 84vh;
-  background: var(--bg-soft);
-  color: var(--text);
-  border: 1px solid var(--border-strong);
-  border-radius: 22px;
-  padding: 0;
-}
-.legal-dialog::backdrop { background: rgba(5, 6, 14, 0.75); backdrop-filter: blur(6px); }
-/* showModal() doesn't lock the page behind the dialog — do it here */
-body:has(dialog[open]) { overflow: hidden; }
-.legal-dialog-inner { padding: 36px 38px 42px; overflow-y: auto; max-height: 84vh; }
-.legal-dialog-head {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 22px;
-}
-.legal-dialog h2 { font-size: 1.6rem; }
-.legal-dialog h3 { font-size: 1.02rem; margin: 26px 0 10px; }
-.legal-dialog p, .legal-dialog li { color: var(--text-dim); font-size: 0.95rem; }
-.legal-dialog ul { padding-left: 20px; display: grid; gap: 8px; margin-top: 8px; }
-.legal-dialog a { color: var(--cyan); text-decoration: underline; }
+/* ───────────────────────── Legal page (/privacy/) ───────────────────────── */
+.legal-page { padding: 60px 0 90px; }
+.legal-page .container { max-width: 760px; }
+.legal-page .nav-logo { margin-bottom: 44px; display: inline-flex; }
+.legal-page h1 { font-size: clamp(2rem, 5vw, 2.8rem); margin-bottom: 26px; }
+.legal-page h3 { font-size: 1.02rem; margin: 26px 0 10px; }
+.legal-page p, .legal-page li { color: var(--text-dim); font-size: 0.95rem; }
+.legal-page ul { padding-left: 20px; display: grid; gap: 8px; margin-top: 8px; }
+.legal-page p a:not(.btn) { color: var(--cyan); text-decoration: underline; }
+.legal-page .btn { margin-top: 26px; }
 .legal-updated { margin-top: 30px; font-family: var(--font-mono); font-size: 0.78rem; }
-.legal-close {
-  width: 40px; height: 40px; flex-shrink: 0;
-  border-radius: 12px;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 1rem;
-}
-.legal-close:hover { border-color: var(--border-strong); }
 
 /* ───────────────────────── Ambient background ───────────────────────── */
 .ambient {

@@ -1,14 +1,14 @@
 import { site } from '../data/content.js'
 
 /* Conversion-event plumbing. Cloudflare Web Analytics only counts pageviews,
-   so CTA clicks and form submissions are invisible without this. Events are
-   sent to window.plausible when a cookieless, event-capable script (Plausible
-   or Umami's Plausible-compatible mode) is added to index.html — until then
-   every call is a silent no-op, keeping the site's no-tracker positioning
-   honest. See docs/GROWTH_PLAN.md §2.7. */
+   so CTA clicks and form submissions are invisible without this. Events go to
+   the cookieless Umami Cloud script in index.html (window.umami); the
+   Plausible call stays as a fallback in case the provider ever changes.
+   See docs/GROWTH_PLAN.md §2.7. */
 export function track(event, props) {
   try {
-    window.plausible?.(event, props ? { props } : undefined)
+    if (window.umami?.track) window.umami.track(event, props)
+    else window.plausible?.(event, props ? { props } : undefined)
   } catch {
     /* analytics must never break the UX */
   }

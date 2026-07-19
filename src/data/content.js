@@ -20,7 +20,7 @@ export const site = {
   // to a prefilled email draft — no lead is ever lost.
   formEndpoint: 'https://formspree.io/f/xgogkaoo',
   // Scheduling link — powers the "Book a Free Discovery Call" flow.
-  bookingUrl: 'https://cal.com/abhishek-rathi-gjf6hp',
+  bookingUrl: 'https://cal.com/revora-consultancy/discovery',
   // Only socials with a real URL are rendered. Fill these in as profiles exist.
   socials: [
     // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
@@ -53,7 +53,7 @@ export const hero = {
   titleGradient: 'Pays For Itself',
   titleBottom: 'Built By Founders',
   subtitle:
-    'AI integration, custom CRMs, ERPs, websites and APIs for growing Indian businesses — designed and built directly by our founders, with a fixed itemised quote, your first demo in 7 days and 100% code ownership.',
+    'We build the AI, CRM and custom systems that run growing Indian businesses — founder-built, fixed-price, and demoed to you within 7 days.',
   ctaPrimary: 'Start Your Project',
   // Used instead of ctaPrimary when site.bookingUrl is set — a scheduled call
   // is lower-friction than "start a project" for a first-time visitor.
@@ -61,6 +61,8 @@ export const hero = {
   // Mid-funnel alternative for visitors not ready to talk: scrolls to the
   // contact form, which promises a written roadmap within 48h — no call needed.
   ctaSecondary: 'Get a Free Project Roadmap',
+  // The roadmap promise, surfaced at the button instead of only at the form.
+  ctaSecondaryNote: 'Written and in your inbox within 48h — no call needed.',
   // Risk-reversal strip under the CTAs — commitments we control, not claims.
   assurances: [
     'Free discovery call & roadmap',
@@ -346,8 +348,8 @@ export const industries = [
 
 export const faq = {
   tag: 'Questions',
-  title: 'Before You',
-  titleGradient: 'Ask',
+  title: 'Straight',
+  titleGradient: 'Answers',
   items: [
     {
       q: 'How much does a project cost?',
@@ -407,8 +409,8 @@ export const ctaBand = {
 }
 
 export const contact = {
-  heading: 'Let’s Build Something',
-  headingGradient: 'Extraordinary',
+  heading: 'Tell Us What’s',
+  headingGradient: 'Slowing You Down',
   text: 'Tell us about your project — a quick call is free, and so is the first roadmap. We reply within 24 hours.',
   // Mid-funnel promise shown above the form — the "no call required" path.
   formNote:

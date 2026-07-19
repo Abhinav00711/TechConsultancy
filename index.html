@@ -96,6 +96,13 @@
          Disclosed in the privacy policy (PrivacyPolicy.jsx). -->
     <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "6cb6a1dd81524bba8af99be4116c5ee1"}'></script>
     <!-- End Cloudflare Web Analytics -->
+
+    <!-- Umami Cloud — cookieless event analytics powering src/lib/analytics.js
+         track() calls (CTA clicks, form submits, WhatsApp opens). Disclosed in
+         the privacy policy. data-domains keeps local dev sessions and the
+         github.io mirror out of the stats; scripts/prerender.mjs blocks it so
+         CI builds never count as visits. -->
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="389c771c-1d42-4134-9ecf-14e8abfb58e9" data-domains="revora.co.in"></script>
   </head>
   <body>
     <div id="root"></div>
