@@ -106,6 +106,7 @@ try {
     })
     // Don't let build machines register pageviews in the site's analytics.
     await page.route('**://static.cloudflareinsights.com/**', (r) => r.abort())
+    await page.route('**://cloud.umami.is/**', (r) => r.abort())
     await page.goto(`http://127.0.0.1:${port}/${route.path}`, { waitUntil: 'networkidle' })
 
     // Scroll through the whole page so every whileInView reveal has fired,

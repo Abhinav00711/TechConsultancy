@@ -17,7 +17,7 @@ An immersive 3D single-page website for a tech consultancy, built with React, Th
 - **Complete sections** — Hero, Services (AI, CRM, ERP, Web, API, Cloud), 3D Demos, About/Founders, Stats, Process, Example Engagements, CTA, FAQ accordion, Contact form, Footer with privacy policy
 - **Responsive** — mobile menu, fluid type, stacked layouts
 - **Accessible** — skip link, visible focus styles, ARIA tabs with keyboard support and a pause control for auto-rotation, `prefers-reduced-motion` honoured by Framer Motion *and* both WebGL canvases (static frame instead of perpetual animation)
-- **Resilient & private** — WebGL error boundary with a static fallback, context-loss guard, self-hosted fonts (no font CDN requests), no cookies, no cross-site trackers (analytics is cookieless Cloudflare Web Analytics, disclosed in the privacy policy)
+- **Resilient & private** — WebGL error boundary with a static fallback, context-loss guard, self-hosted fonts (no font CDN requests), no cookies, no cross-site trackers (analytics is cookieless — Cloudflare Web Analytics for pageviews plus Umami for anonymous CTA/conversion events, both disclosed in the privacy policy)
 
 ## 🚀 Getting started
 
@@ -61,7 +61,7 @@ Everything below needs an account/profile only you can create — each one un-hi
 3. ~~**Branded email**~~ — ✅ done, `consulting@revora.co.in` (Cloudflare Email Routing → Gmail). Still pending: Gmail "send mail as" so replies come from the branded address, and updating the Formspree notification address in its dashboard.
 4. **LinkedIn** — create the company page and add it (plus founder GitHub) to `site.socials`; also add the URLs to the `sameAs` field of the JSON-LD in `index.html`.
 5. **WhatsApp** — confirm `site.whatsapp` is the number you actually answer (ideally a WhatsApp Business profile with the Revora name/logo).
-6. ~~**Analytics**~~ — ✅ done, Cloudflare Web Analytics (cookieless) is in `index.html` and disclosed in the privacy policy; the prerender script blocks the beacon so CI builds don't count as visits.
+6. ~~**Analytics**~~ — ✅ done, Cloudflare Web Analytics (pageviews) and Umami Cloud (conversion events: booking/WhatsApp/service CTA clicks, form submits — see `src/lib/analytics.js`) are in `index.html`, both cookieless and disclosed in the privacy policy; the prerender script blocks both so CI builds don't count as visits. Umami only records the `revora.co.in` domain (`data-domains`), so dev sessions stay out of the stats.
 7. **Google Business Profile** (Kolkata address) and **Clutch/GoodFirms** profiles — free listings where Indian SMEs actually search for agencies.
 8. Keep the stats band honest — it lists commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
 

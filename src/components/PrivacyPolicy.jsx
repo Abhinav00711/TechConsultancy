@@ -51,10 +51,12 @@ export default function PrivacyPolicy() {
 
         <h3>Analytics</h3>
         <p>
-          We use Cloudflare Web Analytics to understand, in aggregate, how this site is used — pages viewed,
-          referrers and country-level location. It is cookieless, does not build visitor profiles and does not
-          follow you to other websites. Loading the measurement script means Cloudflare processes standard
-          technical data (such as your IP address) to deliver it, as described in Cloudflare’s privacy policy.
+          We use two cookieless analytics services to understand, in aggregate, how this site is used: Cloudflare
+          Web Analytics (pages viewed, referrers, country-level location) and Umami (the same aggregates, plus
+          anonymous interaction events such as which buttons are clicked). Neither sets cookies, builds visitor
+          profiles or follows you to other websites. Loading their measurement scripts means Cloudflare and Umami
+          process standard technical data (such as your IP address) to deliver them, as described in their
+          respective privacy policies.
         </p>
 
         <h3>Data retention &amp; your rights</h3>

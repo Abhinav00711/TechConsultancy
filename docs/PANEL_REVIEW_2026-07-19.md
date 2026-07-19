@@ -7,9 +7,12 @@
 > M3 (`/privacy/` as a real prerendered URL + sitemap entry; footer modal → link),
 > M6 partial (Space Grotesk 600 dropped after usage audit; carousel focusable with
 > visible ring; tab chips carry full-name tooltips), plus build-time sitemap
-> `lastmod` stamping. Still needing founders: Q1 analytics account, Q2 Cal.com
-> branding, Q3 ₹ bands, Q5/Q6 LinkedIn/GBP/Search Console, M1 pilot pricing,
-> M5 founding-client pilots, and everything in §7.
+> `lastmod` stamping. **Q1 is now DONE too** — Umami Cloud is installed
+> (script in `index.html`, `track()` routed to `umami.track`, prerender blocks
+> it, privacy policy discloses it), so every CTA/form/WhatsApp event is being
+> measured. Still needing founders: Q2 Cal.com branding, Q3 ₹ bands, Q5/Q6
+> LinkedIn/GBP/Search Console, M1 pilot pricing, M5 founding-client pilots,
+> and the rest of §7.
 
 **Date:** 19 July 2026
 **Method:** Nine independent specialist reviews of the live codebase (every component,
