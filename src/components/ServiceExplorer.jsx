@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion'
+import { m, AnimatePresence, useInView, useReducedMotion } from 'framer-motion'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'
@@ -46,6 +46,10 @@ export default function ServiceExplorer() {
   // render identical to the prerendered snapshot for clean hydration.)
   const [auto, setAuto] = useState(false)
   const [hovering, setHovering] = useState(false)
+  // Screen-reader announcement, set only for slide changes the visitor asked
+  // for. Auto-rotation deliberately stays silent — see the live region below.
+  const [announcement, setAnnouncement] = useState('')
+  const userDrivenChange = useRef(false)
   const wrapRef = useRef(null)
   const inView = useInView(wrapRef, { once: true, margin: '300px' })
   const onScreen = useInView(wrapRef, { margin: '120px' })
@@ -60,9 +64,9 @@ export default function ServiceExplorer() {
   // exact slide. No element carries these ids, so we do the scrolling too.
   useEffect(() => {
     const apply = () => {
-      const m = /^#services-([a-z]+)$/.exec(window.location.hash)
-      if (!m) return
-      const i = services.findIndex((s) => s.id === m[1])
+      const match = /^#services-([a-z]+)$/.exec(window.location.hash)
+      if (!match) return
+      const i = services.findIndex((s) => s.id === match[1])
       if (i === -1) return
       setDirection(1)
       setActive(i)
@@ -73,23 +77,65 @@ export default function ServiceExplorer() {
     return () => window.removeEventListener('hashchange', apply)
   }, [])
 
-  const go = (dir) => {
+  // advance() is what the autoplay timer uses; go()/jump() are the visitor-
+  // facing wrappers, and only those flag the change as announceable.
+  const advance = (dir) => {
     setDirection(dir)
     setActive((i) => (i + dir + services.length) % services.length)
   }
 
+  const go = (dir) => {
+    userDrivenChange.current = true
+    advance(dir)
+  }
+
   const jump = (i) => {
+    userDrivenChange.current = true
     setDirection(i > active ? 1 : -1)
     setActive(i)
   }
 
   useEffect(() => {
+    if (!userDrivenChange.current) return
+    userDrivenChange.current = false
+    setAnnouncement(`Slide ${active + 1} of ${services.length}: ${services[active].title}`)
+  }, [active])
+
+  useEffect(() => {
     // No auto-rotation while paused, hovered/focused, or scrolled offscreen
     if (!auto || hovering || !onScreen) return
-    const id = setInterval(() => go(1), AUTO_MS)
+    const id = setInterval(() => advance(1), AUTO_MS)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auto, hovering, onScreen, active])
+
+  /* Swipe-to-navigate on pointer events rather than framer-motion's `drag`.
+     `drag` lives only in framer's domMax feature bundle, and requiring domMax
+     instead of domAnimation put +12.5 KB gzip on the critical path of every
+     visit for this one gesture (see App.jsx). What is lost is the rubber-band
+     follow during the drag; what is kept is the navigation itself.
+     A swipe must also out-travel its own vertical component, or a thumb
+     scrolling the page past the carousel would flip slides by accident. */
+  const swipeStart = useRef(null)
+
+  const onSwipeStart = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    swipeStart.current = { x: e.clientX, y: e.clientY }
+  }
+
+  const onSwipeCancel = () => {
+    swipeStart.current = null
+  }
+
+  const onSwipeEnd = (e) => {
+    const start = swipeStart.current
+    swipeStart.current = null
+    if (!start) return
+    const dx = e.clientX - start.x
+    const dy = e.clientY - start.y
+    if (Math.abs(dx) < 70 || Math.abs(dx) <= Math.abs(dy)) return
+    go(dx < 0 ? 1 : -1)
+  }
 
   const onCarouselKeyDown = (e) => {
     const n = services.length
@@ -227,11 +273,20 @@ export default function ServiceExplorer() {
                 </button>
               </div>
 
-              {/* aria-live so screen-reader users hear slide changes instead
-                  of content silently swapping under them. */}
-              <div aria-live="polite">
+              {/* The slide itself is NOT a live region. It holds a headline, a
+                  paragraph, four bullets, two KPI chips and a note — making it
+                  live meant a screen reader re-read all of that every 8
+                  seconds during autoplay, to someone who never asked for it.
+                  Pausing on focus doesn't help either: browsing with a virtual
+                  cursor never moves DOM focus.
+                  Instead: one terse announcement, and only for slide changes
+                  the visitor actually initiated (see userDrivenChange). */}
+              <div className="sr-only" role="status">
+                {announcement}
+              </div>
+              <div>
                 <AnimatePresence mode="wait" custom={direction}>
-                  <motion.div
+                  <m.div
                     key={item.id}
                     className="showcase-content"
                     role="group"
@@ -242,37 +297,33 @@ export default function ServiceExplorer() {
                     initial="enter"
                     animate="center"
                     exit="exit"
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.12}
-                    onDragEnd={(e, info) => {
-                      if (info.offset.x < -70) go(1)
-                      else if (info.offset.x > 70) go(-1)
-                    }}
+                    onPointerDown={onSwipeStart}
+                    onPointerUp={onSwipeEnd}
+                    onPointerCancel={onSwipeCancel}
                   >
-                    <motion.div className="carousel-eyebrow" variants={childVariants}>
+                    <m.div className="carousel-eyebrow" variants={childVariants}>
                       <Icon name={item.icon} style={{ transform: 'scale(0.7)', display: 'inline-flex' }} />
                       {item.title}
-                    </motion.div>
-                    <motion.h3 variants={childVariants}>{item.headline}</motion.h3>
-                    <motion.p variants={childVariants}>{item.description}</motion.p>
-                    <motion.ul className="service-points" style={{ '--accent': item.accent }} variants={childVariants}>
+                    </m.div>
+                    <m.h3 variants={childVariants}>{item.headline}</m.h3>
+                    <m.p variants={childVariants}>{item.description}</m.p>
+                    <m.ul className="service-points" style={{ '--accent': item.accent }} variants={childVariants}>
                       {item.points.map((p) => (
                         <li key={p}>{p}</li>
                       ))}
-                    </motion.ul>
-                    <motion.div className="showcase-kpis" variants={childVariants}>
+                    </m.ul>
+                    <m.div className="showcase-kpis" variants={childVariants}>
                       {item.kpis.map((k) => (
                         <div key={k.label} className="kpi-chip">
                           <strong>{k.value}</strong>
                           <span>{k.label}</span>
                         </div>
                       ))}
-                    </motion.div>
-                    <motion.p className="kpi-note" variants={childVariants}>{explorer.kpiNote}</motion.p>
+                    </m.div>
+                    <m.p className="kpi-note" variants={childVariants}>{explorer.kpiNote}</m.p>
                     {/* Every slide ends where a buyer's finger already is —
                         on a button, prefilled with this service. */}
-                    <motion.div className="showcase-actions" variants={childVariants}>
+                    <m.div className="showcase-actions" variants={childVariants}>
                       <a
                         href="#contact"
                         className="btn btn-primary showcase-cta"
@@ -294,8 +345,8 @@ export default function ServiceExplorer() {
                           {`or WhatsApp us about ${item.short}`}
                         </a>
                       )}
-                    </motion.div>
-                  </motion.div>
+                    </m.div>
+                  </m.div>
                 </AnimatePresence>
               </div>
             </div>

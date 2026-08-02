@@ -5,13 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/prerender.mjs",
-    "build:spa": "vite build",
+    "build": "vite build && node scripts/check-critical-path.mjs && node scripts/prerender.mjs",
+    "build:spa": "vite build && node scripts/check-critical-path.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/sora": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.2.8",
-    "@fontsource/sora": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",
     "@react-three/drei": "^9.114.0",
     "@react-three/fiber": "^8.17.10",
@@ -19,7 +19,8 @@
     "framer-motion": "^11.11.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "three": "^0.169.0"
+    "three": "^0.169.0",
+    "web-vitals": "^6.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.3",

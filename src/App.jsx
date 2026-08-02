@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MotionConfig, useReducedMotion } from 'framer-motion'
+import { LazyMotion, MotionConfig, domAnimation, useReducedMotion } from 'framer-motion'
 import Preloader from './components/Preloader.jsx'
 import ScrollProgress from './components/ScrollProgress.jsx'
 import Navbar from './components/Navbar.jsx'
@@ -72,9 +72,23 @@ export default function App() {
   // /privacy/ is a real prerendered URL (GBP, WhatsApp Business and Formspree
   // all require one) — everything else renders the single-page site.
   if (/\/privacy\/?$/.test(window.location.pathname)) return <PrivacyPolicy />
+  // LazyMotion + the `m` component instead of `motion`: `motion.div` statically
+  // pulls framer-motion's entire feature set into whatever chunk imports it, so
+  // every component that animated anything was dragging the full library onto
+  // the critical path. `m` ships only the renderer, and the feature bundle is
+  // declared once here.
+  //
+  // domAnimation, not domMax: domMax exists to add drag and layout animations,
+  // costs +12.5 KB gzip, and the only thing here that wanted it was the
+  // carousel swipe — now a handful of pointer handlers in ServiceExplorer.jsx.
+  //
+  // `strict` makes a stray `motion.*` throw at development time rather than
+  // silently re-inflating the bundle months from now.
   return (
-    <MotionConfig reducedMotion="user">
-      <Site />
-    </MotionConfig>
+    <LazyMotion features={domAnimation} strict>
+      <MotionConfig reducedMotion="user">
+        <Site />
+      </MotionConfig>
+    </LazyMotion>
   )
 }

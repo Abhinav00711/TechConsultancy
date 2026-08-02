@@ -9,9 +9,9 @@
       content="Revora Consultancy — founder-led AI, custom CRM/ERP, web & API development company in Kolkata, India. Fixed itemised quotes, first demo in 7 days, 100% code ownership."
     />
     <meta name="theme-color" content="#05060e" />
-    <!-- Resolve analytics origins early so the beacons don't pay DNS latency later. -->
-    <link rel="dns-prefetch" href="https://cloud.umami.is" />
-    <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
+    <!-- Umami is the only third-party origin on the page; preconnect (not just
+         dns-prefetch) so the TLS handshake is done before the beacon fires. -->
+    <link rel="preconnect" href="https://cloud.umami.is" crossorigin />
     <script>
       // Set theme before first paint to avoid a flash of the wrong theme
       ;(function () {
@@ -98,10 +98,11 @@
     <!-- Fonts are self-hosted via @fontsource (imported in src/main.jsx) —
          no third-party requests, no visitor IPs shared with font CDNs. -->
 
-    <!-- Cloudflare Web Analytics — cookieless, no cross-site tracking.
-         Disclosed in the privacy policy (PrivacyPolicy.jsx). -->
-    <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "6cb6a1dd81524bba8af99be4116c5ee1"}'></script>
-    <!-- End Cloudflare Web Analytics -->
+    <!-- The Cloudflare Insights beacon used to load here. It was removed: its
+         only unique contribution over Umami was Core Web Vitals, and those are
+         now measured in-page by src/lib/vitals.js and reported as Umami events
+         — no second origin, no second script. Umami below is the only
+         third-party request this page makes. -->
 
     <!-- Umami Cloud — cookieless event analytics powering src/lib/analytics.js
          track() calls (CTA clicks, form submits, WhatsApp opens). Disclosed in

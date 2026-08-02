@@ -1,11 +1,11 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { site } from '../data/content.js'
 
 export default function Preloader({ done }) {
   return (
     <AnimatePresence>
       {!done && (
-        <motion.div
+        <m.div
           className="preloader"
           role="status"
           aria-label="Loading"
@@ -13,7 +13,7 @@ export default function Preloader({ done }) {
           transition={{ duration: 0.6, ease: 'easeInOut' }}
         >
           <div style={{ textAlign: 'center' }}>
-            <motion.div
+            <m.div
               className="preloader-logo"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -21,9 +21,9 @@ export default function Preloader({ done }) {
             >
               {site.name}
               <span className="gradient-text">.</span>
-            </motion.div>
+            </m.div>
             <div className="preloader-bar">
-              <motion.div
+              <m.div
                 className="preloader-bar-fill"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
@@ -31,7 +31,7 @@ export default function Preloader({ done }) {
               />
             </div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   )

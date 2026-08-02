@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { hero, site } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track, bookingHref } from '../lib/analytics.js'
@@ -51,24 +51,24 @@ export default function Hero() {
       )}
       <div className="hero-vignette" />
 
-      <motion.div className="hero-content container" variants={container} initial={prerendered ? false : 'hidden'} animate="show">
-        <motion.div variants={item}>
+      <m.div className="hero-content container" variants={container} initial={prerendered ? false : 'hidden'} animate="show">
+        <m.div variants={item}>
           <span className="hero-badge">{hero.badge}</span>
-        </motion.div>
+        </m.div>
 
-        <motion.h1 className="hero-title" variants={item}>
+        <m.h1 className="hero-title" variants={item}>
           {hero.titleTop}
           <br />
           <span className="gradient-text">{hero.titleGradient}</span>
           <br />
           {hero.titleBottom}
-        </motion.h1>
+        </m.h1>
 
-        <motion.p className="hero-sub" variants={item}>
+        <m.p className="hero-sub" variants={item}>
           {hero.subtitle}
-        </motion.p>
+        </m.p>
 
-        <motion.div className="hero-ctas" variants={item}>
+        <m.div className="hero-ctas" variants={item}>
           {site.bookingUrl ? (
             <a
               href={bookingHref('hero')}
@@ -87,20 +87,20 @@ export default function Hero() {
           <a href="#contact" className="btn btn-ghost" onClick={() => track('Roadmap CTA Click', { placement: 'hero' })}>
             {hero.ctaSecondary}
           </a>
-        </motion.div>
+        </m.div>
 
         {hero.ctaSecondaryNote && (
-          <motion.p className="hero-cta-note" variants={item}>
+          <m.p className="hero-cta-note" variants={item}>
             {hero.ctaSecondaryNote}
-          </motion.p>
+          </m.p>
         )}
 
-        <motion.ul className="hero-assurances" variants={item}>
+        <m.ul className="hero-assurances" variants={item}>
           {hero.assurances.map((a) => (
             <li key={a}>{a}</li>
           ))}
-        </motion.ul>
-      </motion.div>
+        </m.ul>
+      </m.div>
     </section>
   )
 }

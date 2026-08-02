@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { faq } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 
@@ -8,13 +8,13 @@ function FaqItem({ id, q, a, open, onToggle }) {
     <div className={`faq-item glass ${open ? 'open' : ''}`}>
       <button className="faq-q" onClick={onToggle} aria-expanded={open} aria-controls={id}>
         <span>{q}</span>
-        <motion.span className="faq-icon" aria-hidden="true" animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
+        <m.span className="faq-icon" aria-hidden="true" animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
           +
-        </motion.span>
+        </m.span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
-          <motion.div
+          <m.div
             id={id}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -23,7 +23,7 @@ function FaqItem({ id, q, a, open, onToggle }) {
             style={{ overflow: 'hidden' }}
           >
             <p className="faq-a">{a}</p>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>

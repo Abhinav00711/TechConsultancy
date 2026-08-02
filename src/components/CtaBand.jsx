@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { site, ctaBand } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import Reveal from './ui/Reveal.jsx'
@@ -7,7 +7,7 @@ export default function CtaBand() {
   const reducedMotion = useReducedMotion()
   return (
     <section className="cta-band">
-      <motion.div
+      <m.div
         className="cta-band-glow"
         animate={reducedMotion ? undefined : { opacity: [0.7, 1, 0.7] }}
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}

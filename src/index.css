@@ -13,7 +13,7 @@
   --violet: #c084fc;
   --pink: #f472b6;
   --gradient: linear-gradient(100deg, #22d3ee 0%, #818cf8 45%, #c084fc 80%, #f472b6 100%);
-  --font-display: 'Sora', system-ui, sans-serif;
+  --font-display: 'Sora Variable', system-ui, sans-serif;
   --font-body: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --nav-h: 76px;
@@ -110,6 +110,20 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
 }
 
 .section { position: relative; padding: 120px 0; }
+
+/* This is a long one-page site: without this the browser lays out and paints
+   all nine sections before it can show the hero. content-visibility lets it
+   skip the rendering work for sections that are still far off screen and do it
+   as they approach instead.
+   `contain-intrinsic-size: auto 900px` is the important half — `auto` makes the
+   browser remember each section's real height once measured, so the scrollbar
+   and in-page anchors behave normally; 900px is only the first-time guess. */
+@supports (content-visibility: auto) {
+  .section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
+  }
+}
 
 .section-tag {
   display: inline-flex;
@@ -267,6 +281,16 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   transition: color 0.25s ease, background 0.25s ease;
 }
 .nav-links a:hover { color: var(--text); background: var(--surface-strong); }
+/* Scroll-spy state (Navbar.jsx). Deliberately quieter than :hover — this is
+   ambient "you are here" feedback, not something asking to be clicked. */
+.nav-links a[aria-current='location'] { color: var(--text); }
+.nav-links a[aria-current='location']::after {
+  content: '';
+  position: absolute;
+  left: 16px; right: 16px; bottom: 3px;
+  height: 2px; border-radius: 2px;
+  background: var(--gradient);
+}
 .nav-cta { display: inline-flex; padding: 11px 24px; font-size: 0.9rem; }
 
 .theme-toggle {
@@ -446,6 +470,9 @@ h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.12; letter-spa
   animation: marquee 36s linear infinite;
 }
 .marquee-section:hover .marquee-track { animation-play-state: paused; }
+/* .paused is set by TechMarquee.jsx when the strip scrolls out of view —
+   an offscreen infinite animation still costs compositor frames and battery. */
+.marquee-section.paused .marquee-track { animation-play-state: paused; }
 .marquee-item {
   display: flex; align-items: center; gap: 56px;
   font-family: var(--font-display); font-weight: 600;

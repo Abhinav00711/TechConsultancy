@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { site, nav } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { Logo } from './ui/Icons.jsx'
@@ -26,6 +26,9 @@ function NavCta({ className, style, onDone }) {
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  // Which section the visitor is currently reading. Empty at the top of the
+  // page (the hero isn't in the nav), which is why no link is highlighted then.
+  const [current, setCurrent] = useState('')
   const burgerRef = useRef(null)
 
   useEffect(() => {
@@ -33,6 +36,32 @@ export default function Navbar() {
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Scroll-spy. Six nav links on a single page with no indication of where you
+  // are is a small, constant orientation tax. The bottom margin means a section
+  // only counts as "current" once it occupies the upper part of the viewport,
+  // so the highlight tracks what's being read rather than what's peeking in.
+  useEffect(() => {
+    if (!('IntersectionObserver' in window)) return
+    const ids = nav.map((item) => item.href.slice(1))
+    const sections = ids.map((id) => document.getElementById(id)).filter(Boolean)
+    if (!sections.length) return
+
+    const visible = new Set()
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id)
+          else visible.delete(entry.target.id)
+        }
+        // nav order matches document order, so the first match is the topmost.
+        setCurrent(ids.find((id) => visible.has(id)) ?? '')
+      },
+      { rootMargin: '-80px 0px -65% 0px' },
+    )
+    sections.forEach((section) => io.observe(section))
+    return () => io.disconnect()
   }, [])
 
   // While the mobile menu is open: lock body scroll, trap Tab inside the
@@ -78,7 +107,7 @@ export default function Navbar() {
 
   return (
     <>
-      <motion.header
+      <m.header
         className={`navbar ${scrolled ? 'scrolled' : ''}`}
         // Prerendered pages already show the navbar — don't hide and replay it.
         initial={window.__PRERENDERED__ ? false : { y: -80, opacity: 0 }}
@@ -97,7 +126,12 @@ export default function Navbar() {
           <ul className="nav-links">
             {nav.map((item) => (
               <li key={item.href}>
-                <a href={item.href}>{item.label}</a>
+                {/* aria-current="location" is the correct token for "this is
+                    where you are in the document" — not "page", which would
+                    claim the link points at the current URL. */}
+                <a href={item.href} aria-current={current === item.href.slice(1) ? 'location' : undefined}>
+                  {item.label}
+                </a>
               </li>
             ))}
           </ul>
@@ -121,11 +155,11 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-      </motion.header>
+      </m.header>
 
       <AnimatePresence>
         {open && (
-          <motion.nav
+          <m.nav
             id="mobile-menu"
             className="mobile-menu"
             initial={{ opacity: 0, y: -16 }}
@@ -139,7 +173,7 @@ export default function Navbar() {
               </a>
             ))}
             <NavCta className="btn btn-primary" style={{ marginTop: 12, justifyContent: 'center' }} onDone={() => setOpen(false)} />
-          </motion.nav>
+          </m.nav>
         )}
       </AnimatePresence>
     </>
