@@ -24,6 +24,8 @@ import { services } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
+const repoRoot = fileURLToPath(new URL('..', import.meta.url))
+const today = new Date().toISOString().slice(0, 10)
 
 // A literal string as it will appear in serialised HTML: '&' becomes '&amp;'
 // before the regex metacharacters are escaped, so an h1 like
@@ -58,6 +60,53 @@ const routes = [
   }),
   { path: '', out: 'index.html', assetPrefix: './', mustContain: /faq|FAQPage/i, changefreq: 'monthly', priority: '1.0' },
 ]
+
+// ── Sitemap <lastmod> ────────────────────────────────────────────────────────
+// Which files decide what a crawler READS on a route. Deliberately not the
+// stylesheet: a CSS tweak changes no indexable content, and stamping all eight
+// URLs with the build date on every push is precisely how <lastmod> becomes a
+// signal Google decides is unreliable and ignores outright.
+const contentSources = (route) => {
+  // index.html carries the <title>, the meta description and the
+  // ProfessionalService schema that every route inherits.
+  const shell = ['index.html']
+  if (route.path === 'privacy/') return [...shell, 'src/components/PrivacyPolicy.jsx']
+  if (route.path === '') {
+    // The home page's sections, matched by directory so a renamed component
+    // cannot silently drop out of the list; the two sub-page components are
+    // the only ones that render nothing here.
+    return [
+      ...shell,
+      'src/data/content.js',
+      'src/components',
+      ':(exclude)src/components/ServicePage.jsx',
+      ':(exclude)src/components/PrivacyPolicy.jsx',
+    ]
+  }
+  // Service pages share their sources, so editing one service's copy also
+  // bumps its five siblings. Splitting that finer means blaming line ranges
+  // inside service-pages.js, which is far more fragile than the date is worth.
+  return [...shell, 'src/data/content.js', 'src/data/service-pages.js', 'src/components/ServicePage.jsx']
+}
+
+const git = (args) => execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8' }).trim()
+
+// Newest commit date touching a route's content — or today, if that content is
+// currently uncommitted. Falls back to today when git cannot answer (a shallow
+// clone, or no repository at all): a date that is merely too recent is less
+// misleading than one that is confidently wrong.
+const lastmodFor = (route) => {
+  const paths = contentSources(route)
+  try {
+    if (git(['status', '--porcelain', '--', ...paths])) return today
+    const committed = git(['log', '-1', '--format=%cI', '--', ...paths])
+    if (committed) return committed.slice(0, 10)
+    console.warn(`prerender: no commit touches /${route.path} content — shallow clone? Using the build date.`)
+  } catch {
+    console.warn('prerender: git unavailable — sitemap lastmod falls back to the build date.')
+  }
+  return today
+}
 
 const mime = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
@@ -458,7 +507,6 @@ try {
   // stamping a hand-maintained file: a route added above then silently missing
   // from the sitemap is the classic way a new page never gets crawled.
   // public/sitemap.xml stays as the fallback `npm run build:spa` publishes.
-  const today = new Date().toISOString().slice(0, 10)
   const sitemap = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -470,7 +518,7 @@ try {
         [
           '  <url>',
           `    <loc>https://revora.co.in/${route.path}</loc>`,
-          `    <lastmod>${today}</lastmod>`,
+          `    <lastmod>${lastmodFor(route)}</lastmod>`,
           `    <changefreq>${route.changefreq}</changefreq>`,
           `    <priority>${route.priority}</priority>`,
           '  </url>',
@@ -480,7 +528,10 @@ try {
     '',
   ].join('\n')
   await writeFile(join(dist, 'sitemap.xml'), sitemap)
-  console.log(`prerender: wrote sitemap.xml with ${routes.length} URLs (lastmod ${today})`)
+  console.log(
+    `prerender: wrote sitemap.xml with ${routes.length} URLs — ` +
+      routes.map((route) => `/${route.path} ${lastmodFor(route)}`).join(', '),
+  )
 } finally {
   await browser.close()
   server.close()
