@@ -3,7 +3,9 @@ import { m, AnimatePresence } from 'framer-motion'
 import { faq } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 
-function FaqItem({ id, q, a, open, onToggle }) {
+/* Also used by the per-service pages (ServicePage.jsx), which render their own
+   FAQ list from the same shape. */
+export function FaqItem({ id, q, a, open, onToggle }) {
   return (
     <div className={`faq-item glass ${open ? 'open' : ''}`}>
       <button className="faq-q" onClick={onToggle} aria-expanded={open} aria-controls={id}>

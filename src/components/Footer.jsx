@@ -1,4 +1,5 @@
 import { site, services } from '../data/content.js'
+import { href, servicePath } from '../lib/routes.js'
 import Icon, { Logo } from './ui/Icons.jsx'
 
 export default function Footer() {
@@ -9,7 +10,8 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div className="footer-brand">
-            <a href="#home" className="nav-logo">
+            {/* href() rewrites these for sub-pages (src/lib/routes.js). */}
+            <a href={href('#home')} className="nav-logo">
               <Logo gradientId="logo-grad-footer" />
               <span>
                 {site.name}
@@ -33,9 +35,12 @@ export default function Footer() {
             <ul>
               {services.map((s) => (
                 <li key={s.title}>
-                  {/* Deep link — ServiceExplorer listens for #services-<id>
-                      and opens that exact slide. */}
-                  <a href={`#services-${s.id}`}>{s.title}</a>
+                  {/* Real pages, not #services-<id> deep links. Six indexable
+                      URLs are the point; the footer is also the site-wide
+                      internal link that stops them being orphans. (The deep
+                      link still works for inbound traffic — ServiceExplorer
+                      keeps its hashchange handler.) */}
+                  <a href={href(servicePath(s.id))}>{s.title}</a>
                 </li>
               ))}
             </ul>
@@ -44,14 +49,14 @@ export default function Footer() {
           <div>
             <h3 className="footer-heading">Company</h3>
             <ul>
-              <li><a href="#about">About Us</a></li>
-              <li><a href="#process">Our Process</a></li>
-              <li><a href="#work">Our Work</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li><a href={href('#about')}>About Us</a></li>
+              <li><a href={href('#process')}>Our Process</a></li>
+              <li><a href={href('#work')}>Our Work</a></li>
+              <li><a href={href('#contact')}>Contact</a></li>
               <li>
                 {/* Relative so it resolves on both the custom domain and a
                     github.io/<repo>/ project URL. */}
-                <a href="privacy/">Privacy Policy</a>
+                <a href={href('privacy/')}>Privacy Policy</a>
               </li>
             </ul>
           </div>

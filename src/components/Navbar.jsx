@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
 import { site, nav } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
+import { currentRoute, href } from '../lib/routes.js'
 import { Logo } from './ui/Icons.jsx'
 import ThemeToggle from './ui/ThemeToggle.jsx'
 
@@ -30,6 +31,14 @@ export default function Navbar() {
   // page (the hero isn't in the nav), which is why no link is highlighted then.
   const [current, setCurrent] = useState('')
   const burgerRef = useRef(null)
+
+  // Only the home page puts a dark hero behind the navbar, and the transparent
+  // state depends on that: index.css forces the dark-theme palette onto
+  // `.navbar:not(.scrolled)` so its text stays readable over the hero. On a
+  // service page that is pale text on a pale background — so those pages wear
+  // the solid navbar from scroll position zero.
+  const overDarkHero = currentRoute().name === 'home'
+  const solid = scrolled || !overDarkHero
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -108,14 +117,16 @@ export default function Navbar() {
   return (
     <>
       <m.header
-        className={`navbar ${scrolled ? 'scrolled' : ''}`}
+        className={`navbar ${solid ? 'scrolled' : ''}`}
         // Prerendered pages already show the navbar — don't hide and replay it.
         initial={window.__PRERENDERED__ ? false : { y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2, ease: [0.21, 0.6, 0.35, 1] }}
       >
         <div className="container navbar-inner">
-          <a href="#home" className="nav-logo">
+          {/* href() rewrites the home page's anchors for sub-pages, where
+              '#about' has to travel back to '/' first (src/lib/routes.js). */}
+          <a href={href('#home')} className="nav-logo">
             <Logo gradientId="logo-grad-nav" />
             <span>
               {site.name}
@@ -129,7 +140,7 @@ export default function Navbar() {
                 {/* aria-current="location" is the correct token for "this is
                     where you are in the document" — not "page", which would
                     claim the link points at the current URL. */}
-                <a href={item.href} aria-current={current === item.href.slice(1) ? 'location' : undefined}>
+                <a href={href(item.href)} aria-current={current === item.href.slice(1) ? 'location' : undefined}>
                   {item.label}
                 </a>
               </li>
@@ -168,7 +179,7 @@ export default function Navbar() {
             transition={{ duration: 0.25 }}
           >
             {nav.map((item) => (
-              <a key={item.href} href={item.href} onClick={() => setOpen(false)}>
+              <a key={item.href} href={href(item.href)} onClick={() => setOpen(false)}>
                 {item.label}
               </a>
             ))}

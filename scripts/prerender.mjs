@@ -20,16 +20,43 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
+import { services } from '../src/data/content.js'
+import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
+
+// A literal string as it will appear in serialised HTML: '&' becomes '&amp;'
+// before the regex metacharacters are escaped, so an h1 like
+// "API Development & Systems Integration" still matches its own page.
+const asHtml = (text) =>
+  new RegExp(text.replace(/&/g, '&amp;').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 
 // Routes to snapshot. assetPrefix replaces the build's './' asset references
 // so nested pages still resolve ../assets/… correctly on GitHub Pages.
 // Order matters: dist/index.html is the SPA shell every route loads from, so
 // it must be overwritten LAST.
+//
+// The six service routes are the site's only indexable service URLs — the home
+// page's carousel is one URL for all six, which cannot rank for any of them.
+// They are generated from the same content the app renders, so adding a
+// seventh service creates its page without touching this file.
 const routes = [
-  { path: 'privacy/', out: 'privacy/index.html', assetPrefix: '../', mustContain: /What we collect/i },
-  { path: '', out: 'index.html', assetPrefix: './', mustContain: /faq|FAQPage/i },
+  { path: 'privacy/', out: 'privacy/index.html', assetPrefix: '../', mustContain: /What we collect/i, changefreq: 'yearly', priority: '0.2' },
+  ...services.map((service) => {
+    const page = servicePages[service.id]
+    // A service without page copy would render an empty page and still be
+    // published and sitemapped. Fail the build instead.
+    if (!page) throw new Error(`prerender: service '${service.id}' has no entry in src/data/service-pages.js`)
+    return {
+      path: `services/${service.id}/`,
+      out: `services/${service.id}/index.html`,
+      assetPrefix: '../../',
+      mustContain: asHtml(page.h1),
+      changefreq: 'monthly',
+      priority: '0.9',
+    }
+  }),
+  { path: '', out: 'index.html', assetPrefix: './', mustContain: /faq|FAQPage/i, changefreq: 'monthly', priority: '1.0' },
 ]
 
 const mime = {
@@ -50,6 +77,15 @@ function findChromium() {
     }
   }
   return null
+}
+
+// This script rewrites dist/index.html — the very shell it loads every route
+// from. Running it twice therefore snapshots an already-snapshotted page and
+// inlines a second copy of the critical CSS into it. Cheap to detect, and
+// silently 20 KB heavier on every page if not.
+if (/window\.__PRERENDERED__/.test(await readFile(join(dist, 'index.html'), 'utf8'))) {
+  console.error('prerender: dist/index.html is already prerendered — run `vite build` first.')
+  process.exit(1)
 }
 
 const executablePath = findChromium()
@@ -386,6 +422,24 @@ try {
       html = html.replaceAll('src="./', `src="${route.assetPrefix}`).replaceAll('href="./', `href="${route.assetPrefix}`)
     }
 
+    // __vitePreload resolves a lazily-imported chunk against the URL of the
+    // module that imported it. Under this server the entry is served from
+    // /services/<id>/assets/… (the shell is returned for any path), so the
+    // modulepreload it injects — and which page.content() captures — carries
+    // that extra directory. In production the entry really is at /assets/…,
+    // so the tag would 404 on every visit while the chunk loaded fine beside
+    // it. Every built asset is flat inside assets/, so collapsing the path is
+    // safe and idempotent for the already-correct references.
+    html = html.replace(
+      /\b(href|src)="[^"]*?assets\/([^"/]+)"/g,
+      (_match, attr, file) => `${attr}="${route.assetPrefix}assets/${file}"`,
+    )
+    for (const [reference] of html.matchAll(/\b(?:href|src)="([^"]*assets\/[^"]*)"/g)) {
+      if (!reference.includes(`="${route.assetPrefix}assets/`)) {
+        throw new Error(`prerender: /${route.path} references an asset outside ${route.assetPrefix}assets/ — ${reference}`)
+      }
+    }
+
     // Sanity check before overwriting anything.
     if (!html.includes('id="root"') || !route.mustContain.test(html)) {
       throw new Error(`prerendered HTML for /${route.path} is missing expected content — aborting without overwriting dist`)
@@ -400,14 +454,33 @@ try {
     await page.close()
   }
 
-  // Keep sitemap lastmod honest — stamp it with the build date.
-  const sitemapPath = join(dist, 'sitemap.xml')
-  if (existsSync(sitemapPath)) {
-    const today = new Date().toISOString().slice(0, 10)
-    const sitemap = (await readFile(sitemapPath, 'utf8')).replaceAll(/<lastmod>[^<]*<\/lastmod>/g, `<lastmod>${today}</lastmod>`)
-    await writeFile(sitemapPath, sitemap)
-    console.log(`prerender: stamped sitemap.xml lastmod ${today}`)
-  }
+  // Generate the sitemap from the routes actually written, rather than
+  // stamping a hand-maintained file: a route added above then silently missing
+  // from the sitemap is the classic way a new page never gets crawled.
+  // public/sitemap.xml stays as the fallback `npm run build:spa` publishes.
+  const today = new Date().toISOString().slice(0, 10)
+  const sitemap = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    // Home first, then the rest in route order — routes puts it last because
+    // of the overwrite ordering, which says nothing about crawl priority.
+    ...[...routes]
+      .sort((a, b) => Number(b.priority) - Number(a.priority))
+      .map((route) =>
+        [
+          '  <url>',
+          `    <loc>https://revora.co.in/${route.path}</loc>`,
+          `    <lastmod>${today}</lastmod>`,
+          `    <changefreq>${route.changefreq}</changefreq>`,
+          `    <priority>${route.priority}</priority>`,
+          '  </url>',
+        ].join('\n'),
+      ),
+    '</urlset>',
+    '',
+  ].join('\n')
+  await writeFile(join(dist, 'sitemap.xml'), sitemap)
+  console.log(`prerender: wrote sitemap.xml with ${routes.length} URLs (lastmod ${today})`)
 } finally {
   await browser.close()
   server.close()

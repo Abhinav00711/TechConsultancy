@@ -83,6 +83,9 @@ export const explorer = {
 
 // Merged services + live-demo data. Each item pairs a service description
 // with the interactive scene it powers in the "Services + Live Demos" section.
+// The long-form copy for each service's own page (/services/<id>/) lives in
+// src/data/service-pages.js — split out only because it is ~28 KB of prose the
+// home page would otherwise download and never render.
 export const services = [
   {
     id: 'ai',

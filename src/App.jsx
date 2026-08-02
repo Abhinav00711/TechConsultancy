@@ -16,6 +16,7 @@ import Contact from './components/Contact.jsx'
 import Footer from './components/Footer.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
 import PrivacyPolicy from './components/PrivacyPolicy.jsx'
+import { currentRoute, servicePageComponent } from './lib/routes.js'
 
 function Site() {
   const reducedMotion = useReducedMotion()
@@ -69,9 +70,17 @@ function Site() {
 }
 
 export default function App() {
-  // /privacy/ is a real prerendered URL (GBP, WhatsApp Business and Formspree
-  // all require one) — everything else renders the single-page site.
-  if (/\/privacy\/?$/.test(window.location.pathname)) return <PrivacyPolicy />
+  // Every URL is its own prerendered HTML file (scripts/prerender.mjs) sharing
+  // one bundle, so routing is a single read of the pathname — see lib/routes.js.
+  // /privacy/ exists because GBP, WhatsApp Business and Formspree all require
+  // one; /services/<id>/ exists because six services with a single indexable
+  // URL between them cannot rank for any of their own search terms.
+  const route = currentRoute()
+  // PrivacyPolicy animates nothing, so it skips the LazyMotion wrapper below.
+  if (route.name === 'privacy') return <PrivacyPolicy />
+  // main.jsx has already awaited this chunk on a /services/ URL — see
+  // loadServicePage() for why it is not React.lazy.
+  const ServicePage = route.name === 'service' ? servicePageComponent() : null
   // LazyMotion + the `m` component instead of `motion`: `motion.div` statically
   // pulls framer-motion's entire feature set into whatever chunk imports it, so
   // every component that animated anything was dragging the full library onto
@@ -87,7 +96,7 @@ export default function App() {
   return (
     <LazyMotion features={domAnimation} strict>
       <MotionConfig reducedMotion="user">
-        <Site />
+        {ServicePage ? <ServicePage service={route.service} /> : <Site />}
       </MotionConfig>
     </LazyMotion>
   )

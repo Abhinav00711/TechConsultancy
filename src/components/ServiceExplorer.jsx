@@ -3,6 +3,7 @@ import { m, AnimatePresence, useInView, useReducedMotion } from 'framer-motion'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'
+import { href, servicePath } from '../lib/routes.js'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
@@ -333,6 +334,17 @@ export default function ServiceExplorer() {
                         }}
                       >
                         {item.cta} <span aria-hidden>→</span>
+                      </a>
+                      {/* The carousel is a summary; this is the page that can
+                          actually rank for the service. Descriptive anchor
+                          text on purpose — "learn more" tells a crawler
+                          nothing about what it points at. */}
+                      <a
+                        className="btn btn-ghost showcase-detail"
+                        href={href(servicePath(item.id))}
+                        onClick={() => track('Service Page Click', { service: item.title })}
+                      >
+                        {`${item.title} in detail`}
                       </a>
                       {site.whatsapp && (
                         <a

@@ -15,6 +15,7 @@ An immersive 3D single-page website for a tech consultancy, built with React, Th
   - Auto-advances every 8s (with progress indicator), pauses when the visitor picks a tab; scenes stay warm so switching is instant
 - **Motion everywhere** — scroll progress bar, staggered hero entrance, scroll-triggered reveals, animated stat counters, cursor-following 3D tilt cards with spotlight glow, dual counter-scrolling marquees (tech stack + industries), animated preloader
 - **Complete sections** — Hero, Services (AI, CRM, ERP, Web, API, Cloud), 3D Demos, About/Founders, Stats, Process, Example Engagements, CTA, FAQ accordion, Contact form, Footer with privacy policy
+- **A landing page per service** — `/services/ai/`, `/crm/`, `/erp/`, `/web/`, `/api/`, `/cloud/`: long-form copy, deliverables, who it's for, the stack, the phase plan, a per-service FAQ and its own contact form (preselected to that service). Each is prerendered with its own `<title>`, meta description, canonical, OG tags and `Service` + `BreadcrumbList` + `FAQPage` schema. They exist because one URL cannot rank for six different searches — "CRM development Kolkata" and "cloud DevOps consulting" are not the same query
 - **Responsive** — mobile menu, fluid type, stacked layouts
 - **Accessible** — skip link, visible focus styles, ARIA tabs with keyboard support and a pause control for auto-rotation, `prefers-reduced-motion` honoured by Framer Motion *and* both WebGL canvases (static frame instead of perpetual animation)
 - **Resilient & private** — WebGL error boundary with a static fallback, context-loss guard, self-hosted fonts (no font CDN requests), no cookies, no cross-site trackers (analytics is cookieless — Umami is the single third-party origin on the page, covering pageviews, anonymous CTA/conversion events and real-visitor Core Web Vitals, all disclosed in the privacy policy)
@@ -30,7 +31,11 @@ npm run preview  # preview the production build
 
 ## ✏️ Editing your content
 
-**All text lives in one file: [`src/data/content.js`](src/data/content.js).**
+**Almost all text lives in one file: [`src/data/content.js`](src/data/content.js).**
+The one exception is the long-form copy for the six service pages, which lives in
+[`src/data/service-pages.js`](src/data/service-pages.js) — ~28 KB of prose that only a
+`/services/<id>/` page renders, split out so the home page doesn't download it.
+
 Everything marked `[PLACEHOLDER]` should be replaced with your real details:
 
 - Company name (currently "Revora Consultancy") — also update `index.html` title/description
@@ -47,10 +52,16 @@ Everything marked `[PLACEHOLDER]` should be replaced with your real details:
 
 `npm run build` runs Vite, then `scripts/prerender.mjs` loads the built site in headless Chromium and writes the fully rendered HTML into `dist/index.html`. Crawlers that don't execute JavaScript (GPTBot, ClaudeBot, PerplexityBot, many others) see the complete content, headings, FAQ and structured data instead of an empty `<div id="root">` — without it the site is invisible to AI answer engines.
 
-- Locally it uses the system Chromium/Chrome; if none is found it warns and keeps the plain SPA build.
+Eight URLs are snapshotted: the home page, `/privacy/`, and the six `/services/<id>/` pages.
+The service routes are generated from `services` in `src/data/content.js`, so adding a seventh
+service (with a matching key in `service-pages.js`) produces its page, its sitemap entry and its
+structured data without touching the script.
+
+- Locally it uses the system Chromium/Chrome; if none is found it warns and keeps the plain SPA build. Point `PRERENDER_CHROMIUM` at a browser to override the search.
 - In CI (`deploy.yml`) `PRERENDER_STRICT=1` makes a missing browser fail the deploy rather than silently publishing the empty shell.
-- `npm run build:spa` skips prerendering.
-- Structured data shipped: `ProfessionalService` (with full Kolkata address + phone) in `index.html`, and an auto-generated `FAQPage` schema derived from the FAQ content in `src/data/content.js`.
+- `npm run build:spa` skips prerendering. `dist/sitemap.xml` is written from the route list on every prerendered build (`public/sitemap.xml` is the fallback `build:spa` publishes), so a new page cannot ship un-crawled.
+- The script refuses to run twice over the same `dist` — it rewrites the shell it loads every route from, so a second pass would inline the critical CSS a second time.
+- Structured data shipped: `ProfessionalService` (with full Kolkata address + phone) in `index.html`, an auto-generated `FAQPage` schema derived from the FAQ content in `src/data/content.js`, and `Service` + `BreadcrumbList` + `FAQPage` on each service page.
 
 ## ✅ Before you launch (the unblock checklist)
 
@@ -86,11 +97,15 @@ When you're ready to go live on the real domain:
 ```
 src/
 ├── data/content.js          ← ALL site text (edit this!)
+├── data/service-pages.js    ← long-form copy for /services/<id>/
+├── lib/routes.js            ← which URL renders what, and link rewriting
 ├── components/
 │   ├── three/HeroScene.jsx       ← hero 3D scene
 │   ├── three/ShowcaseScenes.jsx  ← AI / CRM / ERP / API demo scenes
 │   ├── ui/                  ← Reveal, TiltCard, Icons
-│   └── *.jsx                ← page sections
+│   ├── ServicePage.jsx      ← the six service landing pages (own chunk)
+│   ├── PrivacyPolicy.jsx    ← /privacy/
+│   └── *.jsx                ← home page sections
 ├── App.jsx
 └── index.css                ← design system & styles
 ```

@@ -1,6 +1,7 @@
 import React from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.jsx'
+import { currentRoute, loadServicePage } from './lib/routes.js'
 
 // Self-hosted fonts (no third-party font CDN requests).
 // Only the weights index.css actually uses — every extra weight is another
@@ -28,10 +29,28 @@ const app = (
 // of throwing it away — createRoot().render() would blank and re-render the
 // whole page at LCP time (content flash + layout shift). Dev and non-
 // prerendered builds have an empty #root, so they render normally.
-if (window.__PRERENDERED__ && container.firstChild) {
-  hydrateRoot(container, app)
+const boot = () => {
+  if (window.__PRERENDERED__ && container.firstChild) {
+    hydrateRoot(container, app)
+  } else {
+    createRoot(container).render(app)
+  }
+}
+
+// The /services/<id>/ pages live in their own chunk so the home page never
+// downloads them (src/lib/routes.js). It has to be resolved BEFORE the first
+// render, because hydration must produce the same tree the snapshot contains.
+if (currentRoute().name === 'service') {
+  loadServicePage()
+    .then(boot)
+    .catch((error) => {
+      // The prerendered page is already on screen and fully readable. Booting
+      // without its component would replace it with the home page, so the
+      // right failure mode is to stay static.
+      console.error('service page chunk failed to load', error)
+    })
 } else {
-  createRoot(container).render(app)
+  boot()
 }
 
 // Real-visitor performance metrics into Umami (src/lib/vitals.js), replacing
