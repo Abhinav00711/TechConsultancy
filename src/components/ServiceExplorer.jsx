@@ -10,10 +10,24 @@ const ShowcaseCanvas = lazy(() => import('./three/ShowcaseScenes.jsx'))
 
 const AUTO_MS = 8000
 
+/* Short travel, hard deceleration — the panel arrives with weight and settles
+   rather than sliding the full stock-carousel distance. The children stagger
+   in behind it so the slide reads as content assembling, not a strip moving. */
 const variants = {
-  enter: (dir) => ({ opacity: 0, x: dir * 64 }),
-  center: { opacity: 1, x: 0, transition: { duration: 0.45, ease: [0.21, 0.6, 0.35, 1] } },
-  exit: (dir) => ({ opacity: 0, x: dir * -44, transition: { duration: 0.2 } }),
+  enter: (dir) => ({ opacity: 0, x: dir * 26, y: 8 }),
+  center: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 0.84, 0.28, 1], staggerChildren: 0.045, delayChildren: 0.06 },
+  },
+  exit: (dir) => ({ opacity: 0, x: dir * -18, transition: { duration: 0.16, ease: 'easeIn' } }),
+}
+
+const childVariants = {
+  enter: { opacity: 0, y: 10 },
+  center: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.16, 0.84, 0.28, 1] } },
+  exit: { opacity: 0, transition: { duration: 0.12 } },
 }
 
 /* Tells the contact form which service to preselect when a per-slide CTA is
@@ -236,29 +250,29 @@ export default function ServiceExplorer() {
                       else if (info.offset.x > 70) go(-1)
                     }}
                   >
-                    <div className="carousel-eyebrow">
+                    <motion.div className="carousel-eyebrow" variants={childVariants}>
                       <Icon name={item.icon} style={{ transform: 'scale(0.7)', display: 'inline-flex' }} />
                       {item.title}
-                    </div>
-                    <h3>{item.headline}</h3>
-                    <p>{item.description}</p>
-                    <ul className="service-points" style={{ '--accent': item.accent }}>
+                    </motion.div>
+                    <motion.h3 variants={childVariants}>{item.headline}</motion.h3>
+                    <motion.p variants={childVariants}>{item.description}</motion.p>
+                    <motion.ul className="service-points" style={{ '--accent': item.accent }} variants={childVariants}>
                       {item.points.map((p) => (
                         <li key={p}>{p}</li>
                       ))}
-                    </ul>
-                    <div className="showcase-kpis">
+                    </motion.ul>
+                    <motion.div className="showcase-kpis" variants={childVariants}>
                       {item.kpis.map((k) => (
                         <div key={k.label} className="kpi-chip">
                           <strong>{k.value}</strong>
                           <span>{k.label}</span>
                         </div>
                       ))}
-                    </div>
-                    <p className="kpi-note">{explorer.kpiNote}</p>
+                    </motion.div>
+                    <motion.p className="kpi-note" variants={childVariants}>{explorer.kpiNote}</motion.p>
                     {/* Every slide ends where a buyer's finger already is —
                         on a button, prefilled with this service. */}
-                    <div className="showcase-actions">
+                    <motion.div className="showcase-actions" variants={childVariants}>
                       <a
                         href="#contact"
                         className="btn btn-primary showcase-cta"
@@ -280,7 +294,7 @@ export default function ServiceExplorer() {
                           {`or WhatsApp us about ${item.short}`}
                         </a>
                       )}
-                    </div>
+                    </motion.div>
                   </motion.div>
                 </AnimatePresence>
               </div>
