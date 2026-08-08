@@ -31,7 +31,13 @@ export default defineConfig({
           if (/\/node_modules\/(react|react-dom|scheduler)\//.test(path)) return 'react'
           if (/\/node_modules\/three\//.test(path)) return 'three'
           if (/\/node_modules\/@react-three\//.test(path)) return 'r3f'
-          if (/\/node_modules\/(framer-motion|motion-dom|motion-utils)\//.test(path)) return 'motion'
+          // framer-motion is deliberately NOT pinned to a chunk: the entry uses
+          // only the LazyMotion core (the `m` renderer), while the animation
+          // feature bundle is reached through a dynamic import
+          // (src/lib/motion-features.js). Pinning the whole library to one
+          // chunk would glue the features back onto the entry's static graph;
+          // left alone, Rollup keeps the core in the entry and emits the
+          // features as their own lazy chunk.
         },
       },
     },

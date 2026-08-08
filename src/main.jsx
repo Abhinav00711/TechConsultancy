@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.jsx'
-import { currentRoute, loadServicePage } from './lib/routes.js'
+import { currentRoute, loadServicePage, rootPrefix } from './lib/routes.js'
 
 // Self-hosted fonts (no third-party font CDN requests).
 // Only the weights index.css actually uses — every extra weight is another
@@ -58,8 +58,28 @@ if (currentRoute().name === 'service') {
 // enters the critical chunk, and deferred to idle so the measurement doesn't
 // compete with the page load it is measuring. The build machine must not
 // report its own numbers as visitor data.
+//
+// prefetch.js rides the same idle callback: it only attaches listeners that
+// warm the /services/<id>/ chunk and HTML when a visitor shows intent.
 if (!window.__PRERENDERING__) {
-  const start = () => import('./lib/vitals.js').then((m) => m.reportVitals())
+  const start = () => {
+    import('./lib/vitals.js').then((m) => m.reportVitals())
+    import('./lib/prefetch.js').then((m) => m.setupPrefetch())
+  }
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 3000 })
   else setTimeout(start, 1200)
+}
+
+// Repeat-visit caching (public/sw.js): GitHub Pages caps every response at
+// max-age=600, so without a service worker a returning visitor re-downloads
+// the whole (content-hashed, immutable) bundle after ten minutes. Registered
+// after `load` so it never competes with the page it will later speed up.
+// Dev is excluded — caching the dev server makes stale-code debugging hell —
+// and so is the prerender pass, which must snapshot the network, not a cache.
+if (import.meta.env.PROD && 'serviceWorker' in navigator && !window.__PRERENDERING__) {
+  window.addEventListener('load', () => {
+    // rootPrefix() walks back up to the site root from nested routes, keeping
+    // the registration scope identical on revora.co.in and github.io/<repo>/.
+    navigator.serviceWorker.register(`${rootPrefix() || './'}sw.js`).catch(() => {})
+  })
 }
