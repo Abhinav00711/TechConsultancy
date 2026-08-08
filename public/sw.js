@@ -17,7 +17,7 @@
    Cross-origin requests (Umami) are left alone. Bump VERSION to invalidate
    everything at once; otherwise old hashed assets are trimmed by count. */
 
-const VERSION = 'v1'
+const VERSION = 'v2'
 const ASSET_CACHE = `assets-${VERSION}`
 const PAGE_CACHE = `pages-${VERSION}`
 const RUNTIME_CACHE = `runtime-${VERSION}`

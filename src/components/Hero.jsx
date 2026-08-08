@@ -1,106 +1,55 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
-import { m } from 'motion/react'
 import { hero, site } from '../data/content.js'
-import { isConstrained } from '../lib/perf.js'
 import { track, bookingHref } from '../lib/analytics.js'
+import RoadmapGenerator from './RoadmapGenerator.jsx'
 
-const HeroScene = lazy(() => import('./three/HeroScene.jsx'))
-
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.25 } },
-}
-const item = {
-  hidden: { opacity: 0, y: 40 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.21, 0.6, 0.35, 1] } },
-}
-
-// On a prerendered page the visitor already sees the finished hero — mounting
-// at opacity 0 and re-animating would make painted content vanish and fade
-// back in. initial={false} tells framer-motion to render the final state.
-const prerendered = typeof window !== 'undefined' && Boolean(window.__PRERENDERED__)
-
+/* The masthead. The first screen does work instead of performing: headline and
+   commitments on the left, the roadmap generator — the site's central act of
+   handing the visitor a document — on the right. The 3D moved to the service
+   ledger, where each scene illustrates something specific. */
 export default function Hero() {
-  // The 3D scene mounts after first paint (idle), and never on constrained
-  // devices/connections — the text and CTAs must win the race to the screen,
-  // not ~280 KB gzip of three.js. Starting false also matches the prerendered
-  // snapshot (scenes are skipped there), so hydration adopts the DOM cleanly.
-  const [showScene, setShowScene] = useState(false)
-
-  useEffect(() => {
-    if (window.__PRERENDERING__ || isConstrained()) return
-    const start = () => setShowScene(true)
-    if ('requestIdleCallback' in window) {
-      const id = requestIdleCallback(start, { timeout: 2500 })
-      return () => cancelIdleCallback(id)
-    }
-    const t = setTimeout(start, 350)
-    return () => clearTimeout(t)
-  }, [])
-
   return (
     <section id="home" className="hero">
-      {showScene ? (
-        <Suspense fallback={<div className="hero-canvas" aria-hidden="true"><div className="canvas-fallback" /></div>}>
-          <HeroScene />
-        </Suspense>
-      ) : (
-        <div className="hero-canvas" aria-hidden="true">
-          <div className="canvas-fallback" />
+      <div className="container hero-inner">
+        <div>
+          <p className="hero-badge">{hero.badge}</p>
+
+          <h1 className="hero-title">
+            {hero.titleTop}
+            <br />
+            <span className="accent-text">{hero.titleAccent}</span>
+            <br />
+            {hero.titleBottom}
+          </h1>
+
+          <p className="hero-sub">{hero.subtitle}</p>
+
+          <div className="hero-ctas">
+            {site.bookingUrl ? (
+              <a
+                href={bookingHref('hero')}
+                className="btn btn-primary"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => track('Booking Click', { placement: 'hero' })}
+              >
+                {hero.ctaBooking} <span aria-hidden>→</span>
+              </a>
+            ) : (
+              <a href="#contact" className="btn btn-primary">
+                {hero.ctaPrimary} <span aria-hidden>→</span>
+              </a>
+            )}
+          </div>
+
+          <ul className="hero-assurances">
+            {hero.assurances.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ul>
         </div>
-      )}
-      <div className="hero-vignette" />
 
-      <m.div className="hero-content container" variants={container} initial={prerendered ? false : 'hidden'} animate="show">
-        <m.div variants={item}>
-          <span className="hero-badge">{hero.badge}</span>
-        </m.div>
-
-        <m.h1 className="hero-title" variants={item}>
-          {hero.titleTop}
-          <br />
-          <span className="gradient-text">{hero.titleGradient}</span>
-          <br />
-          {hero.titleBottom}
-        </m.h1>
-
-        <m.p className="hero-sub" variants={item}>
-          {hero.subtitle}
-        </m.p>
-
-        <m.div className="hero-ctas" variants={item}>
-          {site.bookingUrl ? (
-            <a
-              href={bookingHref('hero')}
-              className="btn btn-primary"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => track('Booking Click', { placement: 'hero' })}
-            >
-              {hero.ctaBooking} <span aria-hidden>→</span>
-            </a>
-          ) : (
-            <a href="#contact" className="btn btn-primary">
-              {hero.ctaPrimary} <span aria-hidden>→</span>
-            </a>
-          )}
-          <a href="#contact" className="btn btn-ghost" onClick={() => track('Roadmap CTA Click', { placement: 'hero' })}>
-            {hero.ctaSecondary}
-          </a>
-        </m.div>
-
-        {hero.ctaSecondaryNote && (
-          <m.p className="hero-cta-note" variants={item}>
-            {hero.ctaSecondaryNote}
-          </m.p>
-        )}
-
-        <m.ul className="hero-assurances" variants={item}>
-          {hero.assurances.map((a) => (
-            <li key={a}>{a}</li>
-          ))}
-        </m.ul>
-      </m.div>
+        <RoadmapGenerator />
+      </div>
     </section>
   )
 }

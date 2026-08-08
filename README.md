@@ -1,24 +1,20 @@
-# Revora Consultancy — 3D Consultancy Website
+# Revora Consultancy — the "Ledger" website
 
-An immersive 3D single-page website for a tech consultancy, built with React, Three.js (react-three-fiber) and Motion (formerly Framer Motion).
+A consultancy website built around one idea: **everything Revora sells is a document the client keeps** — the itemised quote, the written roadmap, milestone invoices, the handover pack. The design is built out of that world (ruled paper, a hanging oxide margin rule, mono figures, a signed guarantee card), and the hero hands the visitor a real document: a roadmap generator that scopes their project in under a minute. Built with React, Three.js (react-three-fiber) and Motion.
 
 ![Stack](https://img.shields.io/badge/React-19-61dafb) ![Three.js](https://img.shields.io/badge/Three.js-r185-white) ![Vite](https://img.shields.io/badge/Vite-8-646cff)
 
 ## ✨ Features
 
-- **3D hero scene** — morphing energy orb, orbiting glow rings, floating geometric satellites, a 1,600-particle starfield, cursor-parallax camera and cinematic bloom post-processing
-- **Interactive 3D demos ("See It Live")** — a tabbed showcase where each service is a living 3D visualisation:
-  - *AI Workflow*: a neural network with signal pulses racing between layers
-  - *CRM Pipeline*: a glowing sales funnel — leads spiral down and convert to gold customers
-  - *ERP Modules*: department cubes orbiting a unified core with data pulses on every link
-  - *API Network*: data packets travelling curved highways between service nodes
-  - Auto-advances every 8s (with progress indicator), pauses when the visitor picks a tab; scenes stay warm so switching is instant
-- **Motion everywhere** — scroll progress bar, staggered hero entrance, scroll-triggered reveals, animated stat counters, cursor-following 3D tilt cards with spotlight glow, dual counter-scrolling marquees (tech stack + industries), animated preloader
-- **Complete sections** — Hero, Services (AI, CRM, ERP, Web, API, Cloud), 3D Demos, About/Founders, Stats, Process, Example Engagements, CTA, FAQ accordion, Contact form, Footer with privacy policy
-- **A landing page per service** — `/services/ai/`, `/crm/`, `/erp/`, `/web/`, `/api/`, `/cloud/`: long-form copy, deliverables, who it's for, the stack, the phase plan, a per-service FAQ and its own contact form (preselected to that service). Each is prerendered with its own `<title>`, meta description, canonical, OG tags and `Service` + `BreadcrumbList` + `FAQPage` schema. They exist because one URL cannot rank for six different searches — "CRM development Kolkata" and "cloud DevOps consulting" are not the same query
-- **Responsive** — mobile menu, fluid type, stacked layouts
-- **Accessible** — skip link, visible focus styles, ARIA tabs with keyboard support and a pause control for auto-rotation, `prefers-reduced-motion` honoured by Motion *and* both WebGL canvases (static frame instead of perpetual animation)
-- **Resilient & private** — WebGL error boundary with a static fallback, context-loss guard, self-hosted fonts (no font CDN requests), no cookies, no cross-site trackers (analytics is cookieless — Umami is the single third-party origin on the page, covering pageviews, anonymous CTA/conversion events and real-visitor Core Web Vitals, all disclosed in the privacy policy)
+- **The "Ledger" identity** — paper-first design system in `src/index.css`: one ink, one paper, one oxide accent (`--mark`, hairlines and numerals only), one semantic teal (`--verify`), Fraunces display serif (600, plus its 400 italic for the Guarantee signatures) + system body + JetBrains Mono data. Full dark theme, WCAG AA contrast verified on every token pair. The old gradient/glass/glow language is retired.
+- **Roadmap generator (the hero instrument)** — two questions → a scoped, dated roadmap document on screen: phases with week ranges, an indicative ₹ band, stack, and target figures. Deterministic on purpose (instant, free, can't hallucinate a promise). "Send this to Revora" posts it to Formspree with one contact field; "Download as PDF" prints just the document. Fires `Roadmap Generated / Sent / Print` analytics events.
+- **The services ledger** — six ruled accordion rows (one control at every width); the open row shows that service's 3D system diagram on the page's single dark stage. The six interactive scenes (AI workflow, CRM funnel, ERP modules, API network, web build, deploy pipeline) survive from the previous design — the decorative hero orb did not.
+- **The Revora Guarantee** — the four commitments (100% code ownership, 24h response, 7-day first demo, zero lock-in) as a signed, dated document instead of an animated stats band.
+- **Scoping teardown** — the honest replacement for case studies we don't have yet: this site itself scoped week by week (verifiable), plus two clearly-labeled illustrative engagements.
+- **Pricing bands** — Pilot (₹75k–1.5 L, ~2 weeks) / Build (₹1.5–8 L, 4–10 weeks) / Platform (₹8 L+, phased) — wide indicative ranges; the fixed itemised quote stays the real number. The roadmap generator computes its per-service band from the same scale, so no two parts of the site quote different figures.
+- **A landing page per service** — `/services/ai/`, `/crm/`, `/erp/`, `/web/`, `/api/`, `/cloud/`: long-form copy, deliverables, phase plan, per-service FAQ, own `<title>`/OG/schema. They exist because one URL cannot rank for six different searches.
+- **Responsive & accessible** — mobile menu with focus trap, skip link, visible focus styles, keyboard-operable accordions, `prefers-reduced-motion` honoured (and ambient motion cut by design: motion must carry meaning).
+- **Resilient & private** — WebGL error boundary + static fallback, constrained-device tier skips three.js entirely, self-hosted fonts, no cookies; Umami (cookieless) is the single third-party origin.
 
 ## 🚀 Getting started
 
@@ -36,11 +32,13 @@ The one exception is the long-form copy for the six service pages, which lives i
 [`src/data/service-pages.js`](src/data/service-pages.js) — ~28 KB of prose that only a
 `/services/<id>/` page renders, split out so the home page doesn't download it.
 
-Everything marked `[PLACEHOLDER]` should be replaced with your real details:
+Details worth reviewing or replacing with your own:
 
 - Company name (currently "Revora Consultancy") — also update `index.html` title/description
 - Phone, location and `site.socials` (only socials with a real URL are rendered)
-- The `work` example-engagement cards — swap for real, permissioned case studies as they come in
+- **The ₹ bands** (`pricing`, and each roadmap plan's `baseBand`) are set to sensible defaults anchored to the contact form's budget options — Pilot ₹75k–1.5 L, Build ₹1.5–8 L, Platform ₹8 L+. Adjust them in `content.js` if your real floors differ; the FAQ cost answer quotes the same ranges, so change both together
+- The `work.examples` cards — swap for real, permissioned case studies as they come in
+- The `guarantee` commitments are rendered as signed by both founders — keep each line only if it will be honoured on a bad week
 
 ## 📬 Contact & conversion channels
 
@@ -74,7 +72,7 @@ Everything below needs an account/profile only you can create — each one un-hi
 5. **WhatsApp** — confirm `site.whatsapp` is the number you actually answer (ideally a WhatsApp Business profile with the Revora name/logo).
 6. ~~**Analytics**~~ — ✅ done, Umami Cloud in `index.html` covers pageviews, conversion events (booking/WhatsApp/service CTA clicks, form submits — see `src/lib/analytics.js`) and real-visitor Core Web Vitals (`src/lib/vitals.js`, reported as `Web Vitals` events). Cookieless and disclosed in the privacy policy; the prerender script blocks the script and gates vitals on `__PRERENDERING__` so CI builds don't count as visits. Umami only records the `revora.co.in` domain (`data-domains`), so dev sessions stay out of the stats. The Cloudflare Insights beacon was removed — it was a second third-party origin whose only unique data was Web Vitals.
 7. **Google Business Profile** (Kolkata address) and **Clutch/GoodFirms** profiles — free listings where Indian SMEs actually search for agencies.
-8. Keep the stats band honest — it lists commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
+8. Keep the Guarantee card honest — it lists signed commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
 
 ## 🌐 Deploying (GitHub Pages)
 
@@ -96,16 +94,19 @@ When you're ready to go live on the real domain:
 
 ```
 src/
-├── data/content.js          ← ALL site text (edit this!)
+├── data/content.js          ← ALL site text incl. roadmap plans & pricing (edit this!)
 ├── data/service-pages.js    ← long-form copy for /services/<id>/
 ├── lib/routes.js            ← which URL renders what, and link rewriting
 ├── components/
-│   ├── three/HeroScene.jsx       ← hero 3D scene
-│   ├── three/ShowcaseScenes.jsx  ← AI / CRM / ERP / API demo scenes
-│   ├── ui/                  ← Reveal, TiltCard, Icons
+│   ├── RoadmapGenerator.jsx      ← the hero instrument
+│   ├── ServiceExplorer.jsx       ← the services ledger + dark stage
+│   ├── Guarantee.jsx             ← the signed commitments card
+│   ├── three/ShowcaseScenes.jsx  ← the six 3D service diagrams
+│   ├── three/SceneShell.jsx      ← WebGL error boundary + low-end tiering
+│   ├── ui/                  ← Reveal (inert wrapper), Icons, ThemeToggle
 │   ├── ServicePage.jsx      ← the six service landing pages (own chunk)
 │   ├── PrivacyPolicy.jsx    ← /privacy/
 │   └── *.jsx                ← home page sections
 ├── App.jsx
-└── index.css                ← design system & styles
+└── index.css                ← the "Ledger" design system & all styles
 ```

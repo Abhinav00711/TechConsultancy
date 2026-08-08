@@ -7,7 +7,7 @@ import Reveal from './ui/Reveal.jsx'
    FAQ list from the same shape. */
 export function FaqItem({ id, q, a, open, onToggle }) {
   return (
-    <div className={`faq-item glass ${open ? 'open' : ''}`}>
+    <div className={`faq-item sheet ${open ? 'open' : ''}`}>
       <button className="faq-q" onClick={onToggle} aria-expanded={open} aria-controls={id}>
         <span>{q}</span>
         <m.span className="faq-icon" aria-hidden="true" animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
@@ -54,13 +54,13 @@ export default function Faq() {
         <Reveal>
           <span className="section-tag">{faq.tag}</span>
           <h2 className="section-title">
-            {faq.title} <span className="gradient-text">{faq.titleGradient}</span>
+            {faq.title} <span className="accent-text">{faq.titleAccent}</span>
           </h2>
         </Reveal>
 
         <div className="faq-list">
           {faq.items.map((item, i) => (
-            <Reveal key={item.q} delay={i * 0.06}>
+            <Reveal key={item.q}>
               <FaqItem {...item} id={`faq-a-${i}`} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
             </Reveal>
           ))}

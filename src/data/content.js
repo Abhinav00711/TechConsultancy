@@ -1,12 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // SITE CONTENT — edit everything here.
-// Anything marked [PLACEHOLDER] should be replaced with your real details.
+// The ₹ bands (`pricing`, and each roadmap plan's baseBand) are set to
+// founder-reviewable defaults — adjust them here and the whole site follows.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const site = {
   name: 'Revora',
   suffix: 'Consultancy',
-  tagline: 'Technology that moves your business forward.',
   email: 'consulting@revora.co.in',
   phone: '+91 9654724365',
   // WhatsApp number in international digits-only form (used for wa.me links).
@@ -49,20 +49,15 @@ export const nav = [
 
 export const hero = {
   badge: 'Founder-Led Tech Consultancy · Kolkata, India',
-  titleTop: 'Software That',
-  titleGradient: 'Pays For Itself',
-  titleBottom: 'Built By Founders',
+  titleTop: 'Software that',
+  titleAccent: 'pays for itself,',
+  titleBottom: 'on paper first.',
   subtitle:
-    'We build the AI, CRM and custom systems that run growing Indian businesses — founder-built, fixed-price, and demoed to you within 7 days.',
+    'We build the AI, CRM and custom systems that run growing Indian businesses — founder-built, fixed-price, and demoed to you within 7 days. Every engagement starts as a document you keep: try the roadmap generator and you’re holding one in under a minute.',
   ctaPrimary: 'Start Your Project',
   // Used instead of ctaPrimary when site.bookingUrl is set — a scheduled call
   // is lower-friction than "start a project" for a first-time visitor.
   ctaBooking: 'Book a Free Discovery Call',
-  // Mid-funnel alternative for visitors not ready to talk: scrolls to the
-  // contact form, which promises a written roadmap within 48h — no call needed.
-  ctaSecondary: 'Get a Free Project Roadmap',
-  // The roadmap promise, surfaced at the button instead of only at the form.
-  ctaSecondaryNote: 'Written and in your inbox within 48h — no call needed.',
   // Risk-reversal strip under the CTAs — commitments we control, not claims.
   assurances: [
     'Free discovery call & roadmap',
@@ -72,11 +67,119 @@ export const hero = {
   ],
 }
 
+// ─── Roadmap generator (the hero instrument) ────────────────────────────────
+// Deterministic on purpose: instant, free, works offline, and cannot
+// hallucinate a promise the founders would then have to honour. Each plan's
+// phase lengths are base weeks, scaled by the team-size multiplier below.
+export const roadmap = {
+  eyebrow: 'Roadmap generator',
+  intro: 'Two questions. No email required to see it.',
+  q1: 'What’s slowing you down?',
+  q2: 'How big is the team it affects?',
+  generate: 'Generate my roadmap',
+  send: 'Send this to Revora',
+  print: 'Download as PDF',
+  disclaimer:
+    'Indicative only — a fixed itemised quote follows the discovery call. Yours to keep, whoever you build with.',
+  problems: [
+    { id: 'ai', label: 'Staff retype data between systems all day' },
+    { id: 'crm', label: 'Leads slip through the cracks' },
+    { id: 'erp', label: 'Spreadsheets are our source of truth' },
+    { id: 'web', label: 'Traffic arrives and doesn’t convert' },
+    { id: 'api', label: 'Our tools don’t talk to each other' },
+    { id: 'cloud', label: 'Releases are manual and scary' },
+  ],
+  // Team size scales both the phase lengths and the ₹ band: each plan below
+  // carries a small-team baseBand [min, max] in lakhs, multiplied by `mult`
+  // and rounded by RoadmapGenerator. Bands are anchored to the same ranges as
+  // the `pricing` section and the contact form's budget options, so no two
+  // parts of the site quote different numbers.
+  scales: [
+    { id: 's', label: '1–10 people', mult: 1.0 },
+    { id: 'm', label: '11–50 people', mult: 1.45 },
+    { id: 'l', label: '51–200 people', mult: 1.85 },
+  ],
+  plans: {
+    ai: {
+      title: 'AI workflow automation',
+      sum: 'The work is real but it shouldn’t be manual. We map the workflow, automate the parsing and entry, and route only the genuine edge cases to a human for approval.',
+      phases: [
+        ['Workflow audit and data mapping', 'We sit with the people doing the retyping and document every field, exception and judgement call.', 1],
+        ['Parsing and system integration', 'Documents, emails and chats parsed into your existing systems — no new tool for the team to learn.', 4],
+        ['Approval flows, testing and rollout', 'Humans confirm the edge cases, accuracy is measured against a baseline, then it goes live.', 3],
+      ],
+      stack: ['Python', 'Claude API', 'LangChain', 'FastAPI', 'PostgreSQL'],
+      baseBand: [1.25, 3.5], // small-team ₹ range in lakhs
+      figs: [['−70%', 'target manual work'], ['24/7', 'runs unattended']],
+    },
+    crm: {
+      title: 'Custom CRM',
+      sum: 'Leads leak at the joins between tools. We build one pipeline shaped around how you actually sell, with WhatsApp, email and calls landing in the same place.',
+      phases: [
+        ['Sales-process mapping', 'Your real stages, not a template’s — including the messy ones nobody documents.', 1],
+        ['Pipeline, automation and integrations', 'Stages, lead scoring, auto follow-ups, plus WhatsApp, email and call tracking unified.', 4],
+        ['Dashboards, training and handover', 'Reports your team will actually open, then full credentials and source handed over.', 2],
+      ],
+      stack: ['Next.js', 'Node.js', 'PostgreSQL', 'WhatsApp Business API'],
+      baseBand: [1.5, 4], // small-team ₹ range in lakhs
+      figs: [['+38%', 'target conversion'], ['100%', 'lead capture']],
+    },
+    erp: {
+      title: 'Modular ERP',
+      sum: 'Spreadsheets as a source of truth means every department has a different version of the truth. We put one core in place and add departments to it in phases.',
+      phases: [
+        ['Module and data-model design', 'Which departments come first, what the shared core owns, and how the migration runs.', 2],
+        ['Core build — finance and inventory', 'The single source of truth, with live sync and full audit trails from day one.', 6],
+        ['Department rollout, roles and reporting', 'HR and operations added on, role-based access set, owners get live reporting.', 6],
+      ],
+      stack: ['Node.js', 'PostgreSQL', 'React', 'Docker', 'AWS'],
+      baseBand: [3, 8], // small-team ₹ range in lakhs
+      figs: [['1', 'source of truth'], ['−45%', 'target admin time']],
+    },
+    web: {
+      title: 'Conversion-focused web build',
+      sum: 'Traffic that doesn’t convert is a design and speed problem before it’s a traffic problem. We rebuild for the decision the visitor is actually making.',
+      phases: [
+        ['Concept and content architecture', 'What each page must prove, in what order, to whom — written before anything is designed.', 1],
+        ['Build and interaction', 'Prerendered, fast on a mid-range Android, with interaction where it earns its place.', 2],
+        ['SEO, performance and launch', 'Core Web Vitals, structured data, per-page metadata, then live with analytics in place.', 1],
+      ],
+      stack: ['React', 'Vite', 'Three.js', 'TypeScript'],
+      baseBand: [0.75, 2.5], // small-team ₹ range in lakhs
+      figs: [['<1s', 'load target'], ['SEO', 'built in']],
+    },
+    api: {
+      title: 'Integration and API layer',
+      sum: 'Tools that don’t talk to each other are a staffing cost in disguise. We build the connective tissue — documented, monitored and versioned.',
+      phases: [
+        ['Contract and integration audit', 'Every system, every data flow, every place a human is currently the integration.', 1],
+        ['Endpoints, auth and documentation', 'REST or GraphQL, secured, documented end-to-end so any team can pick it up.', 3],
+        ['Monitoring, versioning and handover', 'Alerts, versioning policy and a runbook — then it’s yours.', 2],
+      ],
+      stack: ['Node.js', 'GraphQL', 'FastAPI', 'PostgreSQL'],
+      baseBand: [1, 3], // small-team ₹ range in lakhs
+      figs: [['99.9%', 'uptime target'], ['100%', 'documented']],
+    },
+    cloud: {
+      title: 'Cloud and delivery pipeline',
+      sum: 'Scary releases mean fewer releases, which means slower everything. We make deploying boring — minutes, not weekends.',
+      phases: [
+        ['Infrastructure audit and plan', 'What you run, what it costs, what breaks at 3am and why.', 1],
+        ['Pipelines, containers and environments', 'CI/CD with zero-downtime deploys, plus a staging environment that matches production.', 3],
+        ['Monitoring, backups and runbook', 'Alerts that reach a human, backups that are tested, and a runbook your team owns.', 2],
+      ],
+      stack: ['Docker', 'Kubernetes', 'AWS', 'GitHub Actions'],
+      baseBand: [0.9, 2.5], // small-team ₹ range in lakhs
+      figs: [['99.9%', 'uptime target'], ['min', 'to deploy']],
+    },
+  },
+}
+
 // Section meta for the merged "Services + Live Demos" section.
 export const explorer = {
   tag: 'Services · Live Demos',
   title: 'What We Build,',
-  titleGradient: 'Shown Live',
+  titleAccent: 'Shown Live',
   sub: 'Six core services, each paired with an interactive preview of the kind of system we ship. Pick a service — see what you get, then watch it work.',
   kpiNote: 'Illustrative design targets — every engagement gets its own measurable goals.',
 }
@@ -170,16 +273,16 @@ export const services = [
     sceneLabel: 'Live Web Build',
     accent: '#f472b6',
     description:
-      'High-performance websites and web apps — immersive 3D experiences, blazing speed and conversion-focused design, from landing pages to full platforms. The site you’re on right now is our own demo.',
+      'High-performance websites and web apps — blazing speed, conversion-focused design, and interactive 3D where it earns its place, from landing pages to full platforms. The site you’re on right now is our own build.',
     points: [
-      '3D & interactive marketing sites',
+      'Interactive & 3D marketing sites',
       'E-commerce & progressive web apps',
       'Conversion-focused UX and copy',
       'SEO & Core Web Vitals built in',
     ],
     kpis: [
       { value: '<1s', label: 'load target' },
-      { value: '3D', label: 'immersive UX' },
+      { value: '100', label: 'Lighthouse target' },
       { value: 'SEO', label: 'built in' },
     ],
   },
@@ -235,7 +338,7 @@ export const services = [
 
 export const about = {
   heading: 'Engineering Meets',
-  headingGradient: 'Business Strategy',
+  headingAccent: 'Business Strategy',
   paragraphs: [
     'Revora Consultancy pairs deep engineering capability with sharp product thinking. We design, build and scale the systems — AI, CRM, ERP, web platforms and APIs — that give ambitious businesses a measurable advantage.',
     'Based in Kolkata and working with clients across India, every engagement is led directly by our founders: one owns the technology, the other owns the outcome. No layers of account managers, no hand-offs — senior people stay accountable for your result from kickoff to launch.',
@@ -270,13 +373,80 @@ export const about = {
   ],
 }
 
-// Commitments we control — no invented track-record numbers.
-export const stats = [
-  { value: 100, suffix: '%', label: 'Code Ownership Handed Over' },
-  { value: 24, suffix: 'h', label: 'Maximum Response Time' },
-  { value: 7, suffix: '', label: 'Days to Your First Demo' },
-  { value: 0, suffix: '', label: 'Lock-in Contracts' },
-]
+// The Revora Guarantee — commitments we control, presented as a signed,
+// dated document rather than a metrics band: these are promises, not
+// achievements, and styling them as big numbers made them read as invented
+// track-record stats. Founder review: keep each line only if it will be
+// honoured on a bad week.
+export const guarantee = {
+  tag: 'The Revora Guarantee',
+  title: 'Four commitments,',
+  titleAccent: 'in writing.',
+  sub: 'Not achievements we claim — terms we work under. Every one of these appears in your quote.',
+  items: [
+    {
+      value: '100%',
+      label: 'Code ownership handed over',
+      text: 'Full source, documentation, credentials and deployment access are yours at launch. Any team can take over.',
+    },
+    {
+      value: '24h',
+      label: 'Maximum response time',
+      text: 'Every message answered within one working day, by a founder — not a ticket queue.',
+    },
+    {
+      value: '7 days',
+      label: 'To your first demo',
+      text: 'Working software on a screen within the first week, then a demo every week after.',
+    },
+    {
+      value: '0',
+      label: 'Lock-in contracts',
+      text: 'Milestone payments, no retainer traps, no ransom on your own data. Leaving must always be easy — that’s why clients stay.',
+    },
+  ],
+  // Rendered as the signature block under the commitments.
+  signedBy: ['Abhinav Rathi', 'Abhishek Rathi'],
+  signedNote: 'Co-founders, Revora Consultancy · Kolkata',
+}
+
+// ─── Pricing bands ──────────────────────────────────────────────────────────
+// Wide indicative ranges, not quotes — the fixed itemised quote after the
+// discovery call is always the real number, and the copy says so. The ranges
+// deliberately sit inside the contact form's budget options (₹1–5 L / 5–15 L /
+// 15 L+) and above the throwaway-freelancer floor: founder-led senior work at
+// SMB-friendly pricing, which is the positioning everywhere else on the page.
+export const pricing = {
+  tag: 'What It Costs',
+  title: 'Three ways in,',
+  titleAccent: 'priced in the open.',
+  sub: 'Exact cost depends on scope, so every project gets a fixed itemised quote before we start. These bands exist so you know roughly where a conversation lands before you have it.',
+  placeholder: false,
+  note: 'Indicative ranges, not quotes — your fixed itemised quote is prepared free after the discovery call, and milestone payments mean you never pay a large lump sum upfront.',
+  bands: [
+    {
+      name: 'Pilot',
+      range: '₹75k – ₹1.5 L',
+      duration: '~2 weeks',
+      text: 'One painful workflow, automated or rebuilt, fixed price. You keep everything we build and judge us on something low-risk.',
+      includes: ['One workflow, end to end', 'Fixed price agreed upfront', 'All code and credentials yours'],
+    },
+    {
+      name: 'Build',
+      range: '₹1.5 L – ₹8 L',
+      duration: '4–10 weeks',
+      text: 'A complete system — a CRM, a website, an automation layer or an API — scoped, built and handed over with training.',
+      includes: ['Weekly demos from week one', 'Milestone payments', 'Free stabilisation period'],
+    },
+    {
+      name: 'Platform',
+      range: '₹8 L+',
+      duration: '3–6 months, phased',
+      text: 'ERP-scale work rolled out department by department, with a care plan that keeps it monitored and improving after launch.',
+      includes: ['Phased rollout, phased payment', 'Role-based access & audit trails', 'Monthly care plan available'],
+    },
+  ],
+}
 
 export const process = [
   {
@@ -301,36 +471,34 @@ export const process = [
   },
 ]
 
-export const techStack = [
-  'React', 'Next.js', 'Node.js', 'Python', 'TypeScript', 'Three.js',
-  'OpenAI', 'LangChain', 'PostgreSQL', 'MongoDB', 'AWS', 'Azure',
-  'Docker', 'Kubernetes', 'GraphQL', 'FastAPI', 'Flutter', 'TensorFlow',
-]
-
-// Example engagements — clearly framed as the kind of work we take on.
-// Swap these for real, permissioned case studies / testimonials as they come in.
+// The scoping teardown — the honest replacement for case-study cards we don't
+// yet have. The featured teardown is real and verifiable (this site); the two
+// example rows are clearly framed as how we'd scope typical engagements.
+// When real, permissioned case studies exist, they replace the examples one at
+// a time and "Target:" becomes "Result:" with a quote.
 export const work = {
-  tag: 'The Work We Take On',
-  title: 'Built Around',
-  titleGradient: 'Your Numbers',
-  sub: 'How we scope a project: a concrete problem, a system, phased delivery and a measurable target. The first card is real — you’re looking at it.',
-  note: 'The first card is our own verifiable work; the others are illustrative examples of typical engagements — your project gets its own goals and quote.',
-  items: [
-    {
-      // Real, verifiable proof — the site itself. Keep this card first.
-      tag: 'Web Development · Our Own Site',
-      title: 'This website — our live case study',
-      text: 'The site you’re on is our own build: interactive 3D scenes, prerendered HTML so search and AI crawlers see everything, self-hosted fonts and cookieless analytics.',
-      target: 'Verifiable: run Lighthouse on this page or view the source — what we sell is what we ship.',
-      scope: 'How we scoped it: design & 3D concept (week 1) → build & content (weeks 2–3) → SEO, performance & launch (week 4).',
-      accent: '#f472b6',
-    },
+  tag: 'How We Scope',
+  title: 'One project,',
+  titleAccent: 'taken apart.',
+  sub: 'We don’t have permissioned client case studies yet, and we won’t invent them. What we can show you is our method — a real project, scoped week by week. The project is this website.',
+  featured: {
+    tag: 'Web Development · Our own site — verifiable',
+    title: 'revora.co.in, scoped the way your project would be',
+    text: 'The site you’re reading is our own build: prerendered HTML so search and AI crawlers see everything, self-hosted fonts, cookieless analytics, and interactive 3D where it illustrates something specific. Run Lighthouse on this page or view the source — what we sell is what we ship.',
+    phases: [
+      { when: 'Week 1', what: 'Concept and content architecture — what each section must prove, to whom, in what order.' },
+      { when: 'Weeks 2–3', what: 'Build and content — design system, sections, the 3D service diagrams, copy.' },
+      { when: 'Week 4', what: 'SEO, performance and launch — prerendering, structured data, Core Web Vitals, analytics.' },
+    ],
+    accent: '#f472b6',
+  },
+  examples: [
     {
       tag: 'AI Integration · Manufacturing',
       title: 'Sales-ops automation',
       text: 'Quotes, purchase orders and emails parsed and entered into the ERP automatically — humans approve only the edge cases.',
       target: 'Target: cut manual data entry by more than half.',
-      scope: 'How we’d scope it: workflow audit & data mapping (week 1) → parsing + ERP integration (weeks 2–5) → approval flows, testing & rollout (weeks 6–8).',
+      scope: 'Workflow audit & data mapping (week 1) → parsing + ERP integration (weeks 2–5) → approval flows, testing & rollout (weeks 6–8).',
       accent: '#22d3ee',
     },
     {
@@ -338,25 +506,21 @@ export const work = {
       title: 'One pipeline instead of three tools',
       text: 'A CRM shaped around the brand’s real sales stages, with WhatsApp, email and call tracking unified in one dashboard.',
       target: 'Target: zero leads lost between tools, faster follow-ups.',
-      scope: 'How we’d scope it: sales-process mapping (week 1) → pipeline + WhatsApp & email integrations (weeks 2–5) → dashboards, training & handover (weeks 6–7).',
+      scope: 'Sales-process mapping (week 1) → pipeline + WhatsApp & email integrations (weeks 2–5) → dashboards, training & handover (weeks 6–7).',
       accent: '#818cf8',
     },
   ],
+  note: 'The featured teardown is our own verifiable work; the examples are illustrative — your project gets its own goals and quote.',
 }
-
-export const industries = [
-  'FinTech', 'Healthcare', 'Retail & D2C', 'Manufacturing', 'Real Estate',
-  'Logistics', 'EdTech', 'Hospitality', 'Professional Services', 'SaaS Startups',
-]
 
 export const faq = {
   tag: 'Questions',
   title: 'Straight',
-  titleGradient: 'Answers',
+  titleAccent: 'Answers',
   items: [
     {
       q: 'How much does a project cost?',
-      a: 'It depends on scope — a high-converting website starts smaller, while custom CRMs and ERPs are larger builds. After a free discovery call you get a fixed, itemised quote. No hourly billing surprises, and we’ll always tell you the cheapest way to reach your goal.',
+      a: 'Three ways in: a ~2-week pilot runs ₹75k–1.5 lakh, a complete system — a CRM, a website, an automation layer or an API — typically lands between ₹1.5 and 8 lakh, and ERP-scale platforms start around ₹8 lakh, rolled out and paid for in phases. After a free discovery call you get a fixed, itemised quote. No hourly billing surprises, and we’ll always tell you the cheapest way to reach your goal.',
     },
     {
       q: 'How long will my project take?',
@@ -413,7 +577,7 @@ export const ctaBand = {
 
 export const contact = {
   heading: 'Tell Us What’s',
-  headingGradient: 'Slowing You Down',
+  headingAccent: 'Slowing You Down',
   text: 'Tell us about your project — a quick call is free, and so is the first roadmap. We reply within 24 hours.',
   // Mid-funnel promise shown above the form — the "no call required" path.
   formNote:

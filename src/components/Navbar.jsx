@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { m, AnimatePresence } from 'motion/react'
 import { site, nav } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
-import { currentRoute, href } from '../lib/routes.js'
+import { href } from '../lib/routes.js'
 import { Logo } from './ui/Icons.jsx'
 import ThemeToggle from './ui/ThemeToggle.jsx'
 
@@ -32,13 +32,10 @@ export default function Navbar() {
   const [current, setCurrent] = useState('')
   const burgerRef = useRef(null)
 
-  // Only the home page puts a dark hero behind the navbar, and the transparent
-  // state depends on that: index.css forces the dark-theme palette onto
-  // `.navbar:not(.scrolled)` so its text stays readable over the hero. On a
-  // service page that is pale text on a pale background — so those pages wear
-  // the solid navbar from scroll position zero.
-  const overDarkHero = currentRoute().name === 'home'
-  const solid = scrolled || !overDarkHero
+  // Paper-first means the navbar sits on the same ground everywhere — the
+  // only scroll effect left is the hairline rule that separates it from
+  // content once the page moves. (The old dark-hero token override is gone
+  // with the dark hero itself.)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -116,21 +113,15 @@ export default function Navbar() {
 
   return (
     <>
-      <m.header
-        className={`navbar ${solid ? 'scrolled' : ''}`}
-        // Prerendered pages already show the navbar — don't hide and replay it.
-        initial={window.__PRERENDERED__ ? false : { y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: [0.21, 0.6, 0.35, 1] }}
-      >
+      <header className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="container navbar-inner">
           {/* href() rewrites the home page's anchors for sub-pages, where
               '#about' has to travel back to '/' first (src/lib/routes.js). */}
           <a href={href('#home')} className="nav-logo">
-            <Logo gradientId="logo-grad-nav" />
+            <Logo />
             <span>
               {site.name}
-              <span className="gradient-text">.</span>
+              <span className="accent-text">.</span>
             </span>
           </a>
 
@@ -166,7 +157,7 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-      </m.header>
+      </header>
 
       <AnimatePresence>
         {open && (

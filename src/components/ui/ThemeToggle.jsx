@@ -15,14 +15,15 @@ const MoonIcon = (
 
 /* The inline head script already resolved the theme before first paint; this
    mirrors it into state after mount and flips it on click. Two-pass on
-   purpose: the first render always assumes 'dark' (what the prerendered
-   snapshot was captured with) so hydration adopts the DOM without a
-   mismatch, then the effect syncs to the visitor's real theme. */
+   purpose: the first render always assumes 'light' — paper is the Ledger
+   default, and what the prerendered snapshot is captured with — so hydration
+   adopts the DOM without a mismatch, then the effect syncs to the visitor's
+   real theme. */
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState('dark')
+  const [theme, setTheme] = useState('light')
 
   useEffect(() => {
-    if (document.documentElement.dataset.theme === 'light') setTheme('light')
+    if (document.documentElement.dataset.theme === 'dark') setTheme('dark')
   }, [])
 
   const next = theme === 'light' ? 'dark' : 'light'
@@ -37,7 +38,7 @@ export default function ThemeToggle() {
       // applies for this page view, it just won't persist
     }
     const m = document.querySelector('meta[name="theme-color"]')
-    if (m) m.setAttribute('content', next === 'light' ? '#f6f7fc' : '#05060e')
+    if (m) m.setAttribute('content', next === 'light' ? '#e6e8e1' : '#0f1316')
   }
 
   return (

@@ -18,10 +18,10 @@ export default function PrivacyPolicy() {
     <main className="legal-page">
       <div className="container">
         <a href="../" className="nav-logo">
-          <Logo gradientId="logo-grad-legal" />
+          <Logo />
           <span>
             {site.name}
-            <span className="gradient-text">.</span>
+            <span className="accent-text">.</span>
           </span>
         </a>
 

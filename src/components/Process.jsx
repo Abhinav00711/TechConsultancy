@@ -8,7 +8,7 @@ export default function Process() {
         <Reveal>
           <span className="section-tag">How We Work</span>
           <h2 className="section-title">
-            From Idea to <span className="gradient-text">Impact</span>
+            From Idea to <span className="accent-text">Impact</span>
           </h2>
           <p className="section-sub">
             A proven four-step engagement — transparent, fast and built around your business goals.
@@ -17,8 +17,8 @@ export default function Process() {
 
         <div className="process-grid">
           {process.map((p, i) => (
-            <Reveal key={p.step} delay={i * 0.12}>
-              <div className="process-card glass" style={{ height: '100%' }}>
+            <Reveal key={p.step}>
+              <div className="process-card sheet" style={{ height: '100%' }}>
                 <span className="process-step">{p.step}</span>
                 <h3>{p.title}</h3>
                 <p>{p.text}</p>

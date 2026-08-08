@@ -10,27 +10,16 @@ const base = {
   viewBox: '0 0 24 24',
 }
 
-export const Logo = ({ size = 36, gradientId = 'logo-grad' }) => {
-  // Deterministic gradient id (unique per usage site via the prop) — useId
-  // would break hydration, since the prerendered snapshot is produced by a
-  // client render whose ids can never match hydrateRoot's tree-based ids.
-  const id = gradientId
-  const g = `url(#${id})`
-  return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="64" y2="64">
-          <stop offset="0" stopColor="#22d3ee" />
-          <stop offset="0.5" stopColor="#818cf8" />
-          <stop offset="1" stopColor="#c084fc" />
-        </linearGradient>
-      </defs>
-      <path d="M14 20 L32 10 L50 20 L50 44 L32 54 L14 44 Z" stroke={g} strokeWidth="3.5" strokeLinejoin="round" />
-      <path d="M32 10 L32 54 M14 20 L50 44 M50 20 L14 44" stroke={g} strokeWidth="1.5" opacity="0.55" />
-      <circle cx="32" cy="32" r="5" fill={g} />
-    </svg>
-  )
-}
+// Single-ink mark — reads as a stamp/seal in the ledger identity. Colour
+// comes from currentColor so each context (nav, footer, legal page) sets it
+// with CSS.
+export const Logo = ({ size = 36 }) => (
+  <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M14 20 L32 10 L50 20 L50 44 L32 54 L14 44 Z" stroke="currentColor" strokeWidth="3.5" strokeLinejoin="round" />
+    <path d="M32 10 L32 54 M14 20 L50 44 M50 20 L14 44" stroke="currentColor" strokeWidth="1.5" opacity="0.55" />
+    <circle cx="32" cy="32" r="5" fill="currentColor" />
+  </svg>
+)
 
 const icons = {
   ai: (

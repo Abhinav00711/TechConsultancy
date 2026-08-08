@@ -1,6 +1,6 @@
 import { site } from '../data/content.js'
 
-/* Conversion-event plumbing. Cloudflare Web Analytics only counts pageviews,
+/* Conversion-event plumbing. Pageview counting alone can't answer this,
    so CTA clicks and form submissions are invisible without this. Events go to
    the cookieless Umami Cloud script in index.html (window.umami); the
    Plausible call stays as a fallback in case the provider ever changes.

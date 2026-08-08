@@ -1,8 +1,8 @@
 // Build guard: nothing WebGL may reach the critical path.
 //
-// The site lazy-loads three.js deliberately — Hero.jsx mounts the scene on an
-// idle callback, ServiceExplorer waits for the viewport, and perf.js skips it
-// entirely on low-end devices and slow connections. All of that is undone the
+// The site lazy-loads three.js deliberately — ServiceExplorer waits for the
+// viewport before mounting a scene, and perf.js skips WebGL entirely on
+// low-end devices and slow connections. All of that is undone the
 // moment the ENTRY chunk statically imports the three/r3f chunks, because then
 // the browser fetches and evaluates ~260 KB gzip of WebGL before first paint on
 // every visit, on every device.
@@ -72,7 +72,7 @@ while (queue.length) {
       `the entry chunk statically depends on the '${hit}' chunk.\n` +
         `  chain: ${chain.join(' -> ')}\n` +
         `  ~260 KB gzip of WebGL now downloads on every visit, and the lazy-load\n` +
-        `  guards in Hero.jsx / ServiceExplorer.jsx / lib/perf.js do nothing.\n` +
+        `  guards in ServiceExplorer.jsx / lib/perf.js do nothing.\n` +
         `  Fix manualChunks in vite.config.js so no shared module lands in three/r3f.`,
     )
   }
