@@ -810,19 +810,21 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
    further down the file regardless of source order. */
 .showcase-canvas.sa-canvas {
   position: relative;
-  min-height: 0; height: 180px;
+  min-height: 0; height: 220px;
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
 }
-.showcase-canvas.sa-canvas .showcase-canvas-label {
-  top: 12px; left: 12px;
-  font-size: 0.64rem; padding: 5px 11px;
+/* The in-scene chips at their stage size would collide on a 220px strip, so
+   they shrink rather than disappear — without them the diagrams are just
+   anonymous hardware in motion. The static corner label goes instead: the
+   accordion row directly above already names the service, and on a strip
+   this short the corner chip lands on top of each scene's title chip. */
+.showcase-canvas.sa-canvas .showcase-canvas-label { display: none; }
+.showcase-canvas.sa-canvas .scene-label {
+  font-size: 8px; padding: 3px 7px; letter-spacing: 0.04em;
 }
-/* The in-scene chips are sized for a 400–560px stage; at 180px they collide
-   with each other and with the corner label. The scene reads as motion here,
-   and the corner label already names it. */
-.showcase-canvas.sa-canvas .scene-label { display: none; }
+.showcase-canvas.sa-canvas .scene-label.strong { font-size: 9px; }
 /* Full-width stacked buttons — a thumb should not have to aim. */
 .showcase-actions.sa-actions {
   flex-direction: column; align-items: stretch;

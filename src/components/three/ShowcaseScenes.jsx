@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect, useState, Suspense } from 'react'
+import { useRef, useMemo, useEffect, Suspense } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import {
   Html, Environment, Lightformer, ContactShadows, RoundedBox, MeshReflectorMaterial,
@@ -7,23 +7,6 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { useInView, useReducedMotion } from 'framer-motion'
 import * as THREE from 'three'
 import { SceneErrorBoundary, guardContextLoss, isLowEnd } from './SceneShell.jsx'
-
-/* narrow screens get a pulled-back camera so labels stay inside the frame */
-function useCompact() {
-  const [compact, setCompact] = useState(() => window.matchMedia('(max-width: 700px)').matches)
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 700px)')
-    const onChange = (e) => setCompact(e.matches)
-    // Safari ≤13.4 has no add/removeEventListener on MediaQueryList
-    if (mq.addEventListener) mq.addEventListener('change', onChange)
-    else mq.addListener(onChange)
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener('change', onChange)
-      else mq.removeListener(onChange)
-    }
-  }, [])
-  return compact
-}
 
 /* ═══════════════════ material library ═══════════════════
    Every surface is a real one. Metals get metalness 1 and earn their look
@@ -341,6 +324,19 @@ function Settle({ children, drop = 0.3, yaw = -0.2, fit = 1 }) {
    so the binding constraint is horizontal: keep everything inside |x| ≲ 1.9,
    labels included, or the outer chips run off the edge. */
 const FIT = { ai: 0.86, crm: 0.88, erp: 0.82, web: 1.12, api: 0.82, cloud: 0.88 }
+
+/* Vertical extent each fitted assembly actually occupies, labels included —
+   world-space centre and half-height. The landscape camera (see
+   ResponsiveCamera) frames these instead of the fixed portrait framing, so a
+   short wide canvas fills with the scene rather than with empty stage. */
+const FRAME = {
+  ai: { center: -0.25, half: 1.0 },
+  crm: { center: -0.12, half: 1.6 },
+  erp: { center: -0.15, half: 1.5 },
+  web: { center: 0.05, half: 1.7 },
+  api: { center: 0.05, half: 1.5 },
+  cloud: { center: 0.2, half: 1.55 },
+}
 
 /* ═══════════════════ AI — an inference appliance on a bench ═══════════════════
    Paper goes in one side, the appliance works, finished actions come out the
@@ -1239,23 +1235,45 @@ function Studio() {
   )
 }
 
-/* Moves the camera in place on breakpoint changes — remounting the Canvas
-   would destroy the WebGL context and recompile every shader. */
-/* Raised three-quarter view rather than a flat elevation: the canvas is
-   portrait, so looking slightly down uses the vertical space a head-on shot
-   wastes, and it is how hardware is photographed anyway. */
-function ResponsiveCamera({ compact }) {
+/* Moves the camera in place on layout changes — remounting the Canvas
+   would destroy the WebGL context and recompile every shader.
+   Two framings, chosen by the canvas's own aspect ratio (not the window's,
+   which says nothing about the shape this canvas ended up):
+   - Portrait (desktop two-column carousel): the raised three-quarter view.
+     Looking slightly down uses the vertical space a head-on shot wastes, and
+     it is how hardware is photographed anyway. Deliberately loose — the
+     reflective floor filling the lower third is part of the composition.
+   - Landscape (the mobile accordion's strip, and the stacked ≤1000px
+     carousel): frame the assembly itself via FRAME. The portrait framing
+     here showed ~2× the scene's height, so everything rendered half-size —
+     "zoomed out" — with the strip mostly empty stage. */
+function ResponsiveCamera({ scene }) {
   const camera = useThree((s) => s.camera)
+  const size = useThree((s) => s.size)
+  const invalidate = useThree((s) => s.invalidate)
   useEffect(() => {
-    camera.position.set(0, compact ? 1.2 : 1.05, compact ? 7.6 : 6.5)
-    camera.lookAt(0, -0.32, 0)
+    const aspect = size.width / Math.max(1, size.height)
+    if (aspect < 1.25) {
+      camera.position.set(0, 1.05, 6.5)
+      camera.lookAt(0, -0.32, 0)
+    } else {
+      const f = FRAME[scene] || FRAME.ai
+      const t = Math.tan((camera.fov / 2) * (Math.PI / 180))
+      // Near enough to fill the height (with breathing room for the label
+      // chips), but never so near that the side labels — reaching |x| ≲ 2.3
+      // plus chip width — leave the horizontal frame.
+      const d = Math.max((f.half * 1.12) / t, 2.7 / (t * aspect))
+      // same raised three-quarter ray as the portrait view (~12° down)
+      camera.position.set(0, f.center + d * 0.21, d)
+      camera.lookAt(0, f.center, 0)
+    }
     camera.updateProjectionMatrix()
-  }, [compact, camera])
+    invalidate()
+  }, [scene, size, camera, invalidate])
   return null
 }
 
 export default function ShowcaseCanvas({ scene }) {
-  const compact = useCompact()
   const wrap = useRef(null)
   const visible = useInView(wrap, { margin: '120px' })
   const reducedMotion = useReducedMotion()
@@ -1283,7 +1301,7 @@ export default function ShowcaseCanvas({ scene }) {
           }}
         >
           <Suspense fallback={null}>
-            <ResponsiveCamera compact={compact} />
+            <ResponsiveCamera scene={scene} />
             <Studio />
             {/* A hint of directional over the env map so edges stay crisp —
                 the environment is doing nearly all of the lighting. */}
