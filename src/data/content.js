@@ -89,12 +89,15 @@ export const roadmap = {
     { id: 'api', label: 'Our tools don’t talk to each other' },
     { id: 'cloud', label: 'Releases are manual and scary' },
   ],
+  // Team size scales both the phase lengths and the ₹ band: each plan below
+  // carries a small-team baseBand [min, max] in lakhs, multiplied by `mult`
+  // and rounded by RoadmapGenerator. Bands are anchored to the same ranges as
+  // the `pricing` section and the contact form's budget options, so no two
+  // parts of the site quote different numbers.
   scales: [
-    // [PLACEHOLDER] The ₹ bands are indicative placeholders — replace with the
-    // real pilot/build/platform floors once pricing is decided (see `pricing`).
-    { id: 's', label: '1–10 people', mult: 1.0, band: '₹1.5–3 L' },
-    { id: 'm', label: '11–50 people', mult: 1.45, band: '₹3–8 L' },
-    { id: 'l', label: '51–200 people', mult: 1.85, band: '₹8–20 L' },
+    { id: 's', label: '1–10 people', mult: 1.0 },
+    { id: 'm', label: '11–50 people', mult: 1.45 },
+    { id: 'l', label: '51–200 people', mult: 1.85 },
   ],
   plans: {
     ai: {
@@ -106,6 +109,7 @@ export const roadmap = {
         ['Approval flows, testing and rollout', 'Humans confirm the edge cases, accuracy is measured against a baseline, then it goes live.', 3],
       ],
       stack: ['Python', 'Claude API', 'LangChain', 'FastAPI', 'PostgreSQL'],
+      baseBand: [1.25, 3.5], // small-team ₹ range in lakhs
       figs: [['−70%', 'target manual work'], ['24/7', 'runs unattended']],
     },
     crm: {
@@ -117,6 +121,7 @@ export const roadmap = {
         ['Dashboards, training and handover', 'Reports your team will actually open, then full credentials and source handed over.', 2],
       ],
       stack: ['Next.js', 'Node.js', 'PostgreSQL', 'WhatsApp Business API'],
+      baseBand: [1.5, 4], // small-team ₹ range in lakhs
       figs: [['+38%', 'target conversion'], ['100%', 'lead capture']],
     },
     erp: {
@@ -128,6 +133,7 @@ export const roadmap = {
         ['Department rollout, roles and reporting', 'HR and operations added on, role-based access set, owners get live reporting.', 6],
       ],
       stack: ['Node.js', 'PostgreSQL', 'React', 'Docker', 'AWS'],
+      baseBand: [3, 8], // small-team ₹ range in lakhs
       figs: [['1', 'source of truth'], ['−45%', 'target admin time']],
     },
     web: {
@@ -139,6 +145,7 @@ export const roadmap = {
         ['SEO, performance and launch', 'Core Web Vitals, structured data, per-page metadata, then live with analytics in place.', 1],
       ],
       stack: ['React', 'Vite', 'Three.js', 'TypeScript'],
+      baseBand: [0.75, 2.5], // small-team ₹ range in lakhs
       figs: [['<1s', 'load target'], ['SEO', 'built in']],
     },
     api: {
@@ -150,6 +157,7 @@ export const roadmap = {
         ['Monitoring, versioning and handover', 'Alerts, versioning policy and a runbook — then it’s yours.', 2],
       ],
       stack: ['Node.js', 'GraphQL', 'FastAPI', 'PostgreSQL'],
+      baseBand: [1, 3], // small-team ₹ range in lakhs
       figs: [['99.9%', 'uptime target'], ['100%', 'documented']],
     },
     cloud: {
@@ -161,6 +169,7 @@ export const roadmap = {
         ['Monitoring, backups and runbook', 'Alerts that reach a human, backups that are tested, and a runbook your team owns.', 2],
       ],
       stack: ['Docker', 'Kubernetes', 'AWS', 'GitHub Actions'],
+      baseBand: [0.9, 2.5], // small-team ₹ range in lakhs
       figs: [['99.9%', 'uptime target'], ['min', 'to deploy']],
     },
   },
@@ -402,16 +411,17 @@ export const guarantee = {
 }
 
 // ─── Pricing bands ──────────────────────────────────────────────────────────
-// [PLACEHOLDER] Every ₹ figure below is an indicative placeholder pending the
-// founders' real bands (flagged in all three panel reviews). Wide ranges are
-// fine; absence reads as "expensive and evasive". The `placeholder` flag
-// renders the "indicative" framing — set it to false once the numbers are real.
+// Wide indicative ranges, not quotes — the fixed itemised quote after the
+// discovery call is always the real number, and the copy says so. The ranges
+// deliberately sit inside the contact form's budget options (₹1–5 L / 5–15 L /
+// 15 L+) and above the throwaway-freelancer floor: founder-led senior work at
+// SMB-friendly pricing, which is the positioning everywhere else on the page.
 export const pricing = {
   tag: 'What It Costs',
   title: 'Three ways in,',
   titleAccent: 'priced in the open.',
   sub: 'Exact cost depends on scope, so every project gets a fixed itemised quote before we start. These bands exist so you know roughly where a conversation lands before you have it.',
-  placeholder: true,
+  placeholder: false,
   note: 'Indicative ranges, not quotes — your fixed itemised quote is prepared free after the discovery call, and milestone payments mean you never pay a large lump sum upfront.',
   bands: [
     {
@@ -510,7 +520,7 @@ export const faq = {
   items: [
     {
       q: 'How much does a project cost?',
-      a: 'It depends on scope — a high-converting website starts smaller, while custom CRMs and ERPs are larger builds. After a free discovery call you get a fixed, itemised quote. No hourly billing surprises, and we’ll always tell you the cheapest way to reach your goal.',
+      a: 'Three ways in: a ~2-week pilot runs ₹75k–1.5 lakh, a complete system — a CRM, a website, an automation layer or an API — typically lands between ₹1.5 and 8 lakh, and ERP-scale platforms start around ₹8 lakh, rolled out and paid for in phases. After a free discovery call you get a fixed, itemised quote. No hourly billing surprises, and we’ll always tell you the cheapest way to reach your goal.',
     },
     {
       q: 'How long will my project take?',

@@ -11,7 +11,7 @@ A consultancy website built around one idea: **everything Revora sells is a docu
 - **The services ledger** — six ruled accordion rows (one control at every width); the open row shows that service's 3D system diagram on the page's single dark stage. The six interactive scenes (AI workflow, CRM funnel, ERP modules, API network, web build, deploy pipeline) survive from the previous design — the decorative hero orb did not.
 - **The Revora Guarantee** — the four commitments (100% code ownership, 24h response, 7-day first demo, zero lock-in) as a signed, dated document instead of an animated stats band.
 - **Scoping teardown** — the honest replacement for case studies we don't have yet: this site itself scoped week by week (verifiable), plus two clearly-labeled illustrative engagements.
-- **Pricing bands** — Pilot / Build / Platform with wide indicative ₹ ranges (placeholders — see below).
+- **Pricing bands** — Pilot (₹75k–1.5 L, ~2 weeks) / Build (₹1.5–8 L, 4–10 weeks) / Platform (₹8 L+, phased) — wide indicative ranges; the fixed itemised quote stays the real number. The roadmap generator computes its per-service band from the same scale, so no two parts of the site quote different figures.
 - **A landing page per service** — `/services/ai/`, `/crm/`, `/erp/`, `/web/`, `/api/`, `/cloud/`: long-form copy, deliverables, phase plan, per-service FAQ, own `<title>`/OG/schema. They exist because one URL cannot rank for six different searches.
 - **Responsive & accessible** — mobile menu with focus trap, skip link, visible focus styles, keyboard-operable accordions, `prefers-reduced-motion` honoured (and ambient motion cut by design: motion must carry meaning).
 - **Resilient & private** — WebGL error boundary + static fallback, constrained-device tier skips three.js entirely, self-hosted fonts, no cookies; Umami (cookieless) is the single third-party origin.
@@ -36,7 +36,7 @@ Everything marked `[PLACEHOLDER]` should be replaced with your real details:
 
 - Company name (currently "Revora Consultancy") — also update `index.html` title/description
 - Phone, location and `site.socials` (only socials with a real URL are rendered)
-- **The ₹ figures** in `pricing` and `roadmap.scales` are indicative placeholders — set the real bands and flip `pricing.placeholder` to `false`
+- **The ₹ bands** (`pricing`, and each roadmap plan's `baseBand`) are set to sensible defaults anchored to the contact form's budget options — Pilot ₹75k–1.5 L, Build ₹1.5–8 L, Platform ₹8 L+. Adjust them in `content.js` if your real floors differ; the FAQ cost answer quotes the same ranges, so change both together
 - The `work.examples` cards — swap for real, permissioned case studies as they come in
 - The `guarantee` commitments are rendered as signed by both founders — keep each line only if it will be honoured on a bad week
 
