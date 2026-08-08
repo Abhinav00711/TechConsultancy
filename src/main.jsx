@@ -11,10 +11,20 @@ import { currentRoute, loadServicePage, rootPrefix } from './lib/routes.js'
 // files that was 59.7 KB of latin woff2 over four requests; the variable font
 // covers the whole 100–800 axis in one 33.7 KB file. Same rendering, ~26 KB and
 // three requests cheaper — and it is the file preloaded in scripts/prerender.mjs.
+//
+// latin-only subsets: the default imports also declare cyrillic and latin-ext
+// @font-face blocks. unicode-range makes those mostly free — until one glyph
+// strays into a range, and one did: the ₹ in the contact form's budget options
+// sits in latin-ext, so every visitor who reached the form downloaded a whole
+// latin-ext file for a character that <option> elements render in the system
+// font anyway. latin-only imports drop those files from the build entirely;
+// ₹, →, ✓ and friends all come from the system font stack.
+// (Sora has no per-subset CSS in its variable package, but no heading contains
+// a latin-ext glyph, so its extra subset is declared yet never downloaded.)
 import '@fontsource-variable/sora'
-import '@fontsource/space-grotesk/400.css'
-import '@fontsource/jetbrains-mono/400.css'
-import '@fontsource/jetbrains-mono/600.css'
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/jetbrains-mono/latin-400.css'
+import '@fontsource/jetbrains-mono/latin-600.css'
 
 import './index.css'
 
