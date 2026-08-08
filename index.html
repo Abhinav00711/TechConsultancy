@@ -9,6 +9,19 @@
       content="Revora Consultancy — founder-led AI, custom CRM/ERP, web & API development company in Kolkata, India. Fixed itemised quotes, first demo in 7 days, 100% code ownership."
     />
     <meta name="theme-color" content="#05060e" />
+    <!-- Cross-document view transitions: same-origin navigations (home ↔
+         service pages ↔ privacy) crossfade instead of hard-cutting, in
+         browsers that support it; others ignore the at-rule and navigate
+         normally. Inline rather than in the stylesheet because prerendered
+         pages defer the stylesheet — the incoming page needs this rule active
+         at first render for the transition to run. Reduced-motion visitors
+         get the instant cut. -->
+    <style>
+      @view-transition { navigation: auto; }
+      @media (prefers-reduced-motion: reduce) {
+        @view-transition { navigation: none; }
+      }
+    </style>
     <!-- Umami is the only third-party origin on the page; preconnect (not just
          dns-prefetch) so the TLS handshake is done before the beacon fires. -->
     <link rel="preconnect" href="https://cloud.umami.is" crossorigin />

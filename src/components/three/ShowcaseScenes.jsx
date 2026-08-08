@@ -4,7 +4,7 @@ import {
   Html, Environment, Lightformer, ContactShadows, RoundedBox, MeshReflectorMaterial,
 } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { useInView, useReducedMotion } from 'framer-motion'
+import { useInView, useReducedMotion } from 'motion/react'
 import * as THREE from 'three'
 import { SceneErrorBoundary, guardContextLoss, isLowEnd } from './SceneShell.jsx'
 

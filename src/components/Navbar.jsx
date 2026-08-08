@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { m, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'motion/react'
 import { site, nav } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { currentRoute, href } from '../lib/routes.js'

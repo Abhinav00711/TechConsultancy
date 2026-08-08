@@ -1,4 +1,4 @@
-import { m, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'motion/react'
 import { site } from '../data/content.js'
 
 export default function Preloader({ done }) {

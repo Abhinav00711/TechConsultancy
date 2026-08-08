@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.jsx'
-import { currentRoute, loadServicePage } from './lib/routes.js'
+import { currentRoute, loadServicePage, rootPrefix } from './lib/routes.js'
 
 // Self-hosted fonts (no third-party font CDN requests).
 // Only the weights index.css actually uses — every extra weight is another
@@ -11,10 +11,20 @@ import { currentRoute, loadServicePage } from './lib/routes.js'
 // files that was 59.7 KB of latin woff2 over four requests; the variable font
 // covers the whole 100–800 axis in one 33.7 KB file. Same rendering, ~26 KB and
 // three requests cheaper — and it is the file preloaded in scripts/prerender.mjs.
+//
+// latin-only subsets: the default imports also declare cyrillic and latin-ext
+// @font-face blocks. unicode-range makes those mostly free — until one glyph
+// strays into a range, and one did: the ₹ in the contact form's budget options
+// sits in latin-ext, so every visitor who reached the form downloaded a whole
+// latin-ext file for a character that <option> elements render in the system
+// font anyway. latin-only imports drop those files from the build entirely;
+// ₹, →, ✓ and friends all come from the system font stack.
+// (Sora has no per-subset CSS in its variable package, but no heading contains
+// a latin-ext glyph, so its extra subset is declared yet never downloaded.)
 import '@fontsource-variable/sora'
-import '@fontsource/space-grotesk/400.css'
-import '@fontsource/jetbrains-mono/400.css'
-import '@fontsource/jetbrains-mono/600.css'
+import '@fontsource/space-grotesk/latin-400.css'
+import '@fontsource/jetbrains-mono/latin-400.css'
+import '@fontsource/jetbrains-mono/latin-600.css'
 
 import './index.css'
 
@@ -58,8 +68,28 @@ if (currentRoute().name === 'service') {
 // enters the critical chunk, and deferred to idle so the measurement doesn't
 // compete with the page load it is measuring. The build machine must not
 // report its own numbers as visitor data.
+//
+// prefetch.js rides the same idle callback: it only attaches listeners that
+// warm the /services/<id>/ chunk and HTML when a visitor shows intent.
 if (!window.__PRERENDERING__) {
-  const start = () => import('./lib/vitals.js').then((m) => m.reportVitals())
+  const start = () => {
+    import('./lib/vitals.js').then((m) => m.reportVitals())
+    import('./lib/prefetch.js').then((m) => m.setupPrefetch())
+  }
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 3000 })
   else setTimeout(start, 1200)
+}
+
+// Repeat-visit caching (public/sw.js): GitHub Pages caps every response at
+// max-age=600, so without a service worker a returning visitor re-downloads
+// the whole (content-hashed, immutable) bundle after ten minutes. Registered
+// after `load` so it never competes with the page it will later speed up.
+// Dev is excluded — caching the dev server makes stale-code debugging hell —
+// and so is the prerender pass, which must snapshot the network, not a cache.
+if (import.meta.env.PROD && 'serviceWorker' in navigator && !window.__PRERENDERING__) {
+  window.addEventListener('load', () => {
+    // rootPrefix() walks back up to the site root from nested routes, keeping
+    // the registration scope identical on revora.co.in and github.io/<repo>/.
+    navigator.serviceWorker.register(`${rootPrefix() || './'}sw.js`).catch(() => {})
+  })
 }

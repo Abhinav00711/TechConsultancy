@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useInView, useReducedMotion } from 'framer-motion'
+import { useInView, useReducedMotion } from 'motion/react'
 import { stats } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 

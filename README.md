@@ -1,8 +1,8 @@
 # Revora Consultancy — 3D Consultancy Website
 
-An immersive 3D single-page website for a tech consultancy, built with React, Three.js (react-three-fiber) and Framer Motion.
+An immersive 3D single-page website for a tech consultancy, built with React, Three.js (react-three-fiber) and Motion (formerly Framer Motion).
 
-![Stack](https://img.shields.io/badge/React-18-61dafb) ![Three.js](https://img.shields.io/badge/Three.js-r169-white) ![Vite](https://img.shields.io/badge/Vite-5-646cff)
+![Stack](https://img.shields.io/badge/React-19-61dafb) ![Three.js](https://img.shields.io/badge/Three.js-r185-white) ![Vite](https://img.shields.io/badge/Vite-8-646cff)
 
 ## ✨ Features
 
@@ -17,7 +17,7 @@ An immersive 3D single-page website for a tech consultancy, built with React, Th
 - **Complete sections** — Hero, Services (AI, CRM, ERP, Web, API, Cloud), 3D Demos, About/Founders, Stats, Process, Example Engagements, CTA, FAQ accordion, Contact form, Footer with privacy policy
 - **A landing page per service** — `/services/ai/`, `/crm/`, `/erp/`, `/web/`, `/api/`, `/cloud/`: long-form copy, deliverables, who it's for, the stack, the phase plan, a per-service FAQ and its own contact form (preselected to that service). Each is prerendered with its own `<title>`, meta description, canonical, OG tags and `Service` + `BreadcrumbList` + `FAQPage` schema. They exist because one URL cannot rank for six different searches — "CRM development Kolkata" and "cloud DevOps consulting" are not the same query
 - **Responsive** — mobile menu, fluid type, stacked layouts
-- **Accessible** — skip link, visible focus styles, ARIA tabs with keyboard support and a pause control for auto-rotation, `prefers-reduced-motion` honoured by Framer Motion *and* both WebGL canvases (static frame instead of perpetual animation)
+- **Accessible** — skip link, visible focus styles, ARIA tabs with keyboard support and a pause control for auto-rotation, `prefers-reduced-motion` honoured by Motion *and* both WebGL canvases (static frame instead of perpetual animation)
 - **Resilient & private** — WebGL error boundary with a static fallback, context-loss guard, self-hosted fonts (no font CDN requests), no cookies, no cross-site trackers (analytics is cookieless — Umami is the single third-party origin on the page, covering pageviews, anonymous CTA/conversion events and real-visitor Core Web Vitals, all disclosed in the privacy policy)
 
 ## 🚀 Getting started

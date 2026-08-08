@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { LazyMotion, MotionConfig, domAnimation, useReducedMotion } from 'framer-motion'
+import { LazyMotion, MotionConfig, useReducedMotion } from 'motion/react'
+
+// The animation feature bundle lives in its own lazy chunk (lib/motion-features
+// re-exports domAnimation). Kicked off at module evaluation — not on first
+// render — so the file downloads in parallel with hydration; LazyMotion just
+// awaits the already-in-flight promise. Until it resolves, `m` components
+// render their initial styles statically, which on prerendered pages is the
+// same content the visitor is already looking at.
+const motionFeatures = import('./lib/motion-features.js')
+const loadMotionFeatures = () => motionFeatures.then((mod) => mod.default)
 import Preloader from './components/Preloader.jsx'
 import ScrollProgress from './components/ScrollProgress.jsx'
 import Navbar from './components/Navbar.jsx'
@@ -84,8 +93,8 @@ export default function App() {
   // LazyMotion + the `m` component instead of `motion`: `motion.div` statically
   // pulls framer-motion's entire feature set into whatever chunk imports it, so
   // every component that animated anything was dragging the full library onto
-  // the critical path. `m` ships only the renderer, and the feature bundle is
-  // declared once here.
+  // the critical path. `m` ships only the renderer; the feature bundle arrives
+  // through the async import above, off the critical path entirely.
   //
   // domAnimation, not domMax: domMax exists to add drag and layout animations,
   // costs +12.5 KB gzip, and the only thing here that wanted it was the
@@ -94,7 +103,7 @@ export default function App() {
   // `strict` makes a stray `motion.*` throw at development time rather than
   // silently re-inflating the bundle months from now.
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={loadMotionFeatures} strict>
       <MotionConfig reducedMotion="user">
         {ServicePage ? <ServicePage service={route.service} /> : <Site />}
       </MotionConfig>
