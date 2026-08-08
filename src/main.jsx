@@ -4,25 +4,17 @@ import App from './App.jsx'
 import { currentRoute, loadServicePage, rootPrefix } from './lib/routes.js'
 
 // Self-hosted fonts (no third-party font CDN requests).
-// Only the weights index.css actually uses — every extra weight is another
-// render-blocking font file.
-//
-// Sora is the display face and needs four weights (400/600/700/800). As static
-// files that was 59.7 KB of latin woff2 over four requests; the variable font
-// covers the whole 100–800 axis in one 33.7 KB file. Same rendering, ~26 KB and
-// three requests cheaper — and it is the file preloaded in scripts/prerender.mjs.
+// The Ledger identity needs exactly two webfont files: Fraunces 600 (the
+// display face — headings, the signature) and JetBrains Mono 400/600 (labels,
+// numerals, tabular data). Body text is the system sans stack on purpose —
+// zero font bytes for the copy visitors actually read, and one fewer file
+// racing the LCP.
 //
 // latin-only subsets: the default imports also declare cyrillic and latin-ext
-// @font-face blocks. unicode-range makes those mostly free — until one glyph
-// strays into a range, and one did: the ₹ in the contact form's budget options
-// sits in latin-ext, so every visitor who reached the form downloaded a whole
-// latin-ext file for a character that <option> elements render in the system
-// font anyway. latin-only imports drop those files from the build entirely;
-// ₹, →, ✓ and friends all come from the system font stack.
-// (Sora has no per-subset CSS in its variable package, but no heading contains
-// a latin-ext glyph, so its extra subset is declared yet never downloaded.)
-import '@fontsource-variable/sora'
-import '@fontsource/space-grotesk/latin-400.css'
+// @font-face blocks, and one stray glyph (the ₹ in the pricing bands sits in
+// latin-ext) would pull a whole extra file. latin-only imports drop those
+// files from the build; ₹, →, ✓ and friends come from the system stack.
+import '@fontsource/fraunces/latin-600.css'
 import '@fontsource/jetbrains-mono/latin-400.css'
 import '@fontsource/jetbrains-mono/latin-600.css'
 

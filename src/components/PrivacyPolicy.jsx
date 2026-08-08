@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
           <Logo gradientId="logo-grad-legal" />
           <span>
             {site.name}
-            <span className="gradient-text">.</span>
+            <span className="accent-text">.</span>
           </span>
         </a>
 

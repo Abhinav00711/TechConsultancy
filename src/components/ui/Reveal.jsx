@@ -1,16 +1,8 @@
-import { m } from 'motion/react'
-
-/* Scroll-triggered reveal wrapper — fades + slides children in when visible */
-export default function Reveal({ children, delay = 0, y = 36, className, once = true }) {
-  return (
-    <m.div
-      className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, margin: '-80px' }}
-      transition={{ duration: 0.7, delay, ease: [0.21, 0.6, 0.35, 1] }}
-    >
-      {children}
-    </m.div>
-  )
+/* Motion doctrine (Ledger redesign): motion must carry meaning. The blanket
+   fade-up-on-scroll this component used to apply was ambient decoration, so it
+   now renders a plain wrapper. Kept as a component so its many call sites —
+   and their className/layout duties — stay untouched, and so a deliberate
+   entrance can be reintroduced in one place if a section ever earns one. */
+export default function Reveal({ children, delay: _delay, y: _y, once: _once, className }) {
+  return <div className={className}>{children}</div>
 }

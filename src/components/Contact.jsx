@@ -71,7 +71,7 @@ export default function Contact() {
         <Reveal>
           <span className="section-tag">Get In Touch</span>
           <h2 className="section-title">
-            {contact.heading} <span className="gradient-text">{contact.headingGradient}</span>
+            {contact.heading} <span className="accent-text">{contact.headingAccent}</span>
           </h2>
           <p className="section-sub">{contact.text}</p>
         </Reveal>
@@ -80,7 +80,7 @@ export default function Contact() {
           <Reveal className="contact-info" delay={0.1}>
             {site.bookingUrl && (
               <a
-                className="contact-info-item glass contact-info-booking"
+                className="contact-info-item sheet contact-info-booking"
                 href={bookingHref('contact')}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -97,7 +97,7 @@ export default function Contact() {
             )}
             {site.whatsappLink && (
               <a
-                className="contact-info-item glass"
+                className="contact-info-item sheet"
                 href={site.whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -112,7 +112,7 @@ export default function Contact() {
                 </div>
               </a>
             )}
-            <a className="contact-info-item glass" href={`mailto:${site.email}`}>
+            <a className="contact-info-item sheet" href={`mailto:${site.email}`}>
               <div className="contact-info-icon">
                 <Icon name="mail" />
               </div>
@@ -122,7 +122,7 @@ export default function Contact() {
               </div>
             </a>
             {site.phone && (
-              <a className="contact-info-item glass" href={`tel:${site.phone.replace(/\s/g, '')}`}>
+              <a className="contact-info-item sheet" href={`tel:${site.phone.replace(/\s/g, '')}`}>
                 <div className="contact-info-icon">
                   <Icon name="phone" />
                 </div>
@@ -132,7 +132,7 @@ export default function Contact() {
                 </div>
               </a>
             )}
-            <div className="contact-info-item glass">
+            <div className="contact-info-item sheet">
               <div className="contact-info-icon">
                 <Icon name="pin" />
               </div>
@@ -144,7 +144,7 @@ export default function Contact() {
           </Reveal>
 
           <Reveal delay={0.2}>
-            <form className="contact-form glass" onSubmit={onSubmit}>
+            <form className="contact-form sheet" onSubmit={onSubmit}>
               {contact.formNote && <p className="form-note">{contact.formNote}</p>}
               <div className="form-row">
                 <div className="form-field">

@@ -173,19 +173,15 @@ const server = createServer(async (req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
 const { port } = server.address()
 
-// Fonts that paint above the fold on every route: the display face behind the
-// H1 and the body face behind the paragraph under it. Without a preload hint
-// the browser cannot even discover them until the stylesheet has downloaded
-// *and* parsed — two serial round trips before the largest text can settle in
-// its real face. Vite hashes the filenames on every build, so resolve them
-// from the emitted assets rather than hardcoding.
-//
-// Deliberately excludes JetBrains Mono: its only above-fold use is the small
-// hero badge, where font-display:swap is unnoticeable and 21 KB of competing
-// bandwidth is not.
+// Fonts that paint above the fold on every route. The Ledger identity's body
+// face is the system sans stack (zero font bytes), so the only file the LCP
+// waits on is the display serif behind the H1. JetBrains Mono is deliberately
+// not preloaded: its above-fold uses (badge, labels, generator legends) are
+// small, where font-display:swap is unnoticeable and competing bandwidth is
+// not. Vite hashes the filenames on every build, so resolve them from the
+// emitted assets rather than hardcoding.
 const CRITICAL_FONTS = [
-  /^sora-latin-wght-normal-[\w-]+\.woff2$/, // --font-display, .hero-title (800)
-  /^space-grotesk-latin-400-normal-[\w-]+\.woff2$/, // --font-body, .hero-sub
+  /^fraunces-latin-600-normal-[\w-]+\.woff2$/, // --font-display, .hero-title
 ]
 const assetFiles = await readdir(join(dist, 'assets'))
 const criticalFonts = CRITICAL_FONTS.map((pattern) => {
@@ -202,9 +198,10 @@ try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
     // Reduced motion → sections render in their final, fully visible state
     // instead of mid-animation (the site honours prefers-reduced-motion).
-    // Dark colour scheme → the snapshot matches the app's first client render
-    // (ThemeToggle assumes dark until it syncs), so hydration stays clean.
-    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+    // Light colour scheme → paper is the Ledger default and the snapshot must
+    // match the app's first client render (ThemeToggle assumes light until it
+    // syncs), so hydration stays clean.
+    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' })
     // Tell the app it's being prerendered: WebGL scenes stay unmounted so the
     // snapshot carries the static gradient fallbacks. That keeps the HTML
     // smaller and — crucially — identical to the app's initial client render,
@@ -307,10 +304,10 @@ try {
       }
     }
     await page.setViewportSize({ width: 1440, height: 900 })
-    // Back to the theme the snapshot is captured in — main.jsx hydrates
-    // assuming dark, so the serialised HTML must carry it.
+    // Back to the theme the snapshot is captured in — the app hydrates
+    // assuming light (paper), so the serialised HTML must carry it.
     await page.evaluate(() => {
-      document.documentElement.dataset.theme = 'dark'
+      document.documentElement.dataset.theme = 'light'
     })
     await page.waitForTimeout(250)
 
@@ -355,15 +352,14 @@ try {
         for (const rule of sheet.cssRules) {
           if (rule.constructor.name === 'CSSFontFaceRule') {
             const src = rule.style.getPropertyValue('src')
-            // The three latin faces that paint above the fold: the H1 display
-            // face, the body face, and the mono face behind the hero badge.
-            // Only the declaration is inlined — the font file itself downloads
-            // on demand either way, but declaring it here means the browser can
-            // start that download at first paint instead of after the deferred
-            // stylesheet arrives, which is the difference between the badge
-            // rendering in its real face or visibly swapping later.
-            // Non-latin subsets and unused weights stay in the deferred sheet.
-            if (/(sora-latin-wght|space-grotesk-latin-400|jetbrains-mono-latin-400)-normal/.test(src)) extras += rule.cssText
+            // The two latin faces that paint above the fold: the H1 display
+            // serif and the mono face behind the badge and generator labels.
+            // (Body text is the system stack — no file to declare.) Only the
+            // declaration is inlined — the font file downloads on demand
+            // either way, but declaring it here means the browser can start
+            // that download at first paint instead of after the deferred
+            // stylesheet arrives. Non-latin subsets stay in the deferred sheet.
+            if (/(fraunces-latin-600|jetbrains-mono-latin-400)-normal/.test(src)) extras += rule.cssText
           } else if (rule.constructor.name === 'CSSKeyframesRule') {
             if (new RegExp(`animation[^;}]*\\b${rule.name}\\b`).test(body)) extras += rule.cssText
           }

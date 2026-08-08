@@ -9,7 +9,7 @@ export default function About() {
         <Reveal>
           <span className="section-tag">Who We Are</span>
           <h2 className="section-title">
-            {about.heading} <span className="gradient-text">{about.headingGradient}</span>
+            {about.heading} <span className="accent-text">{about.headingAccent}</span>
           </h2>
         </Reveal>
 
@@ -23,7 +23,7 @@ export default function About() {
           <div className="founders">
             {about.founders.map((f, i) => (
               <Reveal key={f.name} delay={0.15 + i * 0.15}>
-                <div className="founder-card glass" style={{ '--accent': f.accent }}>
+                <div className="founder-card sheet" style={{ '--accent': f.accent }}>
                   {f.photo ? (
                     <div className="founder-avatar">
                       {/* Each photo ships as a ~2 KB AVIF with a ~3 KB JPEG
@@ -63,7 +63,7 @@ export default function About() {
         <div className="values-grid">
           {about.values.map((v, i) => (
             <Reveal key={v.title} delay={i * 0.1}>
-              <div className="value-card glass" style={{ height: '100%' }}>
+              <div className="value-card sheet" style={{ height: '100%' }}>
                 <h3>{v.title}</h3>
                 <p>{v.text}</p>
               </div>

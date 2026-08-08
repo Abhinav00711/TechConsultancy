@@ -5,7 +5,6 @@ import { track, bookingHref } from '../lib/analytics.js'
 import { setMeta } from '../lib/head.js'
 import { href, servicePath } from '../lib/routes.js'
 import Navbar from './Navbar.jsx'
-import ScrollProgress from './ScrollProgress.jsx'
 import CtaBand from './CtaBand.jsx'
 import Contact from './Contact.jsx'
 import Footer from './Footer.jsx'
@@ -104,7 +103,6 @@ export default function ServicePage({ service }) {
       <a href="#main" className="skip-link">
         Skip to content
       </a>
-      <ScrollProgress />
       <div className="ambient" />
       <Navbar />
       <main id="main" style={{ '--accent': service.accent }}>
@@ -207,7 +205,7 @@ export default function ServicePage({ service }) {
             <div className="service-deliverables">
               {page.deliverables.map((d, i) => (
                 <Reveal key={d.title} delay={i * 0.06}>
-                  <article className="glass service-deliverable">
+                  <article className="sheet service-deliverable">
                     <h3>{d.title}</h3>
                     <p>{d.text}</p>
                   </article>
@@ -221,7 +219,7 @@ export default function ServicePage({ service }) {
           <div className="container">
             <div className="service-split">
               <Reveal>
-                <div className="glass service-panel">
+                <div className="sheet service-panel">
                   <h2 className="service-panel-title">Who this is for</h2>
                   <ul className="service-points">
                     {page.idealFor.map((f) => (
@@ -231,7 +229,7 @@ export default function ServicePage({ service }) {
                 </div>
               </Reveal>
               <Reveal delay={0.1}>
-                <div className="glass service-panel">
+                <div className="sheet service-panel">
                   <h2 className="service-panel-title">What we build it with</h2>
                   <ul className="service-stack">
                     {page.stack.map((t) => (
@@ -256,7 +254,7 @@ export default function ServicePage({ service }) {
             <ol className="service-phases">
               {page.phases.map((phase, i) => (
                 <Reveal key={phase.when} delay={i * 0.08}>
-                  <li className="glass service-phase">
+                  <li className="sheet service-phase">
                     <span className="service-phase-when">{phase.when}</span>
                     <p>{phase.what}</p>
                   </li>
@@ -297,7 +295,7 @@ export default function ServicePage({ service }) {
             <div className="service-related">
               {related.map((r, i) => (
                 <Reveal key={r.id} delay={i * 0.08}>
-                  <a className="glass service-related-card" href={href(servicePath(r.id))} style={{ '--accent': r.accent }}>
+                  <a className="sheet service-related-card" href={href(servicePath(r.id))} style={{ '--accent': r.accent }}>
                     <Icon name={r.icon} />
                     <h3>{r.title}</h3>
                     <p>{r.headline}</p>
@@ -308,7 +306,7 @@ export default function ServicePage({ service }) {
                 </Reveal>
               ))}
               <Reveal delay={0.16}>
-                <a className="glass service-related-card service-related-all" href={href('#services')}>
+                <a className="sheet service-related-card service-related-all" href={href('#services')}>
                   <h3>All six services</h3>
                   <p>Compare every service side by side, with a live demo of each.</p>
                   <span className="service-related-more">

@@ -15,7 +15,7 @@ export default function Footer() {
               <Logo gradientId="logo-grad-footer" />
               <span>
                 {site.name}
-                <span className="gradient-text">.</span>
+                <span className="accent-text">.</span>
               </span>
             </a>
             <p>We design, build and scale technology that gives ambitious businesses a real advantage.</p>
