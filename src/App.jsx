@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { LazyMotion, MotionConfig, useReducedMotion } from 'framer-motion'
+import { LazyMotion, MotionConfig, useReducedMotion } from 'motion/react'
 
 // The animation feature bundle lives in its own lazy chunk (lib/motion-features
 // re-exports domAnimation). Kicked off at module evaluation — not on first

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { m } from 'framer-motion'
+import { m } from 'motion/react'
 import { hero, site } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track, bookingHref } from '../lib/analytics.js'

@@ -2,7 +2,7 @@ import { useRef, useMemo, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
-import { useInView, useReducedMotion } from 'framer-motion'
+import { useInView, useReducedMotion } from 'motion/react'
 import * as THREE from 'three'
 import { SceneErrorBoundary, guardContextLoss, isLowEnd } from './SceneShell.jsx'
 

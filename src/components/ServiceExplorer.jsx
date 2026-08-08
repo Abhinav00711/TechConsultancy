@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { m, AnimatePresence, useInView, useReducedMotion } from 'framer-motion'
+import { m, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'

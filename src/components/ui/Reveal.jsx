@@ -1,4 +1,4 @@
-import { m } from 'framer-motion'
+import { m } from 'motion/react'
 
 /* Scroll-triggered reveal wrapper — fades + slides children in when visible */
 export default function Reveal({ children, delay = 0, y = 36, className, once = true }) {

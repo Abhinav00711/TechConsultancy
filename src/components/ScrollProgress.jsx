@@ -1,4 +1,4 @@
-import { m, useScroll, useSpring } from 'framer-motion'
+import { m, useScroll, useSpring } from 'motion/react'
 
 export default function ScrollProgress() {
   const { scrollYProgress } = useScroll()

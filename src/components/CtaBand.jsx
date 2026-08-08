@@ -1,4 +1,4 @@
-import { m, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'motion/react'
 import { site, ctaBand } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import Reveal from './ui/Reveal.jsx'
