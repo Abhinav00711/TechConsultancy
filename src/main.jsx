@@ -4,17 +4,19 @@ import App from './App.jsx'
 import { currentRoute, loadServicePage, rootPrefix } from './lib/routes.js'
 
 // Self-hosted fonts (no third-party font CDN requests).
-// The Ledger identity needs exactly two webfont files: Fraunces 600 (the
-// display face — headings, the signature) and JetBrains Mono 400/600 (labels,
-// numerals, tabular data). Body text is the system sans stack on purpose —
-// zero font bytes for the copy visitors actually read, and one fewer file
-// racing the LCP.
+// The Ledger identity needs four webfont files: Fraunces 600 (display face)
+// plus its 400 italic (the Guarantee signatures), and JetBrains Mono 400/600
+// (labels, numerals, tabular data). Body text is the system sans stack on
+// purpose — zero font bytes for the copy visitors actually read, and one
+// fewer file racing the LCP. Only Fraunces 600 is preloaded
+// (scripts/prerender.mjs CRITICAL_FONTS); the rest load on demand.
 //
 // latin-only subsets: the default imports also declare cyrillic and latin-ext
 // @font-face blocks, and one stray glyph (the ₹ in the pricing bands sits in
 // latin-ext) would pull a whole extra file. latin-only imports drop those
 // files from the build; ₹, →, ✓ and friends come from the system stack.
 import '@fontsource/fraunces/latin-600.css'
+import '@fontsource/fraunces/latin-400-italic.css' // the Guarantee signatures — a real italic, not a synthesized oblique
 import '@fontsource/jetbrains-mono/latin-400.css'
 import '@fontsource/jetbrains-mono/latin-600.css'
 

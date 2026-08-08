@@ -204,7 +204,7 @@ export default function ServicePage({ service }) {
             </Reveal>
             <div className="service-deliverables">
               {page.deliverables.map((d, i) => (
-                <Reveal key={d.title} delay={i * 0.06}>
+                <Reveal key={d.title}>
                   <article className="sheet service-deliverable">
                     <h3>{d.title}</h3>
                     <p>{d.text}</p>
@@ -228,7 +228,7 @@ export default function ServicePage({ service }) {
                   </ul>
                 </div>
               </Reveal>
-              <Reveal delay={0.1}>
+              <Reveal>
                 <div className="sheet service-panel">
                   <h2 className="service-panel-title">What we build it with</h2>
                   <ul className="service-stack">
@@ -253,7 +253,7 @@ export default function ServicePage({ service }) {
             </Reveal>
             <ol className="service-phases">
               {page.phases.map((phase, i) => (
-                <Reveal key={phase.when} delay={i * 0.08}>
+                <Reveal key={phase.when}>
                   <li className="sheet service-phase">
                     <span className="service-phase-when">{phase.when}</span>
                     <p>{phase.what}</p>
@@ -272,7 +272,7 @@ export default function ServicePage({ service }) {
             </Reveal>
             <div className="faq-list">
               {page.faqs.map((item, i) => (
-                <Reveal key={item.q} delay={i * 0.06}>
+                <Reveal key={item.q}>
                   <FaqItem
                     {...item}
                     id={`service-faq-${i}`}
@@ -294,7 +294,7 @@ export default function ServicePage({ service }) {
             </Reveal>
             <div className="service-related">
               {related.map((r, i) => (
-                <Reveal key={r.id} delay={i * 0.08}>
+                <Reveal key={r.id}>
                   <a className="sheet service-related-card" href={href(servicePath(r.id))} style={{ '--accent': r.accent }}>
                     <Icon name={r.icon} />
                     <h3>{r.title}</h3>
@@ -305,10 +305,10 @@ export default function ServicePage({ service }) {
                   </a>
                 </Reveal>
               ))}
-              <Reveal delay={0.16}>
+              <Reveal>
                 <a className="sheet service-related-card service-related-all" href={href('#services')}>
                   <h3>All six services</h3>
-                  <p>Compare every service side by side, with a live demo of each.</p>
+                  <p>The full services ledger — open any of the six, each with a live demo.</p>
                   <span className="service-related-more">
                     Back to the overview <span aria-hidden>→</span>
                   </span>

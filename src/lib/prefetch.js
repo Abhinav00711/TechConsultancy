@@ -45,7 +45,7 @@ export function setupPrefetch() {
     }
   }
 
-  // Delegated so links added by later renders (carousel slides, accordions)
+  // Delegated so links added by later renders (accordion panels)
   // are covered without re-binding anything.
   document.addEventListener('pointerover', onIntent, { passive: true })
   document.addEventListener('focusin', onIntent)

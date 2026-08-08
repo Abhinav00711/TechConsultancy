@@ -3,6 +3,6 @@
    now renders a plain wrapper. Kept as a component so its many call sites —
    and their className/layout duties — stay untouched, and so a deliberate
    entrance can be reintroduced in one place if a section ever earns one. */
-export default function Reveal({ children, delay: _delay, y: _y, once: _once, className }) {
+export default function Reveal({ children, className }) {
   return <div className={className}>{children}</div>
 }

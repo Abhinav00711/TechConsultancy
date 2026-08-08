@@ -21,7 +21,7 @@
   --border-strong: rgba(20, 25, 28, 0.3);
   --text: #14191c;
   --text-dim: #5a6367;
-  --text-faint: #878f92;
+  --text-faint: #5f676c;
   /* Oxide red — hairline rules, numerals, the stamp. Never a fill. */
   --mark: #b03a20;
   --mark-wash: rgba(176, 58, 32, 0.09);
@@ -47,7 +47,7 @@
   --border-strong: rgba(227, 229, 222, 0.32);
   --text: #e3e5de;
   --text-dim: #99a2a6;
-  --text-faint: #69726f;
+  --text-faint: #828c8f;
   --mark: #e2735a;
   --mark-wash: rgba(226, 115, 90, 0.13);
   --verify: #56b7a4;
@@ -62,7 +62,9 @@
    dark mode uses it raw. */
 * { --accent-ink: var(--accent, var(--mark)); }
 :root:not([data-theme='dark']) * {
-  --accent-ink: color-mix(in srgb, var(--accent, var(--mark)) 52%, #1c2528);
+  /* 42% accent, not more: the lightest accents (cloud amber, ai cyan) need
+     this much ink mixed in to clear WCAG AA (4.5:1) at small sizes on paper. */
+  --accent-ink: color-mix(in srgb, var(--accent, var(--mark)) 42%, #1c2528);
 }
 /* Inside the dark stage the raw accents stay bright in both themes. */
 .showcase-canvas * { --accent-ink: var(--accent, var(--mark)); }
@@ -784,8 +786,10 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
 }
 .guarantee-signers { display: flex; flex-wrap: wrap; gap: 8px 40px; }
 .guarantee-signer {
+  /* Fraunces' real 400 italic (loaded in main.jsx) — a synthesized oblique
+     of the 600 upright reads as a fake signature. */
   font-family: var(--font-display);
-  font-style: italic; font-size: 1.3rem;
+  font-style: italic; font-weight: 400; font-size: 1.3rem;
   color: var(--text);
 }
 .guarantee-signed-note {
@@ -942,6 +946,13 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   color: var(--mark);
 }
 .contact-info-item strong { display: block; font-family: var(--font-display); font-size: 0.98rem; }
+/* The booking card is the primary conversion path — the one card that reads
+   as already-verified rather than one option among five. */
+.contact-info-booking {
+  border-color: color-mix(in srgb, var(--verify) 45%, transparent);
+  background: var(--verify-wash);
+}
+.contact-info-booking .contact-info-icon { color: var(--verify); border-color: color-mix(in srgb, var(--verify) 45%, transparent); }
 .contact-info-item span { color: var(--text-dim); font-size: 0.88rem; }
 
 .contact-form { padding: 34px 32px; display: grid; gap: 18px; position: relative; }

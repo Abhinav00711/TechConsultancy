@@ -118,7 +118,7 @@ export default function Navbar() {
           {/* href() rewrites the home page's anchors for sub-pages, where
               '#about' has to travel back to '/' first (src/lib/routes.js). */}
           <a href={href('#home')} className="nav-logo">
-            <Logo gradientId="logo-grad-nav" />
+            <Logo />
             <span>
               {site.name}
               <span className="accent-text">.</span>

@@ -1,12 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // SITE CONTENT — edit everything here.
-// Anything marked [PLACEHOLDER] should be replaced with your real details.
+// The ₹ bands (`pricing`, and each roadmap plan's baseBand) are set to
+// founder-reviewable defaults — adjust them here and the whole site follows.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const site = {
   name: 'Revora',
   suffix: 'Consultancy',
-  tagline: 'Technology that moves your business forward.',
   email: 'consulting@revora.co.in',
   phone: '+91 9654724365',
   // WhatsApp number in international digits-only form (used for wa.me links).
@@ -273,16 +273,16 @@ export const services = [
     sceneLabel: 'Live Web Build',
     accent: '#f472b6',
     description:
-      'High-performance websites and web apps — immersive 3D experiences, blazing speed and conversion-focused design, from landing pages to full platforms. The site you’re on right now is our own demo.',
+      'High-performance websites and web apps — blazing speed, conversion-focused design, and interactive 3D where it earns its place, from landing pages to full platforms. The site you’re on right now is our own build.',
     points: [
-      '3D & interactive marketing sites',
+      'Interactive & 3D marketing sites',
       'E-commerce & progressive web apps',
       'Conversion-focused UX and copy',
       'SEO & Core Web Vitals built in',
     ],
     kpis: [
       { value: '<1s', label: 'load target' },
-      { value: '3D', label: 'immersive UX' },
+      { value: '100', label: 'Lighthouse target' },
       { value: 'SEO', label: 'built in' },
     ],
   },

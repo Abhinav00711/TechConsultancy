@@ -105,7 +105,11 @@ export default function ServiceExplorer() {
   const openIndex = collapsed ? -1 : active
   // three.js is ~280 KB gzip, so it only downloads once the section is near
   // the viewport and never on the devices isConstrained() screens out.
-  const canRender3D = !window.__PRERENDERING__ && !constrained && inView
+  // Hydration invariant: useInView is always false on the first render, so
+  // this is false in both the prerender pass and the hydration pass no matter
+  // what window.__PRERENDERING__ or isConstrained() say — the canvas only
+  // ever mounts in a post-hydration render. Keep `inView` in this expression.
+  const canRender3D = inView && !constrained && !window.__PRERENDERING__
 
   return (
     <section id="services" className="section">

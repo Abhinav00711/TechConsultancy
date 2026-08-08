@@ -1239,12 +1239,12 @@ function Studio() {
    would destroy the WebGL context and recompile every shader.
    Two framings, chosen by the canvas's own aspect ratio (not the window's,
    which says nothing about the shape this canvas ended up):
-   - Portrait (desktop two-column carousel): the raised three-quarter view.
+   - Portrait (the desktop ledger row's tall stage): the raised three-quarter view.
      Looking slightly down uses the vertical space a head-on shot wastes, and
      it is how hardware is photographed anyway. Deliberately loose — the
      reflective floor filling the lower third is part of the composition.
-   - Landscape (the mobile accordion's strip, and the stacked ≤1000px
-     carousel): frame the assembly itself via FRAME. The portrait framing
+   - Landscape (the mobile ledger row's short strip): frame the assembly
+     itself via FRAME. The portrait framing
      here showed ~2× the scene's height, so everything rendered half-size —
      "zoomed out" — with the strip mostly empty stage. */
 function ResponsiveCamera({ scene }) {

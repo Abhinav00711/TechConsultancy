@@ -60,7 +60,7 @@ export default function Faq() {
 
         <div className="faq-list">
           {faq.items.map((item, i) => (
-            <Reveal key={item.q} delay={i * 0.06}>
+            <Reveal key={item.q}>
               <FaqItem {...item} id={`faq-a-${i}`} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
             </Reveal>
           ))}

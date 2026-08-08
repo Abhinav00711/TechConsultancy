@@ -77,7 +77,7 @@ export default function Contact() {
         </Reveal>
 
         <div className="contact-wrap">
-          <Reveal className="contact-info" delay={0.1}>
+          <Reveal className="contact-info">
             {site.bookingUrl && (
               <a
                 className="contact-info-item sheet contact-info-booking"
@@ -143,7 +143,7 @@ export default function Contact() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.2}>
+          <Reveal>
             <form className="contact-form sheet" onSubmit={onSubmit}>
               {contact.formNote && <p className="form-note">{contact.formNote}</p>}
               <div className="form-row">

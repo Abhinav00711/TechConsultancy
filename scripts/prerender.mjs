@@ -6,9 +6,9 @@
 // search engines) would otherwise see an empty <div id="root">. After this
 // step they get the complete page content, headings, FAQ and structured data.
 //
-// Real visitors are unaffected: React mounts over the snapshot and takes over.
-// A window.__PRERENDERED__ flag tells the app to skip the preloader, since the
-// visitor already sees content.
+// Real visitors are unaffected: React hydrates over the snapshot and takes
+// over. A window.__PRERENDERED__ flag tells main.jsx to hydrateRoot instead of
+// re-rendering from scratch.
 //
 // If no Chromium is found the script warns and exits 0 (the plain SPA build
 // still works) — set PRERENDER_STRICT=1 to make that a hard failure instead.
@@ -39,7 +39,7 @@ const asHtml = (text) =>
 // it must be overwritten LAST.
 //
 // The six service routes are the site's only indexable service URLs — the home
-// page's carousel is one URL for all six, which cannot rank for any of them.
+// page's services ledger is one URL for all six, which cannot rank for any of them.
 // They are generated from the same content the app renders, so adding a
 // seventh service creates its page without touching this file.
 const routes = [
@@ -312,9 +312,9 @@ try {
     await page.waitForTimeout(250)
 
     // Emit the union in source order, rebuilding @media/@supports wrappers so
-    // no rule escapes its condition, plus the @font-face rules for the two
-    // preloaded faces (a preloaded font whose @font-face has not been parsed is
-    // a wasted download) and any @keyframes the kept rules reference.
+    // no rule escapes its condition, plus the @font-face rules for the
+    // above-fold faces (a preloaded font whose @font-face has not been parsed
+    // is a wasted download) and any @keyframes the kept rules reference.
     const criticalCss = await page.evaluate((idList) => {
       const wanted = new Set(idList)
       const sheets = [...document.styleSheets].filter((s) => {
@@ -370,7 +370,7 @@ try {
 
     // Relative url() references resolve against the stylesheet's own location.
     // Moving these rules from /assets/index-*.css into the HTML document
-    // silently repoints every `url(./sora-….woff2)` at the site root, where
+    // silently repoints every `url(./fraunces-….woff2)` at the site root, where
     // nothing exists — the fonts 404 and the whole critical window renders in
     // fallback faces, which is exactly what inlining was meant to prevent.
     const criticalCssResolved = criticalCss.replace(
@@ -429,8 +429,8 @@ try {
     })
 
     let html = await page.content()
-    // Flag the snapshot so the app skips the preloader on hydration, and start
-    // the above-fold fonts in parallel with the stylesheet instead of after it.
+    // Flag the snapshot so main.jsx hydrates over it, and start the
+    // above-fold fonts in parallel with the stylesheet instead of after it.
     // crossorigin is mandatory on font preloads — without it the browser treats
     // the preload and the real @font-face request as different fetches and
     // downloads each file twice.

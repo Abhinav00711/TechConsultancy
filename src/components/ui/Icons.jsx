@@ -12,9 +12,8 @@ const base = {
 
 // Single-ink mark — reads as a stamp/seal in the ledger identity. Colour
 // comes from currentColor so each context (nav, footer, legal page) sets it
-// with CSS. gradientId is accepted for call-site compatibility but unused
-// since the gradient retired.
-export const Logo = ({ size = 36, gradientId: _gradientId = 'logo' }) => (
+// with CSS.
+export const Logo = ({ size = 36 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
     <path d="M14 20 L32 10 L50 20 L50 44 L32 54 L14 44 Z" stroke="currentColor" strokeWidth="3.5" strokeLinejoin="round" />
     <path d="M32 10 L32 54 M14 20 L50 44 M50 20 L14 44" stroke="currentColor" strokeWidth="1.5" opacity="0.55" />

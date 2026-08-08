@@ -22,7 +22,7 @@ export default function About() {
 
           <div className="founders">
             {about.founders.map((f, i) => (
-              <Reveal key={f.name} delay={0.15 + i * 0.15}>
+              <Reveal key={f.name}>
                 <div className="founder-card sheet" style={{ '--accent': f.accent }}>
                   {f.photo ? (
                     <div className="founder-avatar">
@@ -62,7 +62,7 @@ export default function About() {
 
         <div className="values-grid">
           {about.values.map((v, i) => (
-            <Reveal key={v.title} delay={i * 0.1}>
+            <Reveal key={v.title}>
               <div className="value-card sheet" style={{ height: '100%' }}>
                 <h3>{v.title}</h3>
                 <p>{v.text}</p>

@@ -6,7 +6,7 @@ A consultancy website built around one idea: **everything Revora sells is a docu
 
 ## ✨ Features
 
-- **The "Ledger" identity** — paper-first design system in `src/index.css`: one ink, one paper, one oxide accent (`--mark`, hairlines and numerals only), one semantic teal (`--verify`), Fraunces display serif + system body + JetBrains Mono data. Full dark theme. The old gradient/glass/glow language is retired.
+- **The "Ledger" identity** — paper-first design system in `src/index.css`: one ink, one paper, one oxide accent (`--mark`, hairlines and numerals only), one semantic teal (`--verify`), Fraunces display serif (600, plus its 400 italic for the Guarantee signatures) + system body + JetBrains Mono data. Full dark theme, WCAG AA contrast verified on every token pair. The old gradient/glass/glow language is retired.
 - **Roadmap generator (the hero instrument)** — two questions → a scoped, dated roadmap document on screen: phases with week ranges, an indicative ₹ band, stack, and target figures. Deterministic on purpose (instant, free, can't hallucinate a promise). "Send this to Revora" posts it to Formspree with one contact field; "Download as PDF" prints just the document. Fires `Roadmap Generated / Sent / Print` analytics events.
 - **The services ledger** — six ruled accordion rows (one control at every width); the open row shows that service's 3D system diagram on the page's single dark stage. The six interactive scenes (AI workflow, CRM funnel, ERP modules, API network, web build, deploy pipeline) survive from the previous design — the decorative hero orb did not.
 - **The Revora Guarantee** — the four commitments (100% code ownership, 24h response, 7-day first demo, zero lock-in) as a signed, dated document instead of an animated stats band.
@@ -32,7 +32,7 @@ The one exception is the long-form copy for the six service pages, which lives i
 [`src/data/service-pages.js`](src/data/service-pages.js) — ~28 KB of prose that only a
 `/services/<id>/` page renders, split out so the home page doesn't download it.
 
-Everything marked `[PLACEHOLDER]` should be replaced with your real details:
+Details worth reviewing or replacing with your own:
 
 - Company name (currently "Revora Consultancy") — also update `index.html` title/description
 - Phone, location and `site.socials` (only socials with a real URL are rendered)
@@ -72,7 +72,7 @@ Everything below needs an account/profile only you can create — each one un-hi
 5. **WhatsApp** — confirm `site.whatsapp` is the number you actually answer (ideally a WhatsApp Business profile with the Revora name/logo).
 6. ~~**Analytics**~~ — ✅ done, Umami Cloud in `index.html` covers pageviews, conversion events (booking/WhatsApp/service CTA clicks, form submits — see `src/lib/analytics.js`) and real-visitor Core Web Vitals (`src/lib/vitals.js`, reported as `Web Vitals` events). Cookieless and disclosed in the privacy policy; the prerender script blocks the script and gates vitals on `__PRERENDERING__` so CI builds don't count as visits. Umami only records the `revora.co.in` domain (`data-domains`), so dev sessions stay out of the stats. The Cloudflare Insights beacon was removed — it was a second third-party origin whose only unique data was Web Vitals.
 7. **Google Business Profile** (Kolkata address) and **Clutch/GoodFirms** profiles — free listings where Indian SMEs actually search for agencies.
-8. Keep the stats band honest — it lists commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
+8. Keep the Guarantee card honest — it lists signed commitments (code ownership, response time), not invented track-record numbers. Don't add client counts or testimonials until they're real and permissioned.
 
 ## 🌐 Deploying (GitHub Pages)
 
@@ -102,6 +102,7 @@ src/
 │   ├── ServiceExplorer.jsx       ← the services ledger + dark stage
 │   ├── Guarantee.jsx             ← the signed commitments card
 │   ├── three/ShowcaseScenes.jsx  ← the six 3D service diagrams
+│   ├── three/SceneShell.jsx      ← WebGL error boundary + low-end tiering
 │   ├── ui/                  ← Reveal (inert wrapper), Icons, ThemeToggle
 │   ├── ServicePage.jsx      ← the six service landing pages (own chunk)
 │   ├── PrivacyPolicy.jsx    ← /privacy/

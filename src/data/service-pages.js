@@ -3,7 +3,7 @@
 //
 // Split out of content.js purely for weight: this is ~28 KB of prose that only
 // a service page renders, and content.js is imported by the home page's footer
-// and carousel, so leaving it there put all six pages' copy on the critical
+// and services ledger, so leaving it there put all six pages' copy on the critical
 // path of every visit. ServicePage.jsx is the only importer, and it lives in
 // its own chunk (src/lib/routes.js).
 //

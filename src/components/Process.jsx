@@ -17,7 +17,7 @@ export default function Process() {
 
         <div className="process-grid">
           {process.map((p, i) => (
-            <Reveal key={p.step} delay={i * 0.12}>
+            <Reveal key={p.step}>
               <div className="process-card sheet" style={{ height: '100%' }}>
                 <span className="process-step">{p.step}</span>
                 <h3>{p.title}</h3>

@@ -4,8 +4,8 @@ import { track, bookingHref } from '../lib/analytics.js'
 /* Price bands — flagged missing by all three panel reviews. Wide ranges
    qualify leads and stop the silent "expensive and evasive" bounce; the
    fixed itemised quote remains the real number, and the copy says so.
-   The ₹ figures are placeholders until the founders set real bands
-   (pricing.placeholder in content.js). */
+   The bands live in content.js (`pricing`); `pricing.placeholder` adds an
+   sr-only "indicative" note if the figures ever revert to stand-ins. */
 export default function Pricing() {
   return (
     <section id="pricing" className="section">

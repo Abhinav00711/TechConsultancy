@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="footer-brand">
             {/* href() rewrites these for sub-pages (src/lib/routes.js). */}
             <a href={href('#home')} className="nav-logo">
-              <Logo gradientId="logo-grad-footer" />
+              <Logo />
               <span>
                 {site.name}
                 <span className="accent-text">.</span>
@@ -74,7 +74,10 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <span>{`© ${year} ${site.name} ${site.suffix}. All rights reserved.`}</span>
+          {/* suppressHydrationWarning: the prerendered snapshot bakes the
+              build year, so a visitor hydrating after 31 Dec would otherwise
+              log a text mismatch here every January. */}
+          <span suppressHydrationWarning>{`© ${year} ${site.name} ${site.suffix}. All rights reserved.`}</span>
           <span>Engineered with precision in India.</span>
         </div>
       </div>
