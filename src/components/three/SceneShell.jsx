@@ -15,7 +15,7 @@ export function webglSupported() {
   return webglChecked
 }
 
-/* Rough low-end heuristic: few cores or little memory → smaller DPR, no bloom */
+/* Rough low-end heuristic: few cores or little memory → smaller DPR, no floor */
 export function isLowEnd() {
   const mem = navigator.deviceMemory
   const cores = navigator.hardwareConcurrency

@@ -302,6 +302,18 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   border-bottom: 1px solid var(--border);
   padding: 18px 4vw 26px;
   display: flex; flex-direction: column; gap: 2px;
+  /* Closed state — the delayed visibility flip removes it from the
+     accessibility tree and tab order once the fade finishes. */
+  opacity: 0;
+  transform: translateY(-16px);
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+}
+.mobile-menu.open {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .mobile-menu a {
   padding: 13px 14px; border-radius: 2px;

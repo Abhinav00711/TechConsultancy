@@ -3,16 +3,18 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import {
   Html, Environment, Lightformer, ContactShadows, RoundedBox, MeshReflectorMaterial,
 } from '@react-three/drei'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { useInView, useReducedMotion } from 'motion/react'
+import { useInView, useReducedMotion } from '../../lib/hooks.js'
 import * as THREE from 'three'
 import { SceneErrorBoundary, guardContextLoss, isLowEnd } from './SceneShell.jsx'
 
 /* ═══════════════════ material library ═══════════════════
    Every surface is a real one. Metals get metalness 1 and earn their look
    from roughness + the studio environment map, never from emissive colour —
-   emissive is reserved for things that genuinely emit (LEDs, screens, fibre),
-   which is also the only thing the 0.9-threshold bloom is allowed to catch. */
+   emissive is reserved for things that genuinely emit (LEDs, screens, fibre).
+   Those emissives are toneMapped:false, so they render at full brightness
+   without a bloom pass: the EffectComposer that used to exist purely for a
+   subtle halo on the LEDs cost a full-screen pass per frame plus ~45 KB gzip
+   of postprocessing runtime, and was retired for native MSAA instead. */
 
 const M = {
   /* brushed aluminium — bezels, chassis shells, machined hubs.
@@ -65,8 +67,8 @@ const M = {
   }),
   screenOff: new THREE.MeshStandardMaterial({ color: '#080b13', metalness: 0.1, roughness: 0.5 }),
   /* Lit-panel surfaces. Tone-mapped on purpose: a screen is a lit surface in
-     the room, not a light source, so these stay under the bloom threshold and
-     never turn into the flat neon slabs the first pass produced. */
+     the room, not a light source, so they never turn into the flat neon
+     slabs the first pass produced. */
   screenPanel: new THREE.MeshStandardMaterial({
     color: '#1b2233', emissive: '#3d4a68', emissiveIntensity: 0.8, roughness: 0.5,
   }),
@@ -97,8 +99,8 @@ function emissive(color, intensity = 2.4) {
   return m
 }
 
-/* Unlit light points travelling inside fibre — toneMapped off so bloom
-   actually picks them up at the 0.9 threshold. */
+/* Unlit light points travelling inside fibre — toneMapped off so they
+   render at full, unmapped brightness. */
 const lightCache = new Map()
 function lightDot(color) {
   let m = lightCache.get(color)
@@ -1191,7 +1193,10 @@ function Floor({ y }) {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, y, 0]}>
       <circleGeometry args={[13, 72]} />
       <MeshReflectorMaterial
-        resolution={512}
+        /* 256 is plenty for a heavily blurred reflection, and the reflection
+           pass re-renders the whole scene every frame — halving the RT edge
+           quarters that cost. */
+        resolution={256}
         blur={[300, 100]}
         mixBlur={1.1}
         mixStrength={18}
@@ -1293,7 +1298,9 @@ export default function ShowcaseCanvas({ scene }) {
           onCreated={guardContextLoss}
           shadows={false}
           gl={{
-            antialias: lowEnd,
+            // Native MSAA for everyone — the multisampled EffectComposer
+            // that used to provide AA on capable devices is gone.
+            antialias: true,
             alpha: true,
             powerPreference: 'high-performance',
             toneMapping: THREE.ACESFilmicToneMapping,
@@ -1326,19 +1333,13 @@ export default function ShowcaseCanvas({ scene }) {
                 blur={2.2}
                 far={2.6}
                 resolution={256}
-                frames={reducedMotion ? 1 : Infinity}
+                /* 60 frames covers the ~1s Settle entrance, after which
+                   nothing that casts this shadow moves (only LEDs, fibre
+                   dots and a fan keep animating) — re-baking the shadow
+                   map every frame forever was pure heat. */
+                frames={reducedMotion ? 1 : 60}
                 color="#010206"
               />
-            )}
-
-            {/* Threshold 0.9: only LEDs, screens and fibre bloom. The metals
-                are lit, not glowing. No depth of field — on a canvas this
-                small it just softened the machined detail that the whole
-                re-model exists to show. */}
-            {!lowEnd && (
-              <EffectComposer multisampling={4}>
-                <Bloom intensity={0.5} luminanceThreshold={0.9} luminanceSmoothing={0.3} mipmapBlur />
-              </EffectComposer>
             )}
           </Suspense>
         </Canvas>

@@ -17,13 +17,22 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { gzipSync } from 'node:zlib'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
 const assets = join(dist, 'assets')
 
 // Chunk name prefixes that must never be reachable from the entry without
-// going through a dynamic import(). Matches vite.config.js manualChunks keys.
+// going through a dynamic import(). Matches the advancedChunks group names
+// in vite.config.js.
 const FORBIDDEN = ['three', 'r3f']
+
+// Hard ceiling for the entry graph, in gzipped bytes — the number a visitor
+// actually downloads before first render. Set ~8% above the measured size at
+// the time it was introduced (77.6 KB), so real regressions fail the build
+// while hash-to-hash noise doesn't. Raise it consciously, in this file, in a
+// reviewed diff — never by deleting the check.
+const BUDGET_GZIP = 84 * 1024
 
 const fail = (msg) => {
   console.error(`\ncheck-critical-path: ${msg}\n`)
@@ -52,7 +61,11 @@ const present = new Set(await readdir(assets))
 const staticImports = async (file) => {
   const source = await readFile(join(assets, file), 'utf8')
   const found = new Set()
-  for (const [, spec] of source.matchAll(/(?:^|[;\n])import\s*(?:[^"';]*?from\s*)?["']([^"']+)["']/g)) {
+  // `export … from "x"` is as much a static edge as `import … from "x"` —
+  // Rolldown emits re-export chunks, and a guard that missed them would pass
+  // for the wrong reason. `}` counts as a boundary because minified output
+  // runs statements together.
+  for (const [, spec] of source.matchAll(/(?:^|[;\n}])(?:import|export)\s*(?:[^"';]*?from\s*)?["']([^"']+)["']/g)) {
     const name = spec.split('/').pop()
     if (present.has(name)) found.add(name)
   }
@@ -80,12 +93,25 @@ while (queue.length) {
   for (const next of await staticImports(file)) queue.push([next, [...chain, next]])
 }
 
-const total = await [...seen].reduce(async (acc, f) => {
-  const size = (await readFile(join(assets, f))).length
-  return (await acc) + size
-}, Promise.resolve(0))
+let totalRaw = 0
+let totalGzip = 0
+for (const f of seen) {
+  const buf = await readFile(join(assets, f))
+  totalRaw += buf.length
+  totalGzip += gzipSync(buf).length
+}
+
+if (totalGzip > BUDGET_GZIP) {
+  fail(
+    `the entry graph is ${(totalGzip / 1024).toFixed(1)} KB gzip — over the ${(BUDGET_GZIP / 1024).toFixed(0)} KB budget.\n` +
+      `  chunks: ${[...seen].join(', ')}\n` +
+      `  Something new landed on the critical path. Move it behind a dynamic import,\n` +
+      `  or raise BUDGET_GZIP here deliberately if the cost is truly worth it.`,
+  )
+}
 
 console.log(
   `check-critical-path: OK — entry loads ${seen.size} chunk(s), ` +
-    `${(total / 1024).toFixed(0)} KB raw, no WebGL. [${[...seen].join(', ')}]`,
+    `${(totalRaw / 1024).toFixed(0)} KB raw / ${(totalGzip / 1024).toFixed(1)} KB gzip ` +
+    `(budget ${(BUDGET_GZIP / 1024).toFixed(0)} KB), no WebGL. [${[...seen].join(', ')}]`,
 )

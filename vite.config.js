@@ -72,7 +72,8 @@ export default defineConfig({
         // Matched by module path so a package's every module is captured,
         // not just its entry. Order matters: first matching group wins, so
         // 'three' must precede any pattern that could also match three's
-        // dependents.
+        // dependents. (The motion library that once needed careful
+        // non-pinning here is gone — its three animations became CSS.)
         advancedChunks: {
           groups: [
             { name: 'react', test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
