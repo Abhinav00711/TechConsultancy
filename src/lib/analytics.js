@@ -1,14 +1,12 @@
 import { site } from '../data/content.js'
 
 /* Conversion-event plumbing. Pageview counting alone can't answer this,
-   so CTA clicks and form submissions are invisible without this. Events go to
-   the cookieless Umami Cloud script in index.html (window.umami); the
-   Plausible call stays as a fallback in case the provider ever changes.
-   See docs/GROWTH_PLAN.md §2.7. */
+   so CTA clicks and form submissions are invisible without this. Events go
+   to the cookieless Umami Cloud script in index.html (window.umami) — the
+   only analytics provider on the page. See docs/GROWTH_PLAN.md §2.7. */
 export function track(event, props) {
   try {
-    if (window.umami?.track) window.umami.track(event, props)
-    else window.plausible?.(event, props ? { props } : undefined)
+    window.umami?.track?.(event, props)
   } catch {
     /* analytics must never break the UX */
   }

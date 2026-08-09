@@ -1,0 +1,28 @@
+# Pull-request checks. Until this existed, the only workflow ran on push to
+# main — meaning the build, the critical-path budget and the prerender guards
+# all fired AFTER code had already landed. This runs the cheap, deterministic
+# half (lint + SPA build + budget) on every PR; the full prerender still runs
+# in deploy.yml where the runner's Chromium is guaranteed.
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # build:spa includes scripts/check-critical-path.mjs — the WebGL and
+      # gzip-budget guards fail the PR, not the deploy.
+      - run: npm run build:spa

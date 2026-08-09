@@ -9,11 +9,14 @@ import CtaBand from './CtaBand.jsx'
 import Contact from './Contact.jsx'
 import Footer from './Footer.jsx'
 import WhatsAppFab from './WhatsAppFab.jsx'
+import StickyCtaBar from './StickyCtaBar.jsx'
+import Pricing from './Pricing.jsx'
+import Guarantee from './Guarantee.jsx'
+import RoadmapGenerator from './RoadmapGenerator.jsx'
 import { FaqItem } from './Faq.jsx'
-import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
-const ORIGIN = 'https://revora.co.in'
+const ORIGIN = site.origin
 
 /* Structured data for one service page, as an @graph so a single script covers
    the offering, the breadcrumb trail and the FAQ. Deliberately the only
@@ -32,21 +35,12 @@ function jsonLd(service) {
         serviceType: service.title,
         description: page.metaDescription,
         url,
-        provider: {
-          '@type': 'ProfessionalService',
-          name: 'Revora Consultancy',
-          url: `${ORIGIN}/`,
-          email: site.email,
-          telephone: site.phone.replace(/\s/g, ''),
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: 'P38, India Exchange Place, Arun Chambers, 5th Floor',
-            addressLocality: 'Kolkata',
-            addressRegion: 'WB',
-            postalCode: '700001',
-            addressCountry: 'IN',
-          },
-        },
+        // A reference, not a second inline business entity: the shell's
+        // ProfessionalService node (index.html) declares this @id, and the
+        // prerenderer copies that shell into every service page. Two
+        // unlinked ProfessionalService nodes on one URL read as two
+        // unrelated businesses to a search engine.
+        provider: { '@id': `${ORIGIN}/#organization` },
         areaServed: { '@type': 'Country', name: 'India' },
         hasOfferCatalog: {
           '@type': 'OfferCatalog',
@@ -105,7 +99,8 @@ export default function ServicePage({ service }) {
       </a>
       <div className="ambient" />
       <Navbar />
-      <main id="main" style={{ '--accent': service.accent }}>
+      {/* tabIndex so the skip link reliably MOVES focus here, not just scroll */}
+      <main id="main" tabIndex={-1} style={{ '--accent': service.accent }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(service) }} />
 
         <header className="service-hero">
@@ -171,7 +166,7 @@ export default function ServicePage({ service }) {
 
         <section className="section service-section">
           <div className="container service-narrow">
-            <Reveal>
+            <div>
               <h2 className="section-title">{service.headline}</h2>
               {page.intro.map((paragraph) => (
                 <p className="service-body" key={paragraph.slice(0, 40)}>
@@ -183,24 +178,24 @@ export default function ServicePage({ service }) {
                   <li key={p}>{p}</li>
                 ))}
               </ul>
-            </Reveal>
+            </div>
           </div>
         </section>
 
         <section className="section service-section">
           <div className="container">
-            <Reveal>
+            <div>
               <span className="section-tag">What You Get</span>
               <h2 className="section-title">Included in every {service.short} engagement</h2>
-            </Reveal>
+            </div>
             <div className="service-deliverables">
-              {page.deliverables.map((d, i) => (
-                <Reveal key={d.title}>
+              {page.deliverables.map((d) => (
+                <div key={d.title}>
                   <article className="sheet service-deliverable">
                     <h3>{d.title}</h3>
                     <p>{d.text}</p>
                   </article>
-                </Reveal>
+                </div>
               ))}
             </div>
           </div>
@@ -209,7 +204,7 @@ export default function ServicePage({ service }) {
         <section className="section service-section">
           <div className="container">
             <div className="service-split">
-              <Reveal>
+              <div>
                 <div className="sheet service-panel">
                   <h2 className="service-panel-title">Who this is for</h2>
                   <ul className="service-points">
@@ -218,8 +213,8 @@ export default function ServicePage({ service }) {
                     ))}
                   </ul>
                 </div>
-              </Reveal>
-              <Reveal>
+              </div>
+              <div>
                 <div className="sheet service-panel">
                   <h2 className="service-panel-title">What we build it with</h2>
                   <ul className="service-stack">
@@ -231,46 +226,66 @@ export default function ServicePage({ service }) {
                     Chosen per project — we pick the boring, production-proven option unless there is a reason not to.
                   </p>
                 </div>
-              </Reveal>
+              </div>
             </div>
           </div>
         </section>
 
         <section className="section service-section">
           <div className="container">
-            <Reveal>
+            <div>
               <span className="section-tag">How It Runs</span>
               <h2 className="section-title">From first call to handover</h2>
-            </Reveal>
+            </div>
             <ol className="service-phases">
-              {page.phases.map((phase, i) => (
-                <Reveal key={phase.when}>
+              {page.phases.map((phase) => (
+                <div key={phase.when}>
                   <li className="sheet service-phase">
                     <span className="service-phase-when">{phase.when}</span>
                     <p>{phase.what}</p>
                   </li>
-                </Reveal>
+                </div>
               ))}
             </ol>
           </div>
         </section>
 
+        {/* These pages are the ones built to catch search traffic, so they
+            must carry the two things that decide an SMB enquiry on their
+            own: a ₹ number (the generator + the pricing bands) and the
+            signed commitments. A visitor landing here from Google never
+            sees the home page. */}
         <section className="section service-section">
           <div className="container service-narrow">
-            <Reveal>
+            <div>
+              <span className="section-tag">Scope It Yourself</span>
+              <h2 className="section-title">{`A first ${service.short} roadmap, in under a minute`}</h2>
+            </div>
+            <div className="service-roadgen">
+              <RoadmapGenerator defaultProblem={service.id} />
+            </div>
+          </div>
+        </section>
+
+        <Pricing />
+        <Guarantee />
+
+        <section className="section service-section">
+          <div className="container service-narrow">
+            <div>
               <span className="section-tag">Questions</span>
               <h2 className="section-title">{service.short} questions, straight answers</h2>
-            </Reveal>
+            </div>
             <div className="faq-list">
               {page.faqs.map((item, i) => (
-                <Reveal key={item.q}>
+                <div key={item.q}>
                   <FaqItem
                     {...item}
                     id={`service-faq-${i}`}
                     open={openFaq === i}
                     onToggle={() => setOpenFaq(openFaq === i ? -1 : i)}
                   />
-                </Reveal>
+                </div>
               ))}
             </div>
           </div>
@@ -280,12 +295,12 @@ export default function ServicePage({ service }) {
 
         <section className="section service-section" style={{ paddingTop: 0 }}>
           <div className="container">
-            <Reveal>
+            <div>
               <h2 className="section-title">Often paired with</h2>
-            </Reveal>
+            </div>
             <div className="service-related">
-              {related.map((r, i) => (
-                <Reveal key={r.id}>
+              {related.map((r) => (
+                <div key={r.id}>
                   <a className="sheet service-related-card" href={href(servicePath(r.id))} style={{ '--accent': r.accent }}>
                     <Icon name={r.icon} />
                     <h3>{r.title}</h3>
@@ -294,9 +309,9 @@ export default function ServicePage({ service }) {
                       Explore {r.short} <span aria-hidden>→</span>
                     </span>
                   </a>
-                </Reveal>
+                </div>
               ))}
-              <Reveal>
+              <div>
                 <a className="sheet service-related-card service-related-all" href={href('#services')}>
                   <h3>All six services</h3>
                   <p>The full services ledger — open any of the six, each with a live demo.</p>
@@ -304,7 +319,7 @@ export default function ServicePage({ service }) {
                     Back to the overview <span aria-hidden>→</span>
                   </span>
                 </a>
-              </Reveal>
+              </div>
             </div>
           </div>
         </section>
@@ -313,6 +328,7 @@ export default function ServicePage({ service }) {
       </main>
       <Footer />
       <WhatsAppFab />
+      <StickyCtaBar />
     </>
   )
 }

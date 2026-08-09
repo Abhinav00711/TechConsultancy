@@ -77,7 +77,7 @@ export const servicePages = {
       },
       {
         q: 'How much does an AI project cost?',
-        a: 'It depends entirely on scope — a single automated workflow is a small fixed-price pilot; an assistant grounded across several systems is a larger build. You get a fixed itemised quote after the free discovery call, split across milestones so you pay as working software is delivered.',
+        a: 'A single automated workflow runs as a fixed-price pilot, typically ₹75k–₹1.5 L over about two weeks. A fuller build — an assistant grounded across several systems, or automation with approval flows — usually lands between ₹1.25 L and ₹3.5 L for a small team, scaling with team size. You get a fixed itemised quote after the free discovery call, split across milestones so you pay as working software is delivered.',
       },
     ],
     related: ['crm', 'api'],
@@ -144,6 +144,10 @@ export const servicePages = {
       {
         q: 'Will WhatsApp really work inside the CRM?',
         a: 'Yes, through the official WhatsApp Business API: messages appear against the right customer record, approved templates handle outbound follow-ups, and replies notify the deal owner. It needs a WhatsApp Business account in your company name, which we help you set up.',
+      },
+      {
+        q: 'What does a custom CRM cost?',
+        a: 'Typically ₹1.5–4 L for a small team, more with heavier integrations or a larger rollout — and zero per-user licence fees forever, which is where a one-off build overtakes subscriptions within a few years. The smallest way in is a ₹75k–₹1.5 L fixed-price pilot on one workflow. A fixed itemised quote follows the free discovery call.',
       },
       {
         q: 'What if we need changes after launch?',
@@ -216,6 +220,10 @@ export const servicePages = {
         a: 'It gets migrated. We audit it first — historical data is almost always messier than expected — then clean and de-duplicate it, run a rehearsal migration you verify yourself, and only then switch over.',
       },
       {
+        q: 'What does an ERP like this cost?',
+        a: 'The first useful module — usually inventory or accounts — typically lands between ₹3 L and ₹8 L for a small team. A multi-department rollout is quoted phase by phase, each with its own fixed itemised quote and milestone payments, and you can stop after any phase with everything built so far in your hands.',
+      },
+      {
         q: 'Is a custom ERP cheaper than SAP or Odoo?',
         a: 'For a mid-sized business, often yes across three to five years, because there are no per-user licences and no implementation partner. But not always, and we will say so: if a configured off-the-shelf ERP fits your processes, that is the cheaper path and we will help you evaluate it.',
       },
@@ -275,7 +283,7 @@ export const servicePages = {
     faqs: [
       {
         q: 'How much does a website cost?',
-        a: 'A focused marketing site starts smaller than a web app or an e-commerce build, and the number depends on page count, custom design and integrations. You get a fixed itemised quote after a free discovery call — no hourly billing, and we will always point out the cheapest way to hit your goal.',
+        a: 'A focused marketing site typically lands between ₹75k and ₹2.5 L; e-commerce and web apps run higher depending on flows and integrations. You get a fixed itemised quote after a free discovery call — no hourly billing, and we will always point out the cheapest way to hit your goal.',
       },
       {
         q: 'How long will it take?',
@@ -356,6 +364,10 @@ export const servicePages = {
         a: 'Generated from the code as part of the build, so it cannot go stale, and published where your team and your partners can reach it. Handover includes runbooks for the operational parts.',
       },
       {
+        q: 'What does an integration project cost?',
+        a: 'A single integration — one gateway, one ERP connection — is usually a fixed-price pilot in the ₹75k–₹1.5 L band. A documented API layer across several systems typically runs ₹1–3 L for a small team, scaling with the number of systems and the reliability work they need. Fixed itemised quote after the free discovery call.',
+      },
+      {
         q: 'Do you support the API after launch?',
         a: 'Yes. There is a free stabilisation period after launch, and monthly care plans covering monitoring, incident response, dependency updates and small changes with clear SLAs. You own everything either way.',
       },
@@ -424,6 +436,10 @@ export const servicePages = {
       {
         q: 'Will this run in our own cloud account?',
         a: 'Yes, always. Everything is built in accounts you own, with access you grant and can revoke. At handover you get the infrastructure code, the credentials and the runbooks — nothing depends on us continuing.',
+      },
+      {
+        q: 'What does a DevOps engagement cost?',
+        a: 'Most pipeline-and-monitoring builds land between ₹90k and ₹2.5 L for a small team; a contained fix — one pipeline, one environment — fits the ₹75k–₹1.5 L pilot band. The week-one audit produces the fixed itemised quote, and it usually pays for itself out of the cloud bill it trims.',
       },
       {
         q: 'Can you take over infrastructure someone else built?',

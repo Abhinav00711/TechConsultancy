@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { contact, site } from '../data/content.js'
+import { contact, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
-import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
 /* Form status: idle → sending → sent | draft | error.
@@ -68,16 +67,16 @@ export default function Contact() {
   return (
     <section id="contact" className="section">
       <div className="container">
-        <Reveal>
+        <div>
           <span className="section-tag">Get In Touch</span>
           <h2 className="section-title">
             {contact.heading} <span className="accent-text">{contact.headingAccent}</span>
           </h2>
           <p className="section-sub">{contact.text}</p>
-        </Reveal>
+        </div>
 
         <div className="contact-wrap">
-          <Reveal className="contact-info">
+          <div className="contact-info">
             {site.bookingUrl && (
               <a
                 className="contact-info-item sheet contact-info-booking"
@@ -123,9 +122,9 @@ export default function Contact() {
                 <span>{site.email}</span>
               </div>
             </a>
-          </Reveal>
+          </div>
 
-          <Reveal>
+          <div>
             <form className="contact-form sheet" onSubmit={onSubmit}>
               {contact.formNote && <p className="form-note">{contact.formNote}</p>}
               <div className="form-row">
@@ -149,38 +148,14 @@ export default function Contact() {
                     <option value="" disabled>
                       Select a service…
                     </option>
-                    <option>AI Integration</option>
-                    <option>Custom CRM</option>
-                    <option>ERP Solution</option>
-                    <option>Web Development</option>
-                    <option>API Development</option>
-                    <option>Cloud & DevOps</option>
+                    {/* Generated from the same data the prefill events send
+                        (services[].formOption) — a hand-copied list here
+                        silently breaks the prefill the day a service is
+                        added or renamed. */}
+                    {services.map((s) => (
+                      <option key={s.id}>{s.formOption}</option>
+                    ))}
                     <option>Not sure yet — let’s talk</option>
-                  </select>
-                </div>
-              </div>
-              {/* Optional qualifiers — they protect founder time and make the
-                  first reply specific instead of generic. Kept optional so
-                  they never block a lead. */}
-              <div className="form-row">
-                <div className="form-field">
-                  <label htmlFor="cf-budget">Rough Budget (optional)</label>
-                  <select id="cf-budget" name="budget" defaultValue="">
-                    <option value="">Prefer not to say</option>
-                    <option>Under ₹1 lakh</option>
-                    <option>₹1–5 lakh</option>
-                    <option>₹5–15 lakh</option>
-                    <option>₹15 lakh+</option>
-                    <option>Not sure yet</option>
-                  </select>
-                </div>
-                <div className="form-field">
-                  <label htmlFor="cf-timeline">Timeline (optional)</label>
-                  <select id="cf-timeline" name="timeline" defaultValue="">
-                    <option value="">Select…</option>
-                    <option>As soon as possible</option>
-                    <option>This quarter</option>
-                    <option>Just exploring for now</option>
                   </select>
                 </div>
               </div>
@@ -188,9 +163,32 @@ export default function Contact() {
                 <label htmlFor="cf-message">Project Details</label>
                 <textarea id="cf-message" name="message" rows="5" placeholder="Tell us what you want to build, or describe the problem in 3 lines…" required />
               </div>
-              <div className="form-field">
-                <label htmlFor="cf-source">How did you find us? (optional)</label>
-                <input id="cf-source" name="source" type="text" placeholder="Google, LinkedIn, a referral…" />
+              {/* Optional qualifiers — they protect founder time and make the
+                  first reply specific instead of generic. Kept optional so
+                  they never block a lead, and placed BELOW the message: the
+                  visitor describes the problem before being asked to
+                  negotiate budget. (The old "How did you find us?" field is
+                  gone — the hidden page/referrer field and Umami already
+                  answer it without taxing the visitor.) */}
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="cf-budget">Rough Budget (optional)</label>
+                  <select id="cf-budget" name="budget" defaultValue="">
+                    <option value="">Prefer not to say</option>
+                    {contact.budgets.map((b) => (
+                      <option key={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="cf-timeline">Timeline (optional)</label>
+                  <select id="cf-timeline" name="timeline" defaultValue="">
+                    <option value="">Select…</option>
+                    {contact.timelines.map((t) => (
+                      <option key={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               {/* Attribution context — invisible to the visitor, gold for
                   knowing which channel produced the lead. */}
@@ -238,7 +236,8 @@ export default function Contact() {
                 style={{ justifyContent: 'center' }}
                 disabled={status === 'sending'}
               >
-                {status === 'sending' ? 'Sending…' : 'Send Message'} <span aria-hidden>→</span>
+                {/* The button sells the formNote's offer, not a generic verb. */}
+                {status === 'sending' ? 'Sending…' : contact.submitLabel} <span aria-hidden>→</span>
               </button>
               {site.whatsappLink && (
                 <p className="form-alt-channel">
@@ -250,7 +249,7 @@ export default function Contact() {
                 </p>
               )}
             </form>
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>

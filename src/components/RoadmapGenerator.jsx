@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { roadmap, site } from '../data/content.js'
-import { track } from '../lib/analytics.js'
+import { roadmap, services, site } from '../data/content.js'
+import { track, bookingHref } from '../lib/analytics.js'
 
 /* The hero instrument: two questions in, a scoped roadmap out, in under a
    minute. Deterministic on purpose — instant, free, works offline, and cannot
@@ -9,7 +9,12 @@ import { track } from '../lib/analytics.js'
 
    It does four jobs at once: proves we understand the visitor's problem,
    qualifies the lead by service and scale, gives them a document to forward
-   to a business partner, and demonstrates the exact product thinking we sell. */
+   to a business partner, and demonstrates the exact product thinking we sell.
+
+   A visitor holding a generated plan is the hottest traffic on the site, so
+   the document never dead-ends: the booking lane is offered next to "send",
+   and stays offered after sending. Generating also preselects the matching
+   service in the contact form (problem ids equal service ids). */
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const stamp = (d) => `${String(d.getDate()).padStart(2, '0')} ${monthNames[d.getMonth()]} ${d.getFullYear()}`
@@ -19,8 +24,7 @@ const stamp = (d) => `${String(d.getDate()).padStart(2, '0')} ${monthNames[d.get
    lakh) — the units Indian SMB buyers actually think in. The band's floor
    rounds down and its ceiling rounds up, so scaling always widens the range
    instead of two team sizes colliding on the same rounded figure. */
-const fmtLakh = (v, roundFn) =>
-  v < 1 ? `₹${roundFn((v * 100) / 5) * 5}k` : `₹${String(roundFn(v * 2) / 2).replace(/\.0$/, '')} L`
+const fmtLakh = (v, roundFn) => (v < 1 ? `₹${roundFn((v * 100) / 5) * 5}k` : `₹${roundFn(v * 2) / 2} L`)
 
 function buildPlan(problemId, scaleId) {
   const plan = roadmap.plans[problemId]
@@ -41,8 +45,10 @@ function buildPlan(problemId, scaleId) {
   return { plan, scale, phases, total, band }
 }
 
-export default function RoadmapGenerator() {
-  const [problem, setProblem] = useState('ai')
+/* defaultProblem lets each /services/<id>/ page mount the generator with its
+   own service preselected (plan ids match service ids). */
+export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
+  const [problem, setProblem] = useState(defaultProblem)
   const [scale, setScale] = useState('s')
   const [doc, setDoc] = useState(null)
   // send flow: idle → asking (contact field shown) → sending → sent | error
@@ -60,6 +66,10 @@ export default function RoadmapGenerator() {
       date: stamp(new Date()),
     })
     setSendState('idle')
+    // The generated service reaches the contact form too — scrolling down to
+    // it should find the service already selected (Contact.jsx listens).
+    const service = services.find((s) => s.id === problem)
+    if (service) window.dispatchEvent(new CustomEvent('revora:service', { detail: service.formOption }))
     track('Roadmap Generated', { service: built.plan.title, scale: built.scale.label })
     requestAnimationFrame(() => docRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
   }
@@ -112,8 +122,20 @@ export default function RoadmapGenerator() {
     track('Roadmap Print', { service: doc.plan.title })
   }
 
+  const bookLink = site.bookingUrl && (
+    <a
+      href={bookingHref('roadmap')}
+      className="btn btn-ghost"
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => track('Booking Click', { placement: 'roadmap' })}
+    >
+      {roadmap.book}
+    </a>
+  )
+
   return (
-    <div className="roadgen sheet">
+    <div className="roadgen sheet" id="roadgen">
       <div className="roadgen-head">
         <h2>{roadmap.eyebrow}</h2>
         <span>{roadmap.intro}</span>
@@ -164,8 +186,16 @@ export default function RoadmapGenerator() {
         </div>
       </form>
 
+      {/* Mounted from the start so it exists in the accessibility tree BEFORE
+          content lands in it — a live region inserted together with its
+          content is not reliably announced. Announces a short summary, not
+          the ~30-line document. */}
+      <div role="status" className="sr-only">
+        {doc ? `Roadmap ${doc.ref} ready: about ${doc.total} weeks, indicative range ${doc.band}.` : ''}
+      </div>
+
       {doc && (
-        <div className="roadmap-doc" ref={docRef} aria-live="polite">
+        <div className="roadmap-doc" ref={docRef}>
           <div className="roadmap-doc-head">
             <h3>{doc.plan.title}</h3>
             <span>{doc.ref}</span>
@@ -203,24 +233,7 @@ export default function RoadmapGenerator() {
             ))}
           </ul>
 
-          {sendState === 'sent' ? (
-            <p className="roadmap-sent" role="status">
-              ✓ Sent — a founder replies within 24 hours.
-            </p>
-          ) : sendState === 'draft' ? (
-            <p className="roadmap-sent" role="status">
-              ✓ Your email app should open with this roadmap pre-filled — press send there to deliver it.
-            </p>
-          ) : sendState === 'idle' ? (
-            <div className="roadgen-actions">
-              <button type="button" className="btn btn-primary" onClick={() => setSendState('asking')}>
-                {roadmap.send}
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={print}>
-                {roadmap.print}
-              </button>
-            </div>
-          ) : (
+          {sendState === 'asking' || sendState === 'sending' || sendState === 'error' ? (
             <form className="roadgen-actions" onSubmit={send}>
               <div className="form-field" style={{ flex: '1 1 220px' }}>
                 <label htmlFor="rg-contact">Email or WhatsApp number</label>
@@ -232,13 +245,43 @@ export default function RoadmapGenerator() {
               <button type="submit" className="btn btn-primary" disabled={sendState === 'sending'}>
                 {sendState === 'sending' ? 'Sending…' : 'Send'}
               </button>
-              {sendState === 'error' && (
-                <p className="roadmap-error" role="status">
-                  Sending failed — email us at <a href={`mailto:${site.email}`} style={{ textDecoration: 'underline' }}>{site.email}</a> instead.
-                </p>
-              )}
             </form>
+          ) : (
+            <div className="roadgen-actions">
+              {sendState === 'idle' && (
+                <button type="button" className="btn btn-primary" onClick={() => setSendState('asking')}>
+                  {roadmap.send}
+                </button>
+              )}
+              {/* The booking lane stays available after sending too — "a
+                  founder replies within 24 hours" must never be the only
+                  path offered to someone who is ready now. */}
+              {bookLink}
+              <button type="button" className="btn btn-ghost" onClick={print}>
+                {roadmap.print}
+              </button>
+            </div>
           )}
+
+          {/* Persistent wrapper (see the generation status above): the
+              messages swap inside an already-mounted live region. */}
+          <div role="status" aria-live="polite">
+            {sendState === 'sent' && <p className="roadmap-sent">✓ Sent — a founder replies within 24 hours.</p>}
+            {sendState === 'draft' && (
+              <p className="roadmap-sent">
+                ✓ Your email app should open with this roadmap pre-filled — press send there to deliver it.
+              </p>
+            )}
+            {sendState === 'error' && (
+              <p className="roadmap-error">
+                Sending failed — email us at{' '}
+                <a href={`mailto:${site.email}`} style={{ textDecoration: 'underline' }}>
+                  {site.email}
+                </a>{' '}
+                instead.
+              </p>
+            )}
+          </div>
 
           <p className="roadmap-foot">
             {`Prepared ${doc.date} · ${site.name} ${site.suffix}, Kolkata · ${roadmap.disclaimer}`}

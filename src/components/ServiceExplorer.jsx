@@ -1,9 +1,9 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { useInView } from 'motion/react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'
 import { href, servicePath } from '../lib/routes.js'
+import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icons.jsx'
 
 const ShowcaseCanvas = lazy(() => import('./three/ShowcaseScenes.jsx'))
@@ -13,7 +13,12 @@ const ShowcaseCanvas = lazy(() => import('./three/ShowcaseScenes.jsx'))
    dark stage — the scenes are genuine system diagrams, so they finally
    illustrate the specific thing being read instead of decorating a carousel.
    (The carousel + overview-grid split this replaces cost two pickers and an
-   autoplay timer to show one service at a time.) */
+   autoplay timer to show one service at a time.)
+
+   Every panel is always in the DOM — closed ones carry the `hidden`
+   attribute. That is what puts all six services' copy (and their internal
+   links) into the prerendered HTML for crawlers, instead of only the open
+   row's. */
 
 /* Tells the contact form which service to preselect — Contact.jsx listens. */
 function prefillService(option) {
@@ -63,9 +68,19 @@ export default function ServiceExplorer() {
   const [active, setActive] = useState(0)
   // The visitor collapsed the open row. `active` stays valid for deep links.
   const [collapsed, setCollapsed] = useState(false)
-  const wrapRef = useRef(null)
-  const inView = useInView(wrapRef, { once: true, margin: '300px' })
-  const constrained = useMemo(isConstrained, [])
+  // Capable device, post-hydration: the dark stage (gradient fallback) may
+  // render. Starts false so the prerender snapshot and the hydration pass
+  // agree on every device.
+  const [stageReady, setStageReady] = useState(false)
+  // The visitor has actually operated the ledger (toggled a row, or arrived
+  // on a #services-<id> deep link). three.js is ~280 KB gzip — it downloads
+  // only for visitors who showed interest in the diagrams, never merely
+  // because the section scrolled near the viewport.
+  const [engaged, setEngaged] = useState(false)
+
+  useEffect(() => {
+    if (!window.__PRERENDERING__ && !isConstrained()) setStageReady(true)
+  }, [])
 
   // Deep links: #services-crm (footer, ads, LinkedIn posts…) opens that row.
   useEffect(() => {
@@ -76,6 +91,8 @@ export default function ServiceExplorer() {
       if (i === -1) return
       setActive(i)
       setCollapsed(false)
+      // Arriving on a service deep link is as deliberate as a toggle.
+      setEngaged(true)
       document.getElementById('services')?.scrollIntoView()
     }
     apply()
@@ -96,6 +113,7 @@ export default function ServiceExplorer() {
       setActive(i)
       setCollapsed(false)
     }
+    setEngaged(true)
     requestAnimationFrame(() => {
       const after = triggerEl.getBoundingClientRect().top
       if (after !== before) window.scrollBy({ top: after - before, behavior: 'auto' })
@@ -103,13 +121,6 @@ export default function ServiceExplorer() {
   }
 
   const openIndex = collapsed ? -1 : active
-  // three.js is ~280 KB gzip, so it only downloads once the section is near
-  // the viewport and never on the devices isConstrained() screens out.
-  // Hydration invariant: useInView is always false on the first render, so
-  // this is false in both the prerender pass and the hydration pass no matter
-  // what window.__PRERENDERING__ or isConstrained() say — the canvas only
-  // ever mounts in a post-hydration render. Keep `inView` in this expression.
-  const canRender3D = inView && !constrained && !window.__PRERENDERING__
 
   return (
     <section id="services" className="section">
@@ -120,67 +131,107 @@ export default function ServiceExplorer() {
         </h2>
         <p className="section-sub">{explorer.sub}</p>
 
-        <div ref={wrapRef} className="services-accordion">
+        <div className="services-accordion">
           {services.map((s, i) => {
             const open = i === openIndex
             return (
               <div key={s.id} className={`services-accordion-item ${open ? 'open' : ''}`} style={{ '--accent': s.accent }}>
-                <h3 className="sa-heading">
-                  <button
-                    type="button"
-                    className="sa-trigger"
-                    aria-expanded={open}
-                    aria-controls={`sa-panel-${s.id}`}
-                    id={`sa-trigger-${s.id}`}
-                    onClick={(e) => toggle(i, e.currentTarget)}
-                  >
-                    <span className="sa-index">{String(i + 1).padStart(2, '0')}</span>
-                    <Icon name={s.icon} className="sa-icon" />
-                    <span className="sa-label">
-                      <strong>{s.title}</strong>
-                      <span>{s.headline}</span>
-                    </span>
-                    <svg
-                      className="sa-chevron"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
+                <div className="sa-row">
+                  <h3 className="sa-heading">
+                    <button
+                      type="button"
+                      className="sa-trigger"
+                      aria-expanded={open}
+                      aria-controls={`sa-panel-${s.id}`}
+                      id={`sa-trigger-${s.id}`}
+                      onClick={(e) => toggle(i, e.currentTarget)}
                     >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </button>
-                </h3>
-                {open && (
-                  <div className="sa-panel" id={`sa-panel-${s.id}`} role="region" aria-labelledby={`sa-trigger-${s.id}`}>
-                    <div className="sa-copy">
-                      <p>{s.description}</p>
-                      <ul className="service-points">
-                        {s.points.map((p) => (
-                          <li key={p}>{p}</li>
-                        ))}
-                      </ul>
-                      <div className="showcase-actions sa-actions">
-                        <ServiceActions item={s} />
-                      </div>
+                      <span className="sa-index">{String(i + 1).padStart(2, '0')}</span>
+                      <Icon name={s.icon} className="sa-icon" />
+                      <span className="sa-label">
+                        <strong>{s.title}</strong>
+                        <span>{s.headline}</span>
+                      </span>
+                      <svg
+                        className="sa-chevron"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  </h3>
+                  {/* Always-visible exit ramp: without it a closed row has no
+                      link at all, and five of the six service pages end up
+                      with a single internal link site-wide (the footer). */}
+                  <a
+                    className="sa-quicklink"
+                    href={href(servicePath(s.id))}
+                    onClick={() => track('Service Page Click', { service: s.title, placement: 'row-quicklink' })}
+                  >
+                    {`${s.short} in detail`} <span aria-hidden>→</span>
+                  </a>
+                </div>
+                <div
+                  className="sa-panel"
+                  id={`sa-panel-${s.id}`}
+                  role="region"
+                  aria-labelledby={`sa-trigger-${s.id}`}
+                  hidden={!open}
+                >
+                  <div className="sa-copy">
+                    <p>{s.description}</p>
+                    <ul className="service-points">
+                      {s.points.map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
+                    </ul>
+                    <div className="showcase-actions sa-actions">
+                      <ServiceActions item={s} />
                     </div>
-                    {/* The one dark stage on the page: a live diagram of this
-                        service, inset into the paper like an instrument
-                        screen. Nothing renders on constrained devices — the
-                        row reads complete without it. */}
-                    {canRender3D && (
+                  </div>
+                  {/* The one dark stage on the page: a live diagram of this
+                      service, inset into the paper like an instrument
+                      screen. Nothing renders on constrained devices — the
+                      row reads complete without it. The WebGL chunk itself
+                      waits for `engaged`; until then the CSS gradient
+                      stands in. A failed chunk download degrades to the
+                      same gradient instead of unmounting the page. */}
+                  {open && stageReady && (
+                    engaged ? (
                       <div className="showcase-canvas sa-canvas" aria-hidden="true">
-                        <Suspense fallback={<div className="canvas-fallback" />}>
-                          <ShowcaseCanvas scene={s.id} />
-                        </Suspense>
+                        <ErrorBoundary fallback={<div className="canvas-fallback" />}>
+                          <Suspense fallback={<div className="canvas-fallback" />}>
+                            <ShowcaseCanvas scene={s.id} />
+                          </Suspense>
+                        </ErrorBoundary>
                         <div className="showcase-canvas-label">{s.sceneLabel}</div>
                       </div>
-                    )}
-                  </div>
-                )}
+                    ) : (
+                      /* Not aria-hidden here: the load control is real UI.
+                         No "live" label yet either — nothing is live until
+                         the visitor asks for it. */
+                      <div className="showcase-canvas sa-canvas">
+                        <div className="canvas-fallback" aria-hidden="true" />
+                        <button
+                          type="button"
+                          className="canvas-load"
+                          onClick={() => {
+                            setEngaged(true)
+                            track('Scene Load Click', { service: s.title })
+                          }}
+                        >
+                          {`Load the live ${s.sceneLabel} demo`}
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
             )
           })}

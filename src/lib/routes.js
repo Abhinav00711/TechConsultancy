@@ -55,6 +55,18 @@ export const loadServicePage = () =>
 
 export const servicePageComponent = () => servicePageModule
 
+/* Same pattern for /privacy/ — smaller stakes (~3 KB of prose), but there is
+   no reason for the home page's entry chunk to carry a page it never
+   renders, and the resolve-before-boot machinery already exists. */
+let privacyPageModule = null
+
+export const loadPrivacyPage = () =>
+  import('../components/PrivacyPolicy.jsx').then((mod) => {
+    privacyPageModule = mod.default
+  })
+
+export const privacyPageComponent = () => privacyPageModule
+
 /* Rewrite a link written for the home page so it also works from a sub-page.
    '#contact' is deliberately left alone: every page that renders this nav also
    renders its own Contact section, so that anchor is always local. Every other

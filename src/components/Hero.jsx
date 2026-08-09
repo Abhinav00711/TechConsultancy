@@ -39,6 +39,17 @@ export default function Hero() {
                 {hero.ctaPrimary} <span aria-hidden>→</span>
               </a>
             )}
+            {/* The two-lane choice the funnel assumes: ready-now books a
+                call, not-ready generates the free document. On phones the
+                generator is below the fold, so the subtitle's promise needs
+                a control that goes there. */}
+            <a
+              href="#roadgen"
+              className="btn btn-ghost"
+              onClick={() => track('Roadmap CTA Click', { placement: 'hero' })}
+            >
+              {hero.ctaRoadmap} <span aria-hidden>↓</span>
+            </a>
           </div>
 
           <ul className="hero-assurances">

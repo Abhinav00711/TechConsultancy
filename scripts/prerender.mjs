@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { services } from '../src/data/content.js'
+import { services, site } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
@@ -513,7 +513,7 @@ try {
       .map((route) =>
         [
           '  <url>',
-          `    <loc>https://revora.co.in/${route.path}</loc>`,
+          `    <loc>${site.origin}/${route.path}</loc>`,
           `    <lastmod>${lastmodFor(route)}</lastmod>`,
           `    <changefreq>${route.changefreq}</changefreq>`,
           `    <priority>${route.priority}</priority>`,

@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import App from './App.jsx'
-import { currentRoute, loadServicePage, rootPrefix } from './lib/routes.js'
+import { currentRoute, loadPrivacyPage, loadServicePage, rootPrefix } from './lib/routes.js'
 
 // Self-hosted fonts (no third-party font CDN requests).
 // The Ledger identity needs four webfont files: Fraunces 600 (display face)
@@ -41,17 +41,20 @@ const boot = () => {
   }
 }
 
-// The /services/<id>/ pages live in their own chunk so the home page never
-// downloads them (src/lib/routes.js). It has to be resolved BEFORE the first
-// render, because hydration must produce the same tree the snapshot contains.
-if (currentRoute().name === 'service') {
-  loadServicePage()
+// The /services/<id>/ and /privacy/ pages live in their own chunks so the
+// home page never downloads them (src/lib/routes.js). They have to be
+// resolved BEFORE the first render, because hydration must produce the same
+// tree the snapshot contains.
+const routeName = currentRoute().name
+const subPageChunk = routeName === 'service' ? loadServicePage : routeName === 'privacy' ? loadPrivacyPage : null
+if (subPageChunk) {
+  subPageChunk()
     .then(boot)
     .catch((error) => {
       // The prerendered page is already on screen and fully readable. Booting
       // without its component would replace it with the home page, so the
       // right failure mode is to stay static.
-      console.error('service page chunk failed to load', error)
+      console.error(`${routeName} page chunk failed to load`, error)
     })
 } else {
   boot()
@@ -67,8 +70,10 @@ if (currentRoute().name === 'service') {
 // warm the /services/<id>/ chunk and HTML when a visitor shows intent.
 if (!window.__PRERENDERING__) {
   const start = () => {
-    import('./lib/vitals.js').then((m) => m.reportVitals())
-    import('./lib/prefetch.js').then((m) => m.setupPrefetch())
+    // Both are enhancements: a failed chunk (flaky network, stale HTML after
+    // a deploy) must stay silent, not surface as an unhandled rejection.
+    import('./lib/vitals.js').then((m) => m.reportVitals()).catch(() => {})
+    import('./lib/prefetch.js').then((m) => m.setupPrefetch()).catch(() => {})
   }
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 3000 })
   else setTimeout(start, 1200)

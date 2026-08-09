@@ -4,8 +4,7 @@ import { track, bookingHref } from '../lib/analytics.js'
 /* Price bands — flagged missing by all three panel reviews. Wide ranges
    qualify leads and stop the silent "expensive and evasive" bounce; the
    fixed itemised quote remains the real number, and the copy says so.
-   The bands live in content.js (`pricing`); `pricing.placeholder` adds an
-   sr-only "indicative" note if the figures ever revert to stand-ins. */
+   The bands live in content.js (`pricing`). */
 export default function Pricing() {
   return (
     <section id="pricing" className="section">
@@ -20,10 +19,7 @@ export default function Pricing() {
           {pricing.bands.map((band) => (
             <article key={band.name} className="pricing-band sheet">
               <h3>{band.name}</h3>
-              <p className="pricing-range">
-                {band.range}
-                {pricing.placeholder && <span className="sr-only"> (indicative range)</span>}
-              </p>
+              <p className="pricing-range">{band.range}</p>
               <p className="pricing-duration">{band.duration}</p>
               <p>{band.text}</p>
               <ul className="pricing-includes">
@@ -33,7 +29,9 @@ export default function Pricing() {
               </ul>
               {site.bookingUrl && (
                 <a
-                  href={bookingHref('pricing')}
+                  /* Same per-band placement as the Umami event, so Cal.com's
+                     own dashboard can also tell a Pilot click from Platform. */
+                  href={bookingHref(`pricing-${band.name.toLowerCase()}`)}
                   className="btn btn-ghost"
                   target="_blank"
                   rel="noopener noreferrer"

@@ -7,7 +7,11 @@ export default function Process() {
   return (
     <section id="process" className="section process-strip-section">
       <div className="container">
-        <span className="section-tag">{process.tag}</span>
+        {/* The footer links here ("Our Process"), so the landing region needs
+            a real heading for screen-reader users — visually the mono tag
+            already plays that role, hence sr-only. */}
+        <h2 className="sr-only">{process.tag}</h2>
+        <span className="section-tag" aria-hidden="true">{process.tag}</span>
         <p className="process-strip">
           {process.steps.map((step, i) => (
             <span key={step} className="process-strip-step">

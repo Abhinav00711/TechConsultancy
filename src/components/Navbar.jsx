@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { m, AnimatePresence } from 'motion/react'
 import { site, nav } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { href } from '../lib/routes.js'
@@ -159,25 +158,18 @@ export default function Navbar() {
         </div>
       </header>
 
-      <AnimatePresence>
-        {open && (
-          <m.nav
-            id="mobile-menu"
-            className="mobile-menu"
-            initial={{ opacity: 0, y: -16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.25 }}
-          >
-            {nav.map((item) => (
-              <a key={item.href} href={href(item.href)} onClick={() => setOpen(false)}>
-                {item.label}
-              </a>
-            ))}
-            <NavCta className="btn btn-primary" style={{ marginTop: 12, justifyContent: 'center' }} onDone={() => setOpen(false)} />
-          </m.nav>
-        )}
-      </AnimatePresence>
+      {/* Always mounted; CSS animates the open/close and the delayed
+          visibility flip keeps the closed menu out of the accessibility
+          tree and tab order. This used to be the last motion/react call
+          site — a pure CSS transition needs no animation library. */}
+      <nav id="mobile-menu" className={`mobile-menu ${open ? 'open' : ''}`}>
+        {nav.map((item) => (
+          <a key={item.href} href={href(item.href)} onClick={() => setOpen(false)}>
+            {item.label}
+          </a>
+        ))}
+        <NavCta className="btn btn-primary" style={{ marginTop: 12, justifyContent: 'center' }} onDone={() => setOpen(false)} />
+      </nav>
     </>
   )
 }
