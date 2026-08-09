@@ -2,11 +2,16 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'
-import { href, servicePath } from '../lib/routes.js'
+import { href, servicePath, SERVICE_ID } from '../lib/routes.js'
 import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icons.jsx'
 
 const ShowcaseCanvas = lazy(() => import('./three/ShowcaseScenes.jsx'))
+
+/* #services-<id>, the deep link the footer and campaign links use. The id
+   pattern is imported rather than written out, so it cannot drift from the
+   /services/<id>/ route matcher — see SERVICE_ID in lib/routes.js. */
+const HASH_DEEP_LINK = new RegExp(`^#services-(${SERVICE_ID})$`)
 
 /* The services ledger: six ruled rows, one control at every width. The open
    row expands in place and shows its service's 3D diagram on the page's one
@@ -85,7 +90,7 @@ export default function ServiceExplorer() {
   // Deep links: #services-crm (footer, ads, LinkedIn posts…) opens that row.
   useEffect(() => {
     const apply = () => {
-      const match = /^#services-([a-z]+)$/.exec(window.location.hash)
+      const match = HASH_DEEP_LINK.exec(window.location.hash)
       if (!match) return
       const i = services.findIndex((s) => s.id === match[1])
       if (i === -1) return
@@ -113,7 +118,14 @@ export default function ServiceExplorer() {
       setActive(i)
       setCollapsed(false)
     }
-    setEngaged(true)
+    // Deliberately NOT setEngaged(true). Opening a row is a request to read
+    // the copy, not to load a 3D scene — and because this fired on every
+    // toggle, the "Load the live … demo" button below was only ever reachable
+    // on the first row's initial render. Measured: one plain row toggle
+    // fetched 266 KB gzip of three.js + r3f, so someone opening "Custom CRM
+    // Systems" for three paragraphs of text paid the entire WebGL cost. The
+    // deep-link path keeps its setEngaged: arriving on #services-<id> is an
+    // explicit request for that service's diagram.
     requestAnimationFrame(() => {
       const after = triggerEl.getBoundingClientRect().top
       if (after !== before) window.scrollBy({ top: after - before, behavior: 'auto' })

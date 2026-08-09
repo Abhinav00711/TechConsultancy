@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { roadmap, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 
@@ -45,6 +45,17 @@ function buildPlan(problemId, scaleId) {
   return { plan, scale, phases, total, band }
 }
 
+/* The plain-text roadmap that reaches the founders' inbox. Derived rather than
+   built inside the submit handler, because it is also rendered as a hidden
+   field so a native POST (see the form below) carries the plan, not just the
+   contact string. */
+const summaryFor = (doc) =>
+  [
+    `Generated roadmap ${doc.ref} — ${doc.plan.title}`,
+    `Team size: ${doc.scale.label} · ~${doc.total} weeks · indicative ${doc.band}`,
+    ...doc.phases.map((p) => `${p.label}: ${p.title}`),
+  ].join('\n')
+
 /* defaultProblem lets each /services/<id>/ page mount the generator with its
    own service preselected (plan ids match service ids). */
 export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
@@ -55,6 +66,11 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
   const [sendState, setSendState] = useState('idle')
   const seq = useRef(0)
   const docRef = useRef(null)
+  // Captured after mount, like Contact's: reading window during render would
+  // disagree with the prerendered snapshot and break hydration.
+  const [pageContext, setPageContext] = useState('')
+
+  useEffect(() => setPageContext(window.location.href), [])
 
   const generate = (e) => {
     e.preventDefault()
@@ -77,11 +93,7 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
   const send = async (e) => {
     e.preventDefault()
     const contact = new FormData(e.target).get('contact')
-    const summary = [
-      `Generated roadmap ${doc.ref} — ${doc.plan.title}`,
-      `Team size: ${doc.scale.label} · ~${doc.total} weeks · indicative ${doc.band}`,
-      ...doc.phases.map((p) => `${p.label}: ${p.title}`),
-    ].join('\n')
+    const summary = summaryFor(doc)
 
     if (!site.formEndpoint) {
       const subject = encodeURIComponent(`Roadmap enquiry — ${doc.plan.title}`)
@@ -233,8 +245,18 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
             ))}
           </ul>
 
+          {/* action/method on the send form below, for the same reason as the
+              contact form: if the bundle never hydrates, a native POST still
+              delivers the lead instead of a GET spraying it into the URL. The
+              plan and page travel as hidden fields so that fallback carries
+              the whole document, not just the contact string. */}
           {sendState === 'asking' || sendState === 'sending' || sendState === 'error' ? (
-            <form className="roadgen-actions" onSubmit={send}>
+            <form
+              className="roadgen-actions"
+              action={site.formEndpoint || undefined}
+              method="POST"
+              onSubmit={send}
+            >
               <div className="form-field" style={{ flex: '1 1 220px' }}>
                 <label htmlFor="rg-contact">Email or WhatsApp number</label>
                 {/* type="text" on purpose: the field accepts an email or a
@@ -242,6 +264,8 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
                     autofills emails into what may be a phone answer. */}
                 <input id="rg-contact" name="contact" type="text" required placeholder="you@company.com or +91 …" />
               </div>
+              <input type="hidden" name="roadmap" value={summaryFor(doc)} />
+              <input type="hidden" name="page" value={pageContext} />
               <button type="submit" className="btn btn-primary" disabled={sendState === 'sending'}>
                 {sendState === 'sending' ? 'Sending…' : 'Send'}
               </button>
@@ -285,6 +309,14 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
 
           <p className="roadmap-foot">
             {`Prepared ${doc.date} · ${site.name} ${site.suffix}, Kolkata · ${roadmap.disclaimer}`}
+          </p>
+          {/* The whole premise of this document is that the visitor keeps it
+              and forwards it. Printed, it used to carry no way of reaching
+              Revora at all — so a partner reading the PDF had nothing to act
+              on. This line is the only part of the document that survives
+              being detached from the site. */}
+          <p className="roadmap-colophon">
+            {`${site.origin.replace(/^https?:\/\//, '')} · ${site.email} · ${site.phone}`}
           </p>
         </div>
       )}

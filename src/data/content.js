@@ -27,9 +27,18 @@ export const site = {
   // Scheduling link — powers the "Book a Free Discovery Call" flow.
   bookingUrl: 'https://cal.com/revora-consultancy/discovery',
   // Only socials with a real URL are rendered. Fill these in as profiles exist.
+  // These are also the URLs that belong in the `sameAs` of the JSON-LD in
+  // index.html — an entity with no corroborating profile anywhere is hard for
+  // a knowledge graph or an answer engine to tell apart from any other
+  // "Revora". Add the LinkedIn company page here the day it exists, and to
+  // `sameAs` in index.html at the same time.
   socials: [
+    // The site's own source. For a dev consultancy with no permissioned case
+    // studies yet, a public repository is the cheapest verifiable claim
+    // available — and it makes the teardown's "view the source" invitation
+    // literally actionable instead of rhetorical.
+    { label: 'GitHub', icon: 'github', url: 'https://github.com/Abhinav00711/TechConsultancy' },
     // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
-    // { label: 'GitHub', icon: 'github', url: 'https://github.com/…' },
   ],
 }
 

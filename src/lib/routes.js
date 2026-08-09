@@ -10,8 +10,17 @@ import { services } from '../data/content.js'
    build serves both revora.co.in and a github.io/<repo>/ project URL. That is
    also why nothing here may assume the site sits at the domain root. */
 
+/* The one definition of what a service id may look like. Everything that has
+   to recognise an id builds its pattern from this — the route matcher below
+   and the #services-<id> deep link in ServiceExplorer. They used to carry
+   separate literals that disagreed ([a-z0-9-]+ here, [a-z]+ there), so the
+   first hyphenated id (crm-migration) would have routed correctly while every
+   deep link to it silently no-opped: an ad or LinkedIn post pointing at
+   #services-crm-migration lands on the wrong service with no error anywhere. */
+export const SERVICE_ID = '[a-z0-9-]+'
+
 const PRIVACY_PATH = /\/privacy\/?$/
-const SERVICE_PATH = /\/services\/([a-z0-9-]+)\/?$/
+const SERVICE_PATH = new RegExp(`/services/(${SERVICE_ID})/?$`)
 
 /* How far up the tree the site root is from the current URL. Depth is fixed
    per route shape, so it is derived from the pathname rather than counted —

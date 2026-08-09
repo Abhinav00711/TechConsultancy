@@ -1287,6 +1287,12 @@ export default function ShowcaseCanvas({ scene }) {
   // Reduced motion: a single static frame per tab switch instead of a loop.
   const frameloop = reducedMotion ? 'demand' : visible ? 'always' : 'never'
   const Scene = SCENES[scene] || SCENES.ai
+  // Guarded like SCENES and FRAME are. Unguarded, an id with no GROUND entry
+  // passed undefined to <Floor> and NaN to <ContactShadows> — and because NaN
+  // is not an exception, SceneErrorBoundary never fires: three.js takes the
+  // NaN matrix and the visitor gets a corrupted stage rather than the clean
+  // gradient fallback the design intends.
+  const ground = GROUND[scene] ?? GROUND.ai
 
   return (
     <div className="showcase-canvas-inner" ref={wrap}>
@@ -1323,11 +1329,11 @@ export default function ShowcaseCanvas({ scene }) {
 
             {/* The stage. Keyed to the scene so a tab switch re-bakes rather
                 than leaving the previous scene's shadow behind. */}
-            {!lowEnd && <Floor key={`floor-${scene}`} y={GROUND[scene]} />}
+            {!lowEnd && <Floor key={`floor-${scene}`} y={ground} />}
             {!lowEnd && (
               <ContactShadows
                 key={`shadow-${scene}`}
-                position={[0, GROUND[scene] + 0.004, 0]}
+                position={[0, ground + 0.004, 0]}
                 opacity={0.8}
                 scale={11}
                 blur={2.2}

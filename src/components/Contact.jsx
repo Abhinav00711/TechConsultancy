@@ -125,7 +125,22 @@ export default function Contact() {
           </div>
 
           <div>
-            <form className="contact-form sheet" onSubmit={onSubmit}>
+            {/* action/method are load-bearing, not decoration. main.jsx
+                deliberately skips hydration when a chunk 404s (a stale HTML
+                file naming an evicted asset hash after a deploy), so onSubmit
+                is not guaranteed to exist by the time someone presses Send.
+                Without an action the browser then falls back to a native GET
+                against the current URL, putting the visitor's name, email and
+                phone into their history, into the Referer of every subsequent
+                third-party request, and into Umami's page-URL field — and
+                losing the lead silently. With these two attributes the same
+                failure degrades to a plain POST that Formspree accepts. */}
+            <form
+              className="contact-form sheet"
+              action={site.formEndpoint || undefined}
+              method="POST"
+              onSubmit={onSubmit}
+            >
               {contact.formNote && <p className="form-note">{contact.formNote}</p>}
               <div className="form-row">
                 <div className="form-field">

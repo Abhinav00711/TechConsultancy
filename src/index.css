@@ -302,6 +302,15 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   border-bottom: 1px solid var(--border);
   padding: 18px 4vw 26px;
   display: flex; flex-direction: column; gap: 2px;
+  /* The menu is ~355px tall and opening it locks body scroll, so without a
+     bound of its own the tail of the list — Contact and the primary "Book a
+     Free Discovery Call" — is simply unreachable wherever the viewport is
+     shorter than the menu: 400% zoom (WCAG 1.4.10 Reflow) and landscape on a
+     short phone both hit it. overscroll-behavior keeps the scroll from
+     chaining to the locked body behind it. */
+  max-height: calc(100dvh - var(--nav-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   /* Closed state — the delayed visibility flip removes it from the
      accessibility tree and tab order once the fade finishes. */
   opacity: 0;
@@ -515,6 +524,15 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   color: var(--text-faint);
   padding-top: 11px;
   border-top: 1px solid var(--border);
+}
+/* The reach-us line: same mono register as the foot it follows, but in
+   readable ink rather than --text-faint, because on a printed page detached
+   from the site this is the only actionable text on the document. */
+.roadmap-colophon {
+  font-family: var(--font-mono); font-size: 0.66rem;
+  letter-spacing: 0.03em; line-height: 1.6;
+  color: var(--text-dim);
+  margin-top: 3px;
 }
 .roadmap-sent {
   font-family: var(--font-mono); font-size: 0.72rem;
@@ -1360,4 +1378,13 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
     position: absolute; left: 0; top: 0; width: 100%;
     border: none;
   }
+  /* The action row lives INSIDE .roadmap-doc (it belongs beside the plan on
+     screen), so the rule above was printing "Send this to Revora / Download
+     as PDF" onto the PDF as dead text. Same for the send form and the
+     transient status messages — none of them mean anything on paper.
+     Specificity beats the .roadmap-doc * rule above; order alone would not. */
+  body.print-roadmap .roadmap-doc .roadgen-actions,
+  body.print-roadmap .roadmap-doc .roadgen-actions *,
+  body.print-roadmap .roadmap-doc [role='status'],
+  body.print-roadmap .roadmap-doc [role='status'] * { visibility: hidden; }
 }

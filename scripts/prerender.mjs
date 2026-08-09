@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { services, site } from '../src/data/content.js'
+import { roadmap, services, site } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
@@ -32,6 +32,92 @@ const today = new Date().toISOString().slice(0, 10)
 // "API Development & Systems Integration" still matches its own page.
 const asHtml = (text) =>
   new RegExp(text.replace(/&/g, '&amp;').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+
+// ── Content integrity ────────────────────────────────────────────────────────
+// Adding a service means adding its id in seven places. Only two of them used
+// to be checked, and three of the remaining failures were SILENT:
+//
+//   roadmap.plans[id]      missing → buildPlan() throws inside an event
+//                          handler, where React error boundaries do not catch.
+//                          "Generate my roadmap" — the site's central
+//                          conversion instrument — does nothing, forever, with
+//                          an error only in the console.
+//   SCENES / FIT / FRAME /
+//   GROUND[id]             missing → the row renders another service's diagram
+//                          (the maps fall back to `ai`), so the page is
+//                          confidently wrong rather than broken.
+//   icons[id]              missing → the ledger row loses its glyph.
+//
+// None of these are visible in a build log or a smoke test of the home page,
+// and all of them ship. Assert the whole fan-out here instead, where the build
+// can refuse. Runs before Chromium is even looked for, so it fails in seconds.
+
+// Pull a `const NAME = { … }` object literal out of a source file by counting
+// braces — the maps in ShowcaseScenes.jsx are a mix of single- and multi-line,
+// so a line-based regex would only catch some of them. Source text rather than
+// import because these modules are JSX and pull in three.js.
+const objectLiteral = (source, name) => {
+  const start = source.indexOf(`const ${name} = {`)
+  if (start === -1) return null
+  let depth = 0
+  for (let i = source.indexOf('{', start); i < source.length; i += 1) {
+    if (source[i] === '{') depth += 1
+    else if (source[i] === '}') {
+      depth -= 1
+      if (depth === 0) return source.slice(source.indexOf('{', start) + 1, i)
+    }
+  }
+  return null
+}
+
+const assertContent = async () => {
+  const problems = []
+  const idPattern = /^[a-z0-9-]+$/
+
+  const read = async (rel) => readFile(join(repoRoot, rel), 'utf8')
+  const scenesSrc = await read('src/components/three/ShowcaseScenes.jsx')
+  const iconsSrc = await read('src/components/ui/Icons.jsx')
+
+  // The four id-keyed maps in ShowcaseScenes plus the icon set. A map this
+  // check cannot find is itself a failure — silently skipping it would make
+  // the guard worthless the day one is renamed.
+  const maps = { SCENES: null, FIT: null, FRAME: null, GROUND: null }
+  for (const name of Object.keys(maps)) {
+    maps[name] = objectLiteral(scenesSrc, name)
+    if (maps[name] === null) problems.push(`ShowcaseScenes.jsx: cannot find the '${name}' map — this guard needs updating`)
+  }
+  const iconMap = objectLiteral(iconsSrc, 'icons')
+  if (iconMap === null) problems.push("Icons.jsx: cannot find the 'icons' map — this guard needs updating")
+
+  const hasKey = (literal, key) => literal !== null && new RegExp(`(^|[{,\\s])${key}\\s*:`).test(literal)
+
+  for (const service of services) {
+    const { id } = service
+    // Ids reach the URL (/services/<id>/) and the #services-<id> deep link,
+    // both of which match SERVICE_ID in lib/routes.js.
+    if (!idPattern.test(id)) problems.push(`service '${id}': id must match ${idPattern} to be routable`)
+    if (!servicePages[id]) problems.push(`service '${id}': no entry in src/data/service-pages.js`)
+    if (!roadmap.plans[id]) problems.push(`service '${id}': no roadmap.plans entry — the Generate button will throw`)
+    else if (!Array.isArray(roadmap.plans[id].phases) || roadmap.plans[id].phases.length === 0)
+      problems.push(`service '${id}': roadmap.plans.${id}.phases is empty`)
+    if (!roadmap.problems.some((p) => p.id === id))
+      problems.push(`service '${id}': no roadmap.problems entry — it cannot be picked in the generator`)
+    for (const [name, literal] of Object.entries(maps))
+      if (!hasKey(literal, id)) problems.push(`service '${id}': missing from ${name} in ShowcaseScenes.jsx`)
+    if (!hasKey(iconMap, service.icon)) problems.push(`service '${id}': icon '${service.icon}' is not in Icons.jsx`)
+  }
+
+  // Cross-links between service pages: a 'related' id that no longer exists
+  // renders a card linking to a URL that 404s.
+  const ids = new Set(services.map((s) => s.id))
+  for (const [id, page] of Object.entries(servicePages))
+    for (const rel of page.related || [])
+      if (!ids.has(rel)) problems.push(`service-pages.js '${id}': related id '${rel}' is not a service`)
+
+  if (problems.length) {
+    throw new Error(`prerender: content integrity check failed\n  - ${problems.join('\n  - ')}`)
+  }
+}
 
 // Routes to snapshot. assetPrefix replaces the build's './' asset references
 // so nested pages still resolve ../assets/… correctly on GitHub Pages.
@@ -127,6 +213,10 @@ function findChromium() {
   }
   return null
 }
+
+// Before anything expensive: refuse to publish a build whose service ids do
+// not line up across the data files and the components that key off them.
+await assertContent()
 
 // This script rewrites dist/index.html — the very shell it loads every route
 // from. Running it twice therefore snapshots an already-snapshotted page and

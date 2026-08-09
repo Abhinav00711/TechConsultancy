@@ -33,6 +33,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Also linted here, not just in ci.yml: this workflow runs on every push
+      # to main, and on a two-person team a direct push is a normal event —
+      # without this there is no lint gate on that path at all.
+      - run: npm run lint
       # PRERENDER_STRICT: the deploy must fail rather than silently publish an
       # empty SPA shell — scripts/prerender.mjs uses the runner's Chrome.
       - run: npm run build
