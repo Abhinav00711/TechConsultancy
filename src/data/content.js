@@ -322,7 +322,6 @@ export const about = {
       name: 'Abhinav Rathi',
       role: 'Co-Founder · Technology & Engineering',
       bio: 'Leads architecture, engineering and technical delivery — from AI integrations to full-scale platforms. Every technical decision on your project runs through him.',
-      initials: 'AV',
       linkedin: 'https://www.linkedin.com/in/rathiabhinav01',
       // Relative path (no leading slash) so it works both on the custom
       // domain and on a github.io/<repo>/ project URL, like base './'.
@@ -333,7 +332,6 @@ export const about = {
       name: 'Abhishek Rathi',
       role: 'Co-Founder · Product & Strategy',
       bio: 'MBA from the Indian School of Business and a product manager by profession. Leads product strategy, client partnerships and delivery operations — making sure what we build moves your numbers.',
-      initials: 'AB',
       linkedin: 'https://www.linkedin.com/in/rathiabhishek26',
       photo: 'founders/abhishek-rathi.jpg',
       accent: '#c084fc',

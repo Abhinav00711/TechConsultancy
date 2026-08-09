@@ -33,7 +33,7 @@ export default function ThemeToggle() {
     document.documentElement.dataset.theme = next
     try {
       localStorage.setItem('theme', next)
-    } catch (e) {
+    } catch {
       // localStorage unavailable (private mode / disabled) — theme still
       // applies for this page view, it just won't persist
     }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { contact, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
-import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
 /* Form status: idle → sending → sent | draft | error.
@@ -68,16 +67,16 @@ export default function Contact() {
   return (
     <section id="contact" className="section">
       <div className="container">
-        <Reveal>
+        <div>
           <span className="section-tag">Get In Touch</span>
           <h2 className="section-title">
             {contact.heading} <span className="accent-text">{contact.headingAccent}</span>
           </h2>
           <p className="section-sub">{contact.text}</p>
-        </Reveal>
+        </div>
 
         <div className="contact-wrap">
-          <Reveal className="contact-info">
+          <div className="contact-info">
             {site.bookingUrl && (
               <a
                 className="contact-info-item sheet contact-info-booking"
@@ -123,9 +122,9 @@ export default function Contact() {
                 <span>{site.email}</span>
               </div>
             </a>
-          </Reveal>
+          </div>
 
-          <Reveal>
+          <div>
             <form className="contact-form sheet" onSubmit={onSubmit}>
               {contact.formNote && <p className="form-note">{contact.formNote}</p>}
               <div className="form-row">
@@ -250,7 +249,7 @@ export default function Contact() {
                 </p>
               )}
             </form>
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>

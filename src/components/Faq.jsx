@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { faq } from '../data/content.js'
-import Reveal from './ui/Reveal.jsx'
 
 /* Also used by the per-service pages (ServicePage.jsx), which render their own
    FAQ list from the same shape.
@@ -50,18 +49,18 @@ export default function Faq() {
     <section id="faq" className="section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqJsonLd }} />
       <div className="container">
-        <Reveal>
+        <div>
           <span className="section-tag">{faq.tag}</span>
           <h2 className="section-title">
             {faq.title} <span className="accent-text">{faq.titleAccent}</span>
           </h2>
-        </Reveal>
+        </div>
 
         <div className="faq-list">
           {faq.items.map((item, i) => (
-            <Reveal key={item.q}>
+            <div key={item.q}>
               <FaqItem {...item} id={`faq-a-${i}`} open={open === i} onToggle={() => setOpen(open === i ? -1 : i)} />
-            </Reveal>
+            </div>
           ))}
         </div>
       </div>
