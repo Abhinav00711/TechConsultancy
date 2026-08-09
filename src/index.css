@@ -518,7 +518,24 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   background: var(--bg);
   box-shadow: inset 3px 0 0 var(--accent-ink);
 }
-.sa-heading { margin: 0; font: inherit; font-weight: inherit; }
+.sa-row { display: flex; align-items: center; }
+.sa-heading { margin: 0; font: inherit; font-weight: inherit; flex: 1; min-width: 0; }
+/* Persistent per-row exit ramp — a closed row must still link somewhere.
+   Desktop only: on phones the row is already full-width tap target, and the
+   open panel carries the full CTA set. */
+.sa-quicklink {
+  display: none;
+  flex-shrink: 0;
+  margin-right: 18px;
+  font-family: var(--font-mono); font-weight: 600; font-size: 0.68rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-dim);
+  transition: color 0.2s ease;
+}
+.sa-quicklink:hover { color: var(--mark); }
+@media (min-width: 821px) {
+  .sa-quicklink { display: inline-block; }
+}
 .sa-trigger {
   width: 100%;
   min-height: 64px;
@@ -552,6 +569,10 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   padding: 4px 18px 24px 18px;
   display: grid; gap: 16px;
 }
+/* Closed panels stay in the DOM (their copy and links must reach crawlers in
+   the prerendered HTML) — the hidden attribute collapses them, and needs an
+   explicit rule because the display:grid above out-specifies the UA default. */
+.sa-panel[hidden] { display: none; }
 .sa-panel > p { color: var(--text-dim); font-size: 0.95rem; max-width: 66ch; }
 @media (min-width: 821px) {
   /* Desktop: copy beside the stage, stage gets real height. Two columns only
@@ -619,6 +640,34 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
     var(--stage);
 }
 
+/* Explicit opt-in control on the stage before the WebGL chunk is fetched —
+   ~280 KB gzip downloads when this is pressed (or any row is toggled),
+   never merely because the section scrolled into view. */
+.canvas-load {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: none; border: none;
+  color: var(--stage-ink);
+  font-family: var(--font-mono); font-weight: 600; font-size: 0.72rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.canvas-load::after {
+  content: '';
+  position: absolute; inset: 0;
+  border: 1px dashed color-mix(in srgb, var(--accent, #888) 40%, transparent);
+  border-radius: 3px;
+  margin: 14px;
+  pointer-events: none;
+  transition: border-color 0.2s ease;
+}
+.canvas-load:hover::after { border-color: var(--accent, var(--stage-ink)); }
+
+/* Root failure state (App.jsx CrashNotice). */
+.crash-notice { padding: 20vh 0; }
+.crash-notice h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); margin-bottom: 16px; }
+.crash-notice p { color: var(--text-dim); max-width: 52ch; }
+.crash-notice a { color: var(--mark); text-decoration: underline; }
+
 /* In-scene labels float over the dark stage in both themes. */
 .scene-label {
   font-family: var(--font-mono);
@@ -661,6 +710,7 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   color: var(--text); text-align: left;
   font-family: var(--font-display); font-weight: 600; font-size: 1.02rem;
 }
+.faq-h { margin: 0; font: inherit; font-weight: inherit; }
 .faq-icon {
   display: grid; place-items: center;
   width: 26px; height: 26px; flex-shrink: 0;
@@ -669,7 +719,25 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   color: var(--mark);
   font-size: 1rem; font-weight: 400;
   font-family: var(--font-mono);
+  transition: transform 0.25s ease;
 }
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+/* The answer stays in the DOM when collapsed (crawlers must see the text the
+   FAQPage structured data promises); the grid-rows trick animates height in
+   pure CSS, and the delayed visibility flip removes the collapsed panel from
+   the accessibility tree and tab order once the transition ends. */
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 0.35s cubic-bezier(0.21, 0.6, 0.35, 1), visibility 0s linear 0.35s;
+}
+.faq-item.open .faq-panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows 0.35s cubic-bezier(0.21, 0.6, 0.35, 1);
+}
+.faq-panel-inner { overflow: hidden; min-height: 0; }
 .faq-a { padding: 0 22px 20px; color: var(--text-dim); font-size: 0.94rem; max-width: 66ch; }
 
 /* ───────────────────────── About ───────────────────────── */
@@ -953,9 +1021,16 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   padding: 13px 15px;
   color: var(--text);
   font-family: var(--font-body); font-size: 0.95rem;
-  outline: none;
+  /* No `outline: none` here — it out-specifies the global :focus-visible ring
+     and the border/box-shadow focus style alone is far below the contrast a
+     keyboard user needs (WCAG 2.4.7). The ring below is the real indicator;
+     the border tint is decoration. */
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   resize: vertical;
+}
+.form-field :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--mark);
+  outline-offset: 2px;
 }
 .form-field select option { background: var(--bg-soft); }
 .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
@@ -1045,7 +1120,7 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
 .legal-page .container { max-width: 760px; }
 .legal-page .nav-logo { margin-bottom: 44px; display: inline-flex; }
 .legal-page h1 { font-size: clamp(2rem, 5vw, 2.8rem); margin-bottom: 26px; }
-.legal-page h3 { font-size: 1.02rem; margin: 26px 0 10px; }
+.legal-page h2 { font-size: 1.02rem; margin: 26px 0 10px; }
 .legal-page p, .legal-page li { color: var(--text-dim); font-size: 0.95rem; }
 .legal-page ul { padding-left: 20px; display: grid; gap: 8px; margin-top: 8px; }
 .legal-page p a:not(.btn) { color: var(--mark); text-decoration: underline; }
@@ -1161,7 +1236,9 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   position: fixed; right: 22px; bottom: 22px; z-index: 60;
   display: inline-flex; align-items: center; gap: 10px;
   padding: 12px 17px; border-radius: 2px;
-  background: #1faa53; color: #fff;
+  /* Darker than WhatsApp's brand green on purpose: #1faa53 on white text is
+     3.0:1, failing AA for the 12.5px label. This green clears 5:1. */
+  background: #0f7a3a; color: #fff;
   font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
   letter-spacing: 0.05em;
   text-decoration: none;

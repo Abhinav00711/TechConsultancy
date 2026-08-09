@@ -1,11 +1,59 @@
+import { createHash } from 'node:crypto'
+import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+
+/* public/sw.js keys its caches on a VERSION constant. Hand-bumping it is the
+   kind of step that gets forgotten exactly once, so the build stamps it with
+   a hash of the emitted bundle instead: any change to the output invalidates
+   every cache, an identical rebuild keeps them. */
+const stampServiceWorker = () => {
+  let outDir = 'dist'
+  let hash = ''
+  return {
+    name: 'stamp-service-worker',
+    apply: 'build',
+    configResolved(config) {
+      outDir = join(config.root, config.build.outDir)
+    },
+    generateBundle(_options, bundle) {
+      hash = createHash('sha256').update(Object.keys(bundle).sort().join('\n')).digest('hex').slice(0, 10)
+    },
+    // closeBundle, not writeBundle: public/ files (sw.js among them) are only
+    // copied into dist after the bundle itself is written.
+    async closeBundle() {
+      const file = join(outDir, 'sw.js')
+      const source = await readFile(file, 'utf8')
+      const stamped = source.replace(/const VERSION = '[^']*'/, `const VERSION = '${hash}'`)
+      if (stamped === source) throw new Error('stamp-service-worker: VERSION constant not found in sw.js')
+      await writeFile(file, stamped)
+    },
+  }
+}
+
+/* The @fontsource CSS declares every face as woff2 + a legacy woff fallback.
+   woff2 support is effectively universal (~99%), so the woff files are pure
+   deploy weight — ~106 KB nothing ever requests. Strip the fallback source
+   entries from the emitted CSS and drop the files from the bundle. */
+const stripLegacyWoff = () => ({
+  name: 'strip-legacy-woff',
+  apply: 'build',
+  generateBundle(_options, bundle) {
+    for (const [fileName, chunk] of Object.entries(bundle)) {
+      if (fileName.endsWith('.css') && typeof chunk.source === 'string') {
+        chunk.source = chunk.source.replace(/,\s*url\([^)]+\.woff\)\s*format\(["']?woff["']?\)/g, '')
+      }
+      if (fileName.endsWith('.woff')) delete bundle[fileName]
+    }
+  },
+})
 
 export default defineConfig({
   // Relative base so the same build works on GitHub Pages project URLs
   // (…github.io/TechConsultancy/) and on the custom domain (revora.co.in).
   base: './',
-  plugins: [react()],
+  plugins: [react(), stampServiceWorker(), stripLegacyWoff()],
   build: {
     chunkSizeWarningLimit: 1600,
     rollupOptions: {
@@ -25,14 +73,6 @@ export default defineConfig({
         // not just its entry. Order matters: first matching group wins, so
         // 'three' must precede any pattern that could also match three's
         // dependents.
-        //
-        // The motion libraries are deliberately NOT pinned to a chunk: the
-        // entry uses only the LazyMotion core (the `m` renderer), while the
-        // animation feature bundle is reached through a dynamic import
-        // (src/lib/motion-features.js). Pinning the whole library to one
-        // chunk would glue the features back onto the entry's static graph;
-        // left alone, the bundler keeps the core in the entry and emits the
-        // features as their own lazy chunk.
         advancedChunks: {
           groups: [
             { name: 'react', test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/ },

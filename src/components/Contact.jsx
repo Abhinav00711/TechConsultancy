@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { contact, site } from '../data/content.js'
+import { contact, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
@@ -149,12 +149,13 @@ export default function Contact() {
                     <option value="" disabled>
                       Select a service…
                     </option>
-                    <option>AI Integration</option>
-                    <option>Custom CRM</option>
-                    <option>ERP Solution</option>
-                    <option>Web Development</option>
-                    <option>API Development</option>
-                    <option>Cloud & DevOps</option>
+                    {/* Generated from the same data the prefill events send
+                        (services[].formOption) — a hand-copied list here
+                        silently breaks the prefill the day a service is
+                        added or renamed. */}
+                    {services.map((s) => (
+                      <option key={s.id}>{s.formOption}</option>
+                    ))}
                     <option>Not sure yet — let’s talk</option>
                   </select>
                 </div>

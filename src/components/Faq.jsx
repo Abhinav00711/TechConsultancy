@@ -1,33 +1,32 @@
 import { useState } from 'react'
-import { m, AnimatePresence } from 'motion/react'
 import { faq } from '../data/content.js'
 import Reveal from './ui/Reveal.jsx'
 
 /* Also used by the per-service pages (ServicePage.jsx), which render their own
-   FAQ list from the same shape. */
+   FAQ list from the same shape.
+
+   The answer panel is ALWAYS in the DOM — collapsed items hide it with CSS
+   (grid-template-rows 0fr + visibility) rather than unmounting. That keeps
+   the crawled HTML consistent with the FAQPage structured data below (Google
+   requires the answer text to be present on the page; collapsed-but-present
+   is fine, absent is not), keeps aria-controls pointing at a real element,
+   and lets a pure CSS transition replace the old JS height animation. */
 export function FaqItem({ id, q, a, open, onToggle }) {
   return (
     <div className={`faq-item sheet ${open ? 'open' : ''}`}>
-      <button className="faq-q" onClick={onToggle} aria-expanded={open} aria-controls={id}>
-        <span>{q}</span>
-        <m.span className="faq-icon" aria-hidden="true" animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.25 }}>
-          +
-        </m.span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <m.div
-            id={id}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.21, 0.6, 0.35, 1] }}
-            style={{ overflow: 'hidden' }}
-          >
-            <p className="faq-a">{a}</p>
-          </m.div>
-        )}
-      </AnimatePresence>
+      <h3 className="faq-h">
+        <button className="faq-q" id={`${id}-q`} onClick={onToggle} aria-expanded={open} aria-controls={id}>
+          <span>{q}</span>
+          <span className="faq-icon" aria-hidden="true">
+            +
+          </span>
+        </button>
+      </h3>
+      <div className="faq-panel" id={id} role="region" aria-labelledby={`${id}-q`}>
+        <div className="faq-panel-inner">
+          <p className="faq-a">{a}</p>
+        </div>
+      </div>
     </div>
   )
 }

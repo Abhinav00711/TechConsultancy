@@ -7,6 +7,11 @@
 export const site = {
   name: 'Revora',
   suffix: 'Consultancy',
+  // Canonical origin — used for canonicals, JSON-LD @id references and the
+  // sitemap. The structured data in index.html and the links in
+  // public/404.html state it literally (static files can't import this);
+  // change it in all three places together.
+  origin: 'https://revora.co.in',
   email: 'consulting@revora.co.in',
   phone: '+91 9654724365',
   // WhatsApp number in international digits-only form (used for wa.me links).

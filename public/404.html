@@ -150,8 +150,13 @@
         back to something useful.
       </p>
       <div class="actions">
-        <a class="btn btn-primary" href="/">Back to home</a>
-        <a class="btn btn-ghost" href="/#contact">Talk to us</a>
+        <!-- Absolute URLs on purpose: this file is served for ANY unknown
+             path, so its own depth is unknowable and "./" would misresolve.
+             Root-relative "/" breaks on the github.io/<repo>/ mirror, where
+             it points at the account root — the canonical domain is the one
+             address that works from both. -->
+        <a class="btn btn-primary" href="https://revora.co.in/">Back to home</a>
+        <a class="btn btn-ghost" href="https://revora.co.in/#contact">Talk to us</a>
       </div>
     </main>
   </body>

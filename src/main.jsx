@@ -67,8 +67,10 @@ if (currentRoute().name === 'service') {
 // warm the /services/<id>/ chunk and HTML when a visitor shows intent.
 if (!window.__PRERENDERING__) {
   const start = () => {
-    import('./lib/vitals.js').then((m) => m.reportVitals())
-    import('./lib/prefetch.js').then((m) => m.setupPrefetch())
+    // Both are enhancements: a failed chunk (flaky network, stale HTML after
+    // a deploy) must stay silent, not surface as an unhandled rejection.
+    import('./lib/vitals.js').then((m) => m.reportVitals()).catch(() => {})
+    import('./lib/prefetch.js').then((m) => m.setupPrefetch()).catch(() => {})
   }
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 3000 })
   else setTimeout(start, 1200)

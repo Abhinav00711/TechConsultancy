@@ -13,7 +13,7 @@ import { FaqItem } from './Faq.jsx'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
 
-const ORIGIN = 'https://revora.co.in'
+const ORIGIN = site.origin
 
 /* Structured data for one service page, as an @graph so a single script covers
    the offering, the breadcrumb trail and the FAQ. Deliberately the only
@@ -32,21 +32,12 @@ function jsonLd(service) {
         serviceType: service.title,
         description: page.metaDescription,
         url,
-        provider: {
-          '@type': 'ProfessionalService',
-          name: 'Revora Consultancy',
-          url: `${ORIGIN}/`,
-          email: site.email,
-          telephone: site.phone.replace(/\s/g, ''),
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: 'P38, India Exchange Place, Arun Chambers, 5th Floor',
-            addressLocality: 'Kolkata',
-            addressRegion: 'WB',
-            postalCode: '700001',
-            addressCountry: 'IN',
-          },
-        },
+        // A reference, not a second inline business entity: the shell's
+        // ProfessionalService node (index.html) declares this @id, and the
+        // prerenderer copies that shell into every service page. Two
+        // unlinked ProfessionalService nodes on one URL read as two
+        // unrelated businesses to a search engine.
+        provider: { '@id': `${ORIGIN}/#organization` },
         areaServed: { '@type': 'Country', name: 'India' },
         hasOfferCatalog: {
           '@type': 'OfferCatalog',
@@ -105,7 +96,8 @@ export default function ServicePage({ service }) {
       </a>
       <div className="ambient" />
       <Navbar />
-      <main id="main" style={{ '--accent': service.accent }}>
+      {/* tabIndex so the skip link reliably MOVES focus here, not just scroll */}
+      <main id="main" tabIndex={-1} style={{ '--accent': service.accent }}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(service) }} />
 
         <header className="service-hero">

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { site } from '../data/content.js'
+import { setMeta } from '../lib/head.js'
 import { Logo } from './ui/Icons.jsx'
 
 /* Standalone privacy-policy page, served at /privacy/ (prerendered by
@@ -9,9 +10,15 @@ import { Logo } from './ui/Icons.jsx'
    github.io/<repo>/privacy/ project URL. */
 export default function PrivacyPolicy() {
   useEffect(() => {
-    document.title = `Privacy Policy — ${site.name} ${site.suffix}`
-    const canonical = document.querySelector('link[rel="canonical"]')
-    if (canonical) canonical.setAttribute('href', 'https://revora.co.in/privacy/')
+    // setMeta, not just document.title: index.html ships the HOME page's
+    // description/OG/Twitter tags, so a sub-page that doesn't overwrite all
+    // of them is prerendered claiming to be the home page (lib/head.js).
+    setMeta({
+      title: `Privacy Policy — ${site.name} ${site.suffix}`,
+      description:
+        'How Revora Consultancy handles your data: the contact form is the only thing that collects it, analytics are cookieless, and there are no trackers.',
+      canonical: `${site.origin}/privacy/`,
+    })
   }, [])
 
   return (
@@ -34,14 +41,14 @@ export default function PrivacyPolicy() {
           respects your privacy. This page explains what data this website handles and how.
         </p>
 
-        <h3>What we collect</h3>
+        <h2>What we collect</h2>
         <p>
           The only personal data this site collects is what you choose to send us through the contact form or by
           email: your name, email address and the details of your enquiry. We use it solely to respond to you and
           to discuss your project.
         </p>
 
-        <h3>What we don’t do</h3>
+        <h2>What we don’t do</h2>
         <ul>
           <li>No advertising trackers, cross-site tracking or fingerprinting run on this site.</li>
           <li>No cookies are set by this site.</li>
@@ -49,7 +56,7 @@ export default function PrivacyPolicy() {
           <li>We never sell or share your contact details with third parties.</li>
         </ul>
 
-        <h3>Analytics</h3>
+        <h2>Analytics</h2>
         <p>
           We use one cookieless analytics service to understand, in aggregate, how this site is used: Umami (pages
           viewed, referrers, country-level location, anonymous interaction events such as which buttons are
@@ -59,14 +66,14 @@ export default function PrivacyPolicy() {
           described in its privacy policy.
         </p>
 
-        <h3>Data retention &amp; your rights</h3>
+        <h2>Data retention &amp; your rights</h2>
         <p>
           Enquiry emails are kept only as long as needed to handle your request or engagement. You can ask us at any
           time to access, correct or delete the personal data we hold about you by writing to{' '}
           <a href={`mailto:${site.email}`}>{site.email}</a>.
         </p>
 
-        <h3>Hosting</h3>
+        <h2>Hosting</h2>
         <p>
           Like any website, our hosting provider may process technical data (such as IP addresses) in server logs
           for security and reliability. If you submit the contact form and a form service is configured, your

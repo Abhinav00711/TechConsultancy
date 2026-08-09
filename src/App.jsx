@@ -22,7 +22,26 @@ import Contact from './components/Contact.jsx'
 import Footer from './components/Footer.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
 import PrivacyPolicy from './components/PrivacyPolicy.jsx'
+import ErrorBoundary from './components/ui/ErrorBoundary.jsx'
+import { site } from './data/content.js'
 import { currentRoute, servicePageComponent } from './lib/routes.js'
+
+/* Root-level failure state. A crash this high is rare, but without a boundary
+   React's answer to it is a blank white page with the contact form gone —
+   an apology with a working email link is strictly better. */
+function CrashNotice() {
+  return (
+    <main className="crash-notice">
+      <div className="container">
+        <h1>Something broke on our side.</h1>
+        <p>
+          Please refresh the page — and if this keeps happening, email us at{' '}
+          <a href={`mailto:${site.email}`}>{site.email}</a>. We reply within 24 hours.
+        </p>
+      </div>
+    </main>
+  )
+}
 
 function Site() {
   return (
@@ -32,7 +51,8 @@ function Site() {
       </a>
       <div className="ambient" />
       <Navbar />
-      <main id="main">
+      {/* tabIndex so the skip link reliably MOVES focus, not just scrolls */}
+      <main id="main" tabIndex={-1}>
         <Hero />
         <ServiceExplorer />
         <About />
@@ -58,7 +78,13 @@ export default function App() {
   // one bundle, so routing is a single read of the pathname — see lib/routes.js.
   const route = currentRoute()
   // PrivacyPolicy animates nothing, so it skips the LazyMotion wrapper below.
-  if (route.name === 'privacy') return <PrivacyPolicy />
+  if (route.name === 'privacy') {
+    return (
+      <ErrorBoundary fallback={<CrashNotice />}>
+        <PrivacyPolicy />
+      </ErrorBoundary>
+    )
+  }
   // main.jsx has already awaited this chunk on a /services/ URL — see
   // loadServicePage() for why it is not React.lazy.
   const ServicePage = route.name === 'service' ? servicePageComponent() : null
@@ -69,10 +95,12 @@ export default function App() {
   // `motion.*` throw in development rather than silently re-inflating the
   // bundle months from now.
   return (
-    <LazyMotion features={loadMotionFeatures} strict>
-      <MotionConfig reducedMotion="user">
-        {ServicePage ? <ServicePage service={route.service} /> : <Site />}
-      </MotionConfig>
-    </LazyMotion>
+    <ErrorBoundary fallback={<CrashNotice />}>
+      <LazyMotion features={loadMotionFeatures} strict>
+        <MotionConfig reducedMotion="user">
+          {ServicePage ? <ServicePage service={route.service} /> : <Site />}
+        </MotionConfig>
+      </LazyMotion>
+    </ErrorBoundary>
   )
 }
