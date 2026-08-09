@@ -42,8 +42,7 @@ export const nav = [
   { label: 'Services', href: '#services' },
   { label: 'About', href: '#about' },
   { label: 'Work', href: '#work' },
-  { label: 'Process', href: '#process' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'Pricing', href: '#pricing' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -53,18 +52,14 @@ export const hero = {
   titleAccent: 'pays for itself,',
   titleBottom: 'on paper first.',
   subtitle:
-    'We build the AI, CRM and custom systems that run growing Indian businesses — founder-built, fixed-price, and demoed to you within 7 days. Every engagement starts as a document you keep: try the roadmap generator and you’re holding one in under a minute.',
+    'We build the AI, CRM and custom systems that run Indian businesses. Try the roadmap generator — you’re holding a scoped plan in under a minute.',
   ctaPrimary: 'Start Your Project',
   // Used instead of ctaPrimary when site.bookingUrl is set — a scheduled call
   // is lower-friction than "start a project" for a first-time visitor.
   ctaBooking: 'Book a Free Discovery Call',
-  // Risk-reversal strip under the CTAs — commitments we control, not claims.
-  assurances: [
-    'Free discovery call & roadmap',
-    'First demo in 7 days',
-    '100% code ownership',
-    'Zero lock-in',
-  ],
+  // Risk-reversal strip under the CTAs — two bullets max. The full set of
+  // commitments lives in one place only: the signed Guarantee section.
+  assurances: ['First demo in 7 days', 'Zero lock-in'],
 }
 
 // ─── Roadmap generator (the hero instrument) ────────────────────────────────
@@ -110,7 +105,6 @@ export const roadmap = {
       ],
       stack: ['Python', 'Claude API', 'LangChain', 'FastAPI', 'PostgreSQL'],
       baseBand: [1.25, 3.5], // small-team ₹ range in lakhs
-      figs: [['−70%', 'target manual work'], ['24/7', 'runs unattended']],
     },
     crm: {
       title: 'Custom CRM',
@@ -122,7 +116,6 @@ export const roadmap = {
       ],
       stack: ['Next.js', 'Node.js', 'PostgreSQL', 'WhatsApp Business API'],
       baseBand: [1.5, 4], // small-team ₹ range in lakhs
-      figs: [['+38%', 'target conversion'], ['100%', 'lead capture']],
     },
     erp: {
       title: 'Modular ERP',
@@ -134,7 +127,6 @@ export const roadmap = {
       ],
       stack: ['Node.js', 'PostgreSQL', 'React', 'Docker', 'AWS'],
       baseBand: [3, 8], // small-team ₹ range in lakhs
-      figs: [['1', 'source of truth'], ['−45%', 'target admin time']],
     },
     web: {
       title: 'Conversion-focused web build',
@@ -146,7 +138,6 @@ export const roadmap = {
       ],
       stack: ['React', 'Vite', 'Three.js', 'TypeScript'],
       baseBand: [0.75, 2.5], // small-team ₹ range in lakhs
-      figs: [['<1s', 'load target'], ['SEO', 'built in']],
     },
     api: {
       title: 'Integration and API layer',
@@ -158,7 +149,6 @@ export const roadmap = {
       ],
       stack: ['Node.js', 'GraphQL', 'FastAPI', 'PostgreSQL'],
       baseBand: [1, 3], // small-team ₹ range in lakhs
-      figs: [['99.9%', 'uptime target'], ['100%', 'documented']],
     },
     cloud: {
       title: 'Cloud and delivery pipeline',
@@ -170,7 +160,6 @@ export const roadmap = {
       ],
       stack: ['Docker', 'Kubernetes', 'AWS', 'GitHub Actions'],
       baseBand: [0.9, 2.5], // small-team ₹ range in lakhs
-      figs: [['99.9%', 'uptime target'], ['min', 'to deploy']],
     },
   },
 }
@@ -180,8 +169,7 @@ export const explorer = {
   tag: 'Services · Live Demos',
   title: 'What We Build,',
   titleAccent: 'Shown Live',
-  sub: 'Six core services, each paired with an interactive preview of the kind of system we ship. Pick a service — see what you get, then watch it work.',
-  kpiNote: 'Illustrative design targets — every engagement gets its own measurable goals.',
+  sub: 'Six services, each paired with a live diagram of the kind of system we ship.',
 }
 
 // Merged services + live-demo data. Each item pairs a service description
@@ -208,11 +196,6 @@ export const services = [
       'Predictive analytics & AI strategy audits',
       'Decisions routed to humans only when needed',
     ],
-    kpis: [
-      { value: '−70%', label: 'manual work' },
-      { value: '24/7', label: 'always on' },
-      { value: '3×', label: 'faster decisions' },
-    ],
   },
   {
     id: 'crm',
@@ -231,11 +214,6 @@ export const services = [
       'Auto follow-ups, reminders & lead scoring',
       'WhatsApp, email & call tracking in one place',
       'Dashboards your team will actually use',
-    ],
-    kpis: [
-      { value: '+38%', label: 'conversion' },
-      { value: '360°', label: 'customer view' },
-      { value: '100%', label: 'lead capture' },
     ],
   },
   {
@@ -256,11 +234,6 @@ export const services = [
       'Role-based access & full audit trails',
       'Real-time reports for owners & managers',
     ],
-    kpis: [
-      { value: '1', label: 'source of truth' },
-      { value: '−45%', label: 'admin time' },
-      { value: 'Live', label: 'reporting' },
-    ],
   },
   {
     id: 'web',
@@ -279,11 +252,6 @@ export const services = [
       'E-commerce & progressive web apps',
       'Conversion-focused UX and copy',
       'SEO & Core Web Vitals built in',
-    ],
-    kpis: [
-      { value: '<1s', label: 'load target' },
-      { value: '100', label: 'Lighthouse target' },
-      { value: 'SEO', label: 'built in' },
     ],
   },
   {
@@ -304,11 +272,6 @@ export const services = [
       'Event-driven microservices that scale',
       'Monitoring, versioning & security baked in',
     ],
-    kpis: [
-      { value: '99.9%', label: 'uptime target' },
-      { value: 'ms', label: 'latency' },
-      { value: '100%', label: 'documented' },
-    ],
   },
   {
     id: 'cloud',
@@ -327,11 +290,6 @@ export const services = [
       'CI/CD pipelines & zero-downtime deploys',
       'Kubernetes & Docker done right',
       '24/7 monitoring, backups & alerts',
-    ],
-    kpis: [
-      { value: '99.9%', label: 'uptime target' },
-      { value: 'min', label: 'to deploy' },
-      { value: '24/7', label: 'monitoring' },
     ],
   },
 ]
@@ -402,7 +360,7 @@ export const guarantee = {
     {
       value: '0',
       label: 'Lock-in contracts',
-      text: 'Milestone payments, no retainer traps, no ransom on your own data. Leaving must always be easy — that’s why clients stay.',
+      text: 'Milestone payments, no retainer traps, no ransom on your own data. Leaving must always be easy — that’s how we intend to keep you.',
     },
   ],
   // Rendered as the signature block under the commitments.
@@ -420,8 +378,10 @@ export const pricing = {
   tag: 'What It Costs',
   title: 'Three ways in,',
   titleAccent: 'priced in the open.',
-  sub: 'Exact cost depends on scope, so every project gets a fixed itemised quote before we start. These bands exist so you know roughly where a conversation lands before you have it.',
+  sub: 'These bands say roughly where a conversation lands before you have it.',
   placeholder: false,
+  // The only on-page statement of the caveat — the FAQ no longer repeats it.
+  // (The roadmap document keeps its own line because it leaves the site.)
   note: 'Indicative ranges, not quotes — your fixed itemised quote is prepared free after the discovery call, and milestone payments mean you never pay a large lump sum upfront.',
   bands: [
     {
@@ -448,28 +408,13 @@ export const pricing = {
   ],
 }
 
-export const process = [
-  {
-    step: '01',
-    title: 'Discover',
-    text: 'We dive deep into your business, goals and pain points. You get a clear technical roadmap — free of charge.',
-  },
-  {
-    step: '02',
-    title: 'Design',
-    text: 'Architecture, UX and milestones defined together. You know exactly what’s being built, when, and why.',
-  },
-  {
-    step: '03',
-    title: 'Build',
-    text: 'Agile sprints with weekly demos. Watch your product take shape with full transparency at every step.',
-  },
-  {
-    step: '04',
-    title: 'Launch & Scale',
-    text: 'Battle-tested deployment, monitoring and iteration. We stay with you as your product and users grow.',
-  },
-]
+// One ruled line, not four cards — the Work teardown already shows the method
+// with real week numbers, which is stronger evidence than a phase diagram.
+export const process = {
+  tag: 'How We Work',
+  steps: ['Discover', 'Design', 'Build', 'Launch & Scale'],
+  note: 'A demo every week, from week one.',
+}
 
 // The scoping teardown — the honest replacement for case-study cards we don't
 // yet have. The featured teardown is real and verifiable (this site); the two
@@ -517,62 +462,47 @@ export const faq = {
   tag: 'Questions',
   title: 'Straight',
   titleAccent: 'Answers',
+  // Six additive questions only. Cost, timeline, ownership, support and
+  // payments were cut — Pricing and the Guarantee already answer them, and a
+  // FAQ that restates the page reads as padding.
   items: [
     {
-      q: 'How much does a project cost?',
-      a: 'Three ways in: a ~2-week pilot runs ₹75k–1.5 lakh, a complete system — a CRM, a website, an automation layer or an API — typically lands between ₹1.5 and 8 lakh, and ERP-scale platforms start around ₹8 lakh, rolled out and paid for in phases. After a free discovery call you get a fixed, itemised quote. No hourly billing surprises, and we’ll always tell you the cheapest way to reach your goal.',
-    },
-    {
-      q: 'How long will my project take?',
-      a: 'Typical ranges: a website in 2–4 weeks, an MVP or CRM in 6–10 weeks, a full ERP rolled out in phases over 3–6 months. You see working software from week one — we demo progress every single week.',
-    },
-    {
-      q: 'Who owns the code and the IP?',
-      a: 'You do — 100%. Full source code, documentation, credentials and deployment access are handed over. No lock-in, no ransom. If you ever want another team to take over, they can.',
-    },
-    {
-      q: 'Do you support us after launch?',
-      a: 'Yes. Every project includes a free stabilisation period, and we offer monthly care plans covering monitoring, backups, security patches and small improvements — with clear SLAs.',
-    },
-    {
-      q: 'Can you work with the systems we already have?',
-      a: 'Almost always. We integrate with existing tools (Tally, Zoho, Shopify, SAP, payment gateways, WhatsApp and more) via APIs, and we’ll audit your current setup before recommending anything new.',
+      q: 'Do we actually need AI?',
+      a: 'Honestly — sometimes no. Many businesses get more value from a clean CRM, one well-placed automation or a faster website than from a big AI project. On the discovery call we’ll tell you which is true for you, even when the answer is “not yet”.',
     },
     {
       q: 'We’re not technical. Is that a problem?',
       a: 'Not at all — most of our clients aren’t. We speak plain business language, translate every decision into cost and outcome, and show you clickable demos instead of jargon.',
     },
     {
-      q: 'Do we actually need AI?',
-      a: 'Honestly — sometimes no. Many businesses get more value from a clean CRM, one well-placed automation or a faster website than from a big AI project. On the discovery call we’ll tell you which is true for you, even when the answer is “not yet” — recommending the cheapest path to your goal is how we earn the bigger project later.',
-    },
-    {
-      q: 'What’s the smallest way to start?',
-      a: 'A small fixed-price pilot: we pick one painful workflow, automate or rebuild it in about two weeks, and you keep everything we build. You judge our speed, communication and quality on something low-risk before committing to a bigger build.',
-    },
-    {
-      q: 'Why choose you over a freelancer or a big agency?',
-      a: 'You get the two founders — an engineer and an ISB-trained product manager — working on your project directly. Freelancers can be cheap but can also disappear; big agencies hand your project to juniors behind layers of account managers. We’re senior people, accountable by name, at SMB-friendly pricing.',
+      q: 'Can you work with the systems we already have?',
+      a: 'Almost always. We integrate with existing tools (Tally, Zoho, Shopify, SAP, payment gateways, WhatsApp and more) via APIs, and we’ll audit your current setup before recommending anything new.',
     },
     {
       q: 'Is our business data safe with you?',
       a: 'Yes. We sign an NDA before you share anything sensitive, we build on your accounts and infrastructure — so access stays yours to grant and revoke — and every credential is handed over at launch. Your data never becomes our leverage.',
     },
     {
-      q: 'How do payments work?',
-      a: 'Milestone-based. The fixed quote is split across project milestones, so you pay as working software is delivered and demoed — never one large lump sum upfront. The exact split is agreed in the quote before we start.',
+      q: 'Why choose you over a freelancer or a big agency?',
+      a: 'You get the two founders — an engineer and an ISB-trained product manager — working on your project directly. Freelancers can be cheap but can also disappear; big agencies hand your project to juniors behind layers of account managers. We’re senior people, accountable by name, at SMB-friendly pricing.',
+    },
+    {
+      q: 'What’s the smallest way to start?',
+      a: 'A fixed-price pilot: one painful workflow, automated or rebuilt in about two weeks, and you keep everything we build. You judge our speed, communication and quality on something low-risk first.',
     },
   ],
 }
 
-// CTA band copy + the guarantees strip — the FAQ's strongest risk-reversal
-// promises, promoted to sit right next to the ask.
+// CTA band copy. No guarantees strip — the four commitments live in the
+// signed Guarantee section only; restating them here read as insecurity.
 export const ctaBand = {
+  titleTop: 'Ready to put',
+  titleAccent: 'technology',
+  titleBottom: 'to work for your business?',
   sub: 'Book a free discovery call. No sales pitch — just an honest technical conversation about your goals.',
   button: 'Book a Free Discovery Call',
   reassurance:
     'Every call ends with a written summary of what we’d build and roughly what it would cost — yours to keep, whoever you build with.',
-  guarantees: ['Fixed itemised quote', 'First demo in 7 days', '100% code ownership', 'Zero lock-in'],
 }
 
 export const contact = {
@@ -581,5 +511,5 @@ export const contact = {
   text: 'Tell us about your project — a quick call is free, and so is the first roadmap. We reply within 24 hours.',
   // Mid-funnel promise shown above the form — the "no call required" path.
   formNote:
-    'Not ready for a call? Just describe your problem in a few lines. Within 48 hours you get a one-page roadmap: recommended system, phases, timeline and a ballpark range — no call required.',
+    'Not ready for a call? Three lines about your problem gets you a one-page roadmap within 48 hours — no call required.',
 }

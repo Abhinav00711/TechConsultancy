@@ -112,6 +112,8 @@ export default function Contact() {
                 </div>
               </a>
             )}
+            {/* Three paths, not five — phone and the office address stay in
+                the footer; the decision moment offers Book, WhatsApp, Email. */}
             <a className="contact-info-item sheet" href={`mailto:${site.email}`}>
               <div className="contact-info-icon">
                 <Icon name="mail" />
@@ -121,26 +123,6 @@ export default function Contact() {
                 <span>{site.email}</span>
               </div>
             </a>
-            {site.phone && (
-              <a className="contact-info-item sheet" href={`tel:${site.phone.replace(/\s/g, '')}`}>
-                <div className="contact-info-icon">
-                  <Icon name="phone" />
-                </div>
-                <div>
-                  <strong>Call Us</strong>
-                  <span>{site.phone}</span>
-                </div>
-              </a>
-            )}
-            <div className="contact-info-item sheet">
-              <div className="contact-info-icon">
-                <Icon name="pin" />
-              </div>
-              <div>
-                <strong>Find Us</strong>
-                <span>{site.location}</span>
-              </div>
-            </div>
           </Reveal>
 
           <Reveal>

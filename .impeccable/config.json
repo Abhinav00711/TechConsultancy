@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-08-09T07:41:27.379Z",
+        "reason": "User confirmed: 3px open-state stripe on .services-accordion-item is a selected-row state indicator, not a card accent; static card stripes were thinned to the 1px margin-rule motif"
+      }
+    ]
+  }
+}

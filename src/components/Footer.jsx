@@ -18,7 +18,7 @@ export default function Footer() {
                 <span className="accent-text">.</span>
               </span>
             </a>
-            <p>We design, build and scale technology that gives ambitious businesses a real advantage.</p>
+            <p>Founder-led. Kolkata. Fixed price, first demo in 7 days.</p>
             {site.socials.length > 0 && (
               <div className="footer-socials">
                 {site.socials.map((s) => (
@@ -78,7 +78,7 @@ export default function Footer() {
               build year, so a visitor hydrating after 31 Dec would otherwise
               log a text mismatch here every January. */}
           <span suppressHydrationWarning>{`© ${year} ${site.name} ${site.suffix}. All rights reserved.`}</span>
-          <span>Engineered with precision in India.</span>
+          <span>Built in Kolkata, India.</span>
         </div>
       </div>
     </footer>

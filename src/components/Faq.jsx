@@ -48,7 +48,7 @@ export default function Faq() {
   const [open, setOpen] = useState(0)
 
   return (
-    <section id="faq" className="section" style={{ paddingTop: 0 }}>
+    <section id="faq" className="section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqJsonLd }} />
       <div className="container">
         <Reveal>

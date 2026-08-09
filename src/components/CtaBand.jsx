@@ -6,7 +6,7 @@ export default function CtaBand() {
     <section className="cta-band">
       <div className="container">
         <h2>
-          Ready to put <span className="accent-text">technology</span> to work for your business?
+          {ctaBand.titleTop} <span className="accent-text">{ctaBand.titleAccent}</span> {ctaBand.titleBottom}
         </h2>
         <p>{ctaBand.sub}</p>
         {site.bookingUrl ? (
@@ -25,11 +25,6 @@ export default function CtaBand() {
           </a>
         )}
         <p className="cta-reassurance">{ctaBand.reassurance}</p>
-        <ul className="cta-guarantees">
-          {ctaBand.guarantees.map((g) => (
-            <li key={g}>{g}</li>
-          ))}
-        </ul>
       </div>
     </section>
   )

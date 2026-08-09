@@ -1,31 +1,26 @@
 import { process } from '../data/content.js'
-import Reveal from './ui/Reveal.jsx'
 
+/* One ruled line, not four cards. The Work teardown already demonstrates the
+   method with real week numbers — this strip only names the phases and the
+   single commitment that matters (a weekly demo), then gets out of the way. */
 export default function Process() {
   return (
-    <section id="process" className="section">
+    <section id="process" className="section process-strip-section">
       <div className="container">
-        <Reveal>
-          <span className="section-tag">How We Work</span>
-          <h2 className="section-title">
-            From Idea to <span className="accent-text">Impact</span>
-          </h2>
-          <p className="section-sub">
-            A proven four-step engagement — transparent, fast and built around your business goals.
-          </p>
-        </Reveal>
-
-        <div className="process-grid">
-          {process.map((p, i) => (
-            <Reveal key={p.step}>
-              <div className="process-card sheet" style={{ height: '100%' }}>
-                <span className="process-step">{p.step}</span>
-                <h3>{p.title}</h3>
-                <p>{p.text}</p>
-              </div>
-            </Reveal>
+        <span className="section-tag">{process.tag}</span>
+        <p className="process-strip">
+          {process.steps.map((step, i) => (
+            <span key={step} className="process-strip-step">
+              {step}
+              {i < process.steps.length - 1 && (
+                <span className="process-strip-arrow" aria-hidden="true">
+                  →
+                </span>
+              )}
+            </span>
           ))}
-        </div>
+          <span className="process-strip-note">{process.note}</span>
+        </p>
       </div>
     </section>
   )

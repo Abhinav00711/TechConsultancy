@@ -41,8 +41,10 @@ function Site() {
         <Work />
         <Pricing />
         <Process />
-        <CtaBand />
+        {/* FAQ before the ask — objections handled first, so the CtaBand is
+            the last thing a reader meets before the contact form. */}
         <Faq />
+        <CtaBand />
         <Contact />
       </main>
       <Footer />

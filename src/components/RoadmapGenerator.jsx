@@ -76,7 +76,8 @@ export default function RoadmapGenerator() {
     if (!site.formEndpoint) {
       const subject = encodeURIComponent(`Roadmap enquiry — ${doc.plan.title}`)
       window.location.href = `mailto:${site.email}?subject=${subject}&body=${encodeURIComponent(`${summary}\n\nReach me at: ${contact}`)}`
-      setSendState('sent')
+      // A mail draft is not a delivered message — don't claim it was sent.
+      setSendState('draft')
       return
     }
 
@@ -183,6 +184,8 @@ export default function RoadmapGenerator() {
             ))}
           </ul>
 
+          {/* Two figures only — weeks and the ₹ band — because these are the
+              two numbers the plan actually controls. No projected outcomes. */}
           <div className="roadmap-figs">
             <div className="roadmap-fig">
               <strong>{`${doc.total} weeks`}</strong>
@@ -192,12 +195,6 @@ export default function RoadmapGenerator() {
               <strong>{doc.band}</strong>
               <span>indicative range</span>
             </div>
-            {doc.plan.figs.map(([value, label]) => (
-              <div key={label} className="roadmap-fig">
-                <strong>{value}</strong>
-                <span>{label}</span>
-              </div>
-            ))}
           </div>
 
           <ul className="roadmap-stack">
@@ -208,7 +205,11 @@ export default function RoadmapGenerator() {
 
           {sendState === 'sent' ? (
             <p className="roadmap-sent" role="status">
-              ✓ Sent — a founder replies within 24 hours with your fixed itemised quote path.
+              ✓ Sent — a founder replies within 24 hours.
+            </p>
+          ) : sendState === 'draft' ? (
+            <p className="roadmap-sent" role="status">
+              ✓ Your email app should open with this roadmap pre-filled — press send there to deliver it.
             </p>
           ) : sendState === 'idle' ? (
             <div className="roadgen-actions">
@@ -223,7 +224,10 @@ export default function RoadmapGenerator() {
             <form className="roadgen-actions" onSubmit={send}>
               <div className="form-field" style={{ flex: '1 1 220px' }}>
                 <label htmlFor="rg-contact">Email or WhatsApp number</label>
-                <input id="rg-contact" name="contact" type="text" required placeholder="you@company.com or +91 …" autoComplete="email" />
+                {/* type="text" on purpose: the field accepts an email or a
+                    phone number, so no autoComplete hint — a wrong one
+                    autofills emails into what may be a phone answer. */}
+                <input id="rg-contact" name="contact" type="text" required placeholder="you@company.com or +91 …" />
               </div>
               <button type="submit" className="btn btn-primary" disabled={sendState === 'sending'}>
                 {sendState === 'sending' ? 'Sending…' : 'Send'}

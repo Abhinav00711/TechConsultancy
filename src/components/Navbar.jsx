@@ -15,7 +15,7 @@ function NavCta({ className, style, onDone }) {
   }
   return site.bookingUrl ? (
     <a href={bookingHref('nav')} className={className} style={style} target="_blank" rel="noopener noreferrer" onClick={onClick}>
-      Book a Free Call
+      Book a Free Discovery Call
     </a>
   ) : (
     <a href="#contact" className={className} style={style} onClick={onDone}>

@@ -131,15 +131,6 @@ export default function ServicePage({ service }) {
             <h1 className="service-h1">{page.h1}</h1>
             <p className="service-lede">{page.lede}</p>
 
-            <div className="showcase-kpis service-hero-kpis">
-              {service.kpis.map((k) => (
-                <div key={k.label} className="kpi-chip">
-                  <strong>{k.value}</strong>
-                  <span>{k.label}</span>
-                </div>
-              ))}
-            </div>
-
             <div className="service-hero-actions">
               {site.bookingUrl ? (
                 <a
@@ -236,7 +227,7 @@ export default function ServicePage({ service }) {
                       <li key={t}>{t}</li>
                     ))}
                   </ul>
-                  <p className="kpi-note">
+                  <p className="stack-note">
                     Chosen per project — we pick the boring, production-proven option unless there is a reason not to.
                   </p>
                 </div>

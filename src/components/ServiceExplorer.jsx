@@ -163,15 +163,6 @@ export default function ServiceExplorer() {
                           <li key={p}>{p}</li>
                         ))}
                       </ul>
-                      <div className="showcase-kpis">
-                        {s.kpis.map((k) => (
-                          <div key={k.label} className="kpi-chip">
-                            <strong>{k.value}</strong>
-                            <span>{k.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <p className="kpi-note">{explorer.kpiNote}</p>
                       <div className="showcase-actions sa-actions">
                         <ServiceActions item={s} />
                       </div>
