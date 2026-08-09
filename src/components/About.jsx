@@ -60,16 +60,6 @@ export default function About() {
           </div>
         </div>
 
-        <div className="values-grid">
-          {about.values.map((v, i) => (
-            <Reveal key={v.title}>
-              <div className="value-card sheet" style={{ height: '100%' }}>
-                <h3>{v.title}</h3>
-                <p>{v.text}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
       </div>
     </section>
   )

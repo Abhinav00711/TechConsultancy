@@ -11,6 +11,7 @@ import CtaBand from './components/CtaBand.jsx'
 import Contact from './components/Contact.jsx'
 import Footer from './components/Footer.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
+import StickyCtaBar from './components/StickyCtaBar.jsx'
 import ErrorBoundary from './components/ui/ErrorBoundary.jsx'
 import { site } from './data/content.js'
 import { currentRoute, privacyPageComponent, servicePageComponent } from './lib/routes.js'
@@ -51,11 +52,13 @@ function Site() {
       <main id="main" tabIndex={-1}>
         <Hero />
         <ServiceExplorer />
-        <About />
-        <Guarantee />
-        {/* Proof before process — show scoping method before the phase list. */}
+        {/* Proof and price directly after the services: "can they do it" and
+            "what does it cost" are the two questions that decide an enquiry,
+            so they come before the founder bios. */}
         <Work />
         <Pricing />
+        <Guarantee />
+        <About />
         <Process />
         {/* FAQ before the ask — objections handled first, so the CtaBand is
             the last thing a reader meets before the contact form. */}
@@ -65,6 +68,7 @@ function Site() {
       </main>
       <Footer />
       <WhatsAppFab />
+      <StickyCtaBar />
     </>
   )
 }

@@ -43,11 +43,13 @@ export const waLink = (message = site.whatsappMessage) =>
 site.whatsappLink = waLink()
 
 // Matches the section order in App.jsx (the logo already links home).
+// Proof and price come before the bios: Work and Pricing answer the two
+// questions that decide an enquiry, so they outrank About.
 export const nav = [
   { label: 'Services', href: '#services' },
-  { label: 'About', href: '#about' },
   { label: 'Work', href: '#work' },
   { label: 'Pricing', href: '#pricing' },
+  { label: 'About', href: '#about' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -62,6 +64,11 @@ export const hero = {
   // Used instead of ctaPrimary when site.bookingUrl is set — a scheduled call
   // is lower-friction than "start a project" for a first-time visitor.
   ctaBooking: 'Book a Free Discovery Call',
+  // The second lane: the subtitle points at the roadmap generator, so the
+  // hero needs a control that actually goes there — on phones the generator
+  // sits below the whole hero column, out of sight of the sentence
+  // describing it.
+  ctaRoadmap: 'Generate my roadmap',
   // Risk-reversal strip under the CTAs — two bullets max. The full set of
   // commitments lives in one place only: the signed Guarantee section.
   assurances: ['First demo in 7 days', 'Zero lock-in'],
@@ -78,6 +85,10 @@ export const roadmap = {
   q2: 'How big is the team it affects?',
   generate: 'Generate my roadmap',
   send: 'Send this to Revora',
+  // The highest-intent moment on the site is the second after a visitor
+  // generates a plan with a week count and a ₹ band — it must offer the
+  // booking lane, not only an inbox and a wait.
+  book: 'Book a call about this plan',
   print: 'Download as PDF',
   disclaimer:
     'Indicative only — a fixed itemised quote follows the discovery call. Yours to keep, whoever you build with.',
@@ -328,12 +339,10 @@ export const about = {
       accent: '#c084fc',
     },
   ],
-  values: [
-    { title: 'Ship Fast', text: 'Rapid iterations, weekly demos, no black boxes.' },
-    { title: 'Own It', text: 'We treat your product like it’s our own company.' },
-    { title: 'Stay Sharp', text: 'Always on the newest stack that’s production-proven.' },
-    { title: 'Be Honest', text: 'Straight answers on scope, cost and trade-offs.' },
-  ],
+  // No values grid: "Ship Fast / Own It / Stay Sharp / Be Honest" were the
+  // last unfalsifiable adjectives on the page. The signed Guarantee states
+  // the same four things as commitments with terms attached, which is the
+  // only form in which they mean anything.
 }
 
 // The Revora Guarantee — commitments we control, presented as a signed,
@@ -384,7 +393,6 @@ export const pricing = {
   title: 'Three ways in,',
   titleAccent: 'priced in the open.',
   sub: 'These bands say roughly where a conversation lands before you have it.',
-  placeholder: false,
   // The only on-page statement of the caveat — the FAQ no longer repeats it.
   // (The roadmap document keeps its own line because it leaves the site.)
   note: 'Indicative ranges, not quotes — your fixed itemised quote is prepared free after the discovery call, and milestone payments mean you never pay a large lump sum upfront.',
@@ -506,6 +514,10 @@ export const ctaBand = {
   titleBottom: 'to work for your business?',
   sub: 'Book a free discovery call. No sales pitch — just an honest technical conversation about your goals.',
   button: 'Book a Free Discovery Call',
+  // The credential that carries the founder-led positioning, placed at the
+  // decision moment instead of only in a bio four sections earlier.
+  founderNote:
+    'You’ll be talking to the founders themselves — an engineer and an ISB-trained product manager, accountable by name.',
   reassurance:
     'Every call ends with a written summary of what we’d build and roughly what it would cost — yours to keep, whoever you build with.',
 }
@@ -517,4 +529,10 @@ export const contact = {
   // Mid-funnel promise shown above the form — the "no call required" path.
   formNote:
     'Not ready for a call? Three lines about your problem gets you a one-page roadmap within 48 hours — no call required.',
+  // The submit button sells the formNote's offer, not a generic "send".
+  submitLabel: 'Send — get my roadmap in 48h',
+  // Deliberately anchored to the same ranges as `pricing.bands` — no two
+  // parts of the site may quote different numbers.
+  budgets: ['Under ₹1 lakh', '₹1–5 lakh', '₹5–15 lakh', '₹15 lakh+', 'Not sure yet'],
+  timelines: ['As soon as possible', 'This quarter', 'Just exploring for now'],
 }

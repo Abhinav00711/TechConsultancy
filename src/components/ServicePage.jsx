@@ -9,6 +9,10 @@ import CtaBand from './CtaBand.jsx'
 import Contact from './Contact.jsx'
 import Footer from './Footer.jsx'
 import WhatsAppFab from './WhatsAppFab.jsx'
+import StickyCtaBar from './StickyCtaBar.jsx'
+import Pricing from './Pricing.jsx'
+import Guarantee from './Guarantee.jsx'
+import RoadmapGenerator from './RoadmapGenerator.jsx'
 import { FaqItem } from './Faq.jsx'
 import Reveal from './ui/Reveal.jsx'
 import Icon from './ui/Icons.jsx'
@@ -186,7 +190,7 @@ export default function ServicePage({ service }) {
               <h2 className="section-title">Included in every {service.short} engagement</h2>
             </Reveal>
             <div className="service-deliverables">
-              {page.deliverables.map((d, i) => (
+              {page.deliverables.map((d) => (
                 <Reveal key={d.title}>
                   <article className="sheet service-deliverable">
                     <h3>{d.title}</h3>
@@ -235,7 +239,7 @@ export default function ServicePage({ service }) {
               <h2 className="section-title">From first call to handover</h2>
             </Reveal>
             <ol className="service-phases">
-              {page.phases.map((phase, i) => (
+              {page.phases.map((phase) => (
                 <Reveal key={phase.when}>
                   <li className="sheet service-phase">
                     <span className="service-phase-when">{phase.when}</span>
@@ -246,6 +250,26 @@ export default function ServicePage({ service }) {
             </ol>
           </div>
         </section>
+
+        {/* These pages are the ones built to catch search traffic, so they
+            must carry the two things that decide an SMB enquiry on their
+            own: a ₹ number (the generator + the pricing bands) and the
+            signed commitments. A visitor landing here from Google never
+            sees the home page. */}
+        <section className="section service-section">
+          <div className="container service-narrow">
+            <Reveal>
+              <span className="section-tag">Scope It Yourself</span>
+              <h2 className="section-title">{`A first ${service.short} roadmap, in under a minute`}</h2>
+            </Reveal>
+            <div className="service-roadgen">
+              <RoadmapGenerator defaultProblem={service.id} />
+            </div>
+          </div>
+        </section>
+
+        <Pricing />
+        <Guarantee />
 
         <section className="section service-section">
           <div className="container service-narrow">
@@ -305,6 +329,7 @@ export default function ServicePage({ service }) {
       </main>
       <Footer />
       <WhatsAppFab />
+      <StickyCtaBar />
     </>
   )
 }

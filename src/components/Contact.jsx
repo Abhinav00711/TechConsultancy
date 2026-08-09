@@ -160,38 +160,36 @@ export default function Contact() {
                   </select>
                 </div>
               </div>
+              <div className="form-field">
+                <label htmlFor="cf-message">Project Details</label>
+                <textarea id="cf-message" name="message" rows="5" placeholder="Tell us what you want to build, or describe the problem in 3 lines…" required />
+              </div>
               {/* Optional qualifiers — they protect founder time and make the
                   first reply specific instead of generic. Kept optional so
-                  they never block a lead. */}
+                  they never block a lead, and placed BELOW the message: the
+                  visitor describes the problem before being asked to
+                  negotiate budget. (The old "How did you find us?" field is
+                  gone — the hidden page/referrer field and Umami already
+                  answer it without taxing the visitor.) */}
               <div className="form-row">
                 <div className="form-field">
                   <label htmlFor="cf-budget">Rough Budget (optional)</label>
                   <select id="cf-budget" name="budget" defaultValue="">
                     <option value="">Prefer not to say</option>
-                    <option>Under ₹1 lakh</option>
-                    <option>₹1–5 lakh</option>
-                    <option>₹5–15 lakh</option>
-                    <option>₹15 lakh+</option>
-                    <option>Not sure yet</option>
+                    {contact.budgets.map((b) => (
+                      <option key={b}>{b}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="form-field">
                   <label htmlFor="cf-timeline">Timeline (optional)</label>
                   <select id="cf-timeline" name="timeline" defaultValue="">
                     <option value="">Select…</option>
-                    <option>As soon as possible</option>
-                    <option>This quarter</option>
-                    <option>Just exploring for now</option>
+                    {contact.timelines.map((t) => (
+                      <option key={t}>{t}</option>
+                    ))}
                   </select>
                 </div>
-              </div>
-              <div className="form-field">
-                <label htmlFor="cf-message">Project Details</label>
-                <textarea id="cf-message" name="message" rows="5" placeholder="Tell us what you want to build, or describe the problem in 3 lines…" required />
-              </div>
-              <div className="form-field">
-                <label htmlFor="cf-source">How did you find us? (optional)</label>
-                <input id="cf-source" name="source" type="text" placeholder="Google, LinkedIn, a referral…" />
               </div>
               {/* Attribution context — invisible to the visitor, gold for
                   knowing which channel produced the lead. */}
@@ -239,7 +237,8 @@ export default function Contact() {
                 style={{ justifyContent: 'center' }}
                 disabled={status === 'sending'}
               >
-                {status === 'sending' ? 'Sending…' : 'Send Message'} <span aria-hidden>→</span>
+                {/* The button sells the formNote's offer, not a generic verb. */}
+                {status === 'sending' ? 'Sending…' : contact.submitLabel} <span aria-hidden>→</span>
               </button>
               {site.whatsappLink && (
                 <p className="form-alt-channel">
