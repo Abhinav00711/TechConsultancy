@@ -56,11 +56,20 @@ export default function Contact() {
       })
       if (!res.ok) throw new Error(`Form endpoint responded ${res.status}`)
       setStatus('sent')
-      track('Form Submit', { service: String(data.get('service') || '') })
+      // budget and timeline ride along so the lead-QUALITY mix is visible in
+      // Umami without opening the Formspree dashboard.
+      track('Form Submit', {
+        service: String(data.get('service') || ''),
+        budget: String(data.get('budget') || 'unspecified'),
+        timeline: String(data.get('timeline') || 'unspecified'),
+      })
       form.reset()
       setService('')
-    } catch {
+    } catch (error) {
       setStatus('error')
+      // Same reason as the roadmap's send error: an untracked catch makes a
+      // Formspree cap breach indistinguishable from a week with no enquiries.
+      track('Form Error', { reason: String(error?.message || 'unknown') })
     }
   }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { services, site, waLink } from '../data/content.js'
+import { roadmap, services, site, waLink } from '../data/content.js'
 import { servicePages } from '../data/service-pages.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { setMeta } from '../lib/head.js'
@@ -42,6 +42,25 @@ function jsonLd(service) {
         // unrelated businesses to a search engine.
         provider: { '@id': `${ORIGIN}/#organization` },
         areaServed: { '@type': 'Country', name: 'India' },
+        // The site states its ₹ bands in plain sight, but nothing here was
+        // machine-readable: the hasOfferCatalog below carries Offers with no
+        // price at all, which is inert to both Google and an LLM asked "what
+        // does Revora charge". Sourced from the same roadmap baseBand the
+        // generator quotes (lakhs → rupees), so the structured figure can
+        // never drift from the one on screen. Price transparency is a strong
+        // citation hook in a market where competitors all say "contact us".
+        ...(roadmap.plans[service.id]?.baseBand
+          ? {
+              offers: {
+                '@type': 'AggregateOffer',
+                priceCurrency: 'INR',
+                lowPrice: Math.round(roadmap.plans[service.id].baseBand[0] * 100000),
+                highPrice: Math.round(roadmap.plans[service.id].baseBand[1] * 100000),
+                offerCount: page.deliverables.length,
+                availability: 'https://schema.org/InStock',
+              },
+            }
+          : {}),
         hasOfferCatalog: {
           '@type': 'OfferCatalog',
           name: `${service.title} deliverables`,
@@ -237,14 +256,16 @@ export default function ServicePage({ service }) {
               <span className="section-tag">How It Runs</span>
               <h2 className="section-title">From first call to handover</h2>
             </div>
+            {/* key belongs on the <li>; the <div> that used to carry it sat
+                between <ol> and <li>, which makes this not a list at all as
+                far as the accessibility tree is concerned — a screen reader
+                announced no item count and no position (WCAG 1.3.1). */}
             <ol className="service-phases">
               {page.phases.map((phase) => (
-                <div key={phase.when}>
-                  <li className="sheet service-phase">
-                    <span className="service-phase-when">{phase.when}</span>
-                    <p>{phase.what}</p>
-                  </li>
-                </div>
+                <li key={phase.when} className="sheet service-phase">
+                  <span className="service-phase-when">{phase.when}</span>
+                  <p>{phase.what}</p>
+                </li>
               ))}
             </ol>
           </div>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { roadmap, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
+import { useReducedMotion } from '../lib/hooks.js'
 
 /* The hero instrument: two questions in, a scoped roadmap out, in under a
    minute. Deterministic on purpose — instant, free, works offline, and cannot
@@ -66,6 +67,17 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
   const [sendState, setSendState] = useState('idle')
   const seq = useRef(0)
   const docRef = useRef(null)
+  const contactRef = useRef(null)
+  const reducedMotion = useReducedMotion()
+
+  /* Pressing "send" swaps the button out for this field, which unmounts the
+     element that had focus — focus falls back to <body>, so a keyboard user
+     is dumped at the top of the document and a screen-reader user is never
+     told a new field appeared. Move focus onto the field the press asked
+     for. (WCAG 2.4.3 Focus Order.) */
+  useEffect(() => {
+    if (sendState === 'asking') contactRef.current?.focus()
+  }, [sendState])
   // Captured after mount, like Contact's: reading window during render would
   // disagree with the prerendered snapshot and break hydration.
   const [pageContext, setPageContext] = useState('')
@@ -87,11 +99,18 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
     const service = services.find((s) => s.id === problem)
     if (service) window.dispatchEvent(new CustomEvent('revora:service', { detail: service.formOption }))
     track('Roadmap Generated', { service: built.plan.title, scale: built.scale.label })
-    requestAnimationFrame(() => docRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+    // behavior:'smooth' overrides the CSS scroll-behavior reset, so this was
+    // the one animation on the site that ignored prefers-reduced-motion.
+    requestAnimationFrame(() =>
+      docRef.current?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest' }),
+    )
   }
 
   const send = async (e) => {
     e.preventDefault()
+    // aria-disabled rather than disabled on the button (see below), so the
+    // handler has to refuse a second submit itself.
+    if (sendState === 'sending') return
     const contact = new FormData(e.target).get('contact')
     const summary = summaryFor(doc)
 
@@ -117,8 +136,13 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
       if (!res.ok) throw new Error(`Form endpoint responded ${res.status}`)
       setSendState('sent')
       track('Roadmap Sent', { service: doc.plan.title })
-    } catch {
+    } catch (error) {
       setSendState('error')
+      // Formspree's free tier caps at 50 submissions/month. At the cap every
+      // POST 4xx's and this branch runs — but it used to track nothing, so
+      // 'Roadmap Sent' simply stopped appearing, which looks exactly like a
+      // quiet week. Silence and failure must not be the same signal.
+      track('Roadmap Send Error', { service: doc.plan.title, reason: String(error?.message || 'unknown') })
     }
   }
 
@@ -262,18 +286,54 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
                 {/* type="text" on purpose: the field accepts an email or a
                     phone number, so no autoComplete hint — a wrong one
                     autofills emails into what may be a phone answer. */}
-                <input id="rg-contact" name="contact" type="text" required placeholder="you@company.com or +91 …" />
+                <input
+                  ref={contactRef}
+                  id="rg-contact"
+                  name="contact"
+                  type="text"
+                  required
+                  placeholder="you@company.com or +91 …"
+                />
               </div>
               <input type="hidden" name="roadmap" value={summaryFor(doc)} />
               <input type="hidden" name="page" value={pageContext} />
-              <button type="submit" className="btn btn-primary" disabled={sendState === 'sending'}>
+              {/* aria-disabled, not disabled: a `disabled` button is removed
+                  from the accessibility tree, so disabling the element that
+                  currently has focus mid-submit drops the user's place. The
+                  handler guards the double submit instead. */}
+              <button
+                type="submit"
+                className="btn btn-primary"
+                aria-disabled={sendState === 'sending' || undefined}
+              >
                 {sendState === 'sending' ? 'Sending…' : 'Send'}
+              </button>
+              {/* Without this the send was a one-way door: asking for the
+                  email unmounted Book and Download, and the error state never
+                  returns to idle — so a failed send permanently removed the
+                  two zero-friction actions from the hottest lead on the site. */}
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setSendState('idle')}
+              >
+                Cancel
               </button>
             </form>
           ) : (
             <div className="roadgen-actions">
               {sendState === 'idle' && (
-                <button type="button" className="btn btn-primary" onClick={() => setSendState('asking')}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setSendState('asking')
+                    // Without this, generated → abandoned-at-the-email-field
+                    // is invisible: 'Roadmap Generated' and 'Roadmap Sent'
+                    // bracket the funnel's leakiest step without measuring it.
+                    track('Roadmap Send Start', { service: doc.plan.title })
+                  }}
+                >
                   {roadmap.send}
                 </button>
               )}

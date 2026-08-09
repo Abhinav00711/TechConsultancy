@@ -73,8 +73,14 @@
         "description": "Founder-led AI integration, custom software (CRM, ERP), web and API development consultancy in Kolkata, India.",
         "url": "https://revora.co.in/",
         "image": "https://revora.co.in/og-image.png",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://revora.co.in/favicon.svg",
+          "caption": "Revora Consultancy"
+        },
         "email": "consulting@revora.co.in",
         "telephone": "+919654724365",
+        "priceRange": "₹75,000–₹8,00,000+",
         "address": {
           "@type": "PostalAddress",
           "streetAddress": "P38, India Exchange Place, Arun Chambers, 5th Floor",
@@ -115,6 +121,22 @@
           "API Development",
           "Cloud & DevOps"
         ]
+      }
+    </script>
+    <!-- The WebSite node is what Google reads to decide the site name shown
+         in results; without it the SERP name is guessed from the title tag.
+         No SearchAction here on purpose — the site has no search, and
+         declaring one that doesn't exist is a structured-data violation. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://revora.co.in/#website",
+        "name": "Revora Consultancy",
+        "alternateName": "Revora",
+        "url": "https://revora.co.in/",
+        "inLanguage": "en-IN",
+        "publisher": { "@id": "https://revora.co.in/#organization" }
       }
     </script>
     <!-- Fonts are self-hosted via @fontsource (imported in src/main.jsx) —

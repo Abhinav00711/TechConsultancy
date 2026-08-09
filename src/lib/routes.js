@@ -76,13 +76,27 @@ export const loadPrivacyPage = () =>
 
 export const privacyPageComponent = () => privacyPageModule
 
-/* Rewrite a link written for the home page so it also works from a sub-page.
-   '#contact' is deliberately left alone: every page that renders this nav also
-   renders its own Contact section, so that anchor is always local. Every other
-   in-page anchor has to travel back to the home page first, and '#home' is
-   simply the home page itself. */
+/* Which of the home page's nav anchors a sub-page renders for ITSELF. A link
+   to one of these must stay local; every other in-page anchor has to travel
+   back to the home page first, and '#home' is simply the home page.
+
+   This used to be a bare `target === '#contact'`, which was wrong the moment
+   ServicePage started rendering <Pricing/> too: on /services/crm/ the nav's
+   "Pricing" link navigated the visitor OFF the page they were reading, while
+   the scroll-spy simultaneously marked that link aria-current="location" —
+   so a screen-reader user was told "you are here" by a link that leaves.
+
+   Keep in step with what each page component actually renders. The service
+   route's prerender guard asserts id="pricing" is present for exactly this
+   reason (scripts/prerender.mjs), so the two cannot drift silently. */
+const SERVICE_LOCAL_ANCHORS = new Set(['#contact', '#pricing'])
+// PrivacyPolicy renders none of the nav sections — it hand-rolls its own shell.
+const PRIVACY_LOCAL_ANCHORS = new Set()
+
 export function href(target, pathname = window.location.pathname) {
   const root = rootPrefix(pathname)
-  if (!root || target === '#contact') return target
-  return target === '#home' ? root : `${root}${target}`
+  if (!root) return target
+  if (target === '#home') return root
+  const local = SERVICE_PATH.test(pathname) ? SERVICE_LOCAL_ANCHORS : PRIVACY_LOCAL_ANCHORS
+  return local.has(target) ? target : `${root}${target}`
 }

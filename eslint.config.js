@@ -7,7 +7,11 @@ import reactHooks from 'eslint-plugin-react-hooks'
    dependency mistakes, undefined globals. Style is left to the codebase's
    own conventions — no formatter fights, no bikeshed rules. */
 export default [
-  { ignores: ['dist/', 'node_modules/'] },
+  // Mirrors .gitignore. ESLint does not read that file, so the throwaway
+  // /.*.mjs harnesses it excludes used to make `npm run lint` fail on files
+  // that were never part of the codebase — and a lint script that is red for
+  // unrelated reasons is one people stop reading.
+  { ignores: ['dist/', 'node_modules/', '.*.mjs'] },
   js.configs.recommended,
   {
     files: ['**/*.{js,jsx,mjs}'],

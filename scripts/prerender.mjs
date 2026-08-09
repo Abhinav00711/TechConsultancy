@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { roadmap, services, site } from '../src/data/content.js'
+import { explorer, hero, pricing, roadmap, services, site } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
@@ -129,7 +129,7 @@ const assertContent = async () => {
 // They are generated from the same content the app renders, so adding a
 // seventh service creates its page without touching this file.
 const routes = [
-  { path: 'privacy/', out: 'privacy/index.html', assetPrefix: '../', mustContain: /What we collect/i, changefreq: 'yearly', priority: '0.2' },
+  { path: 'privacy/', out: 'privacy/index.html', assetPrefix: '../', mustContain: [/What we collect/i], mustStyle: ['.legal-page'], changefreq: 'yearly', priority: '0.2' },
   ...services.map((service) => {
     const page = servicePages[service.id]
     // A service without page copy would render an empty page and still be
@@ -139,12 +139,29 @@ const routes = [
       path: `services/${service.id}/`,
       out: `services/${service.id}/index.html`,
       assetPrefix: '../../',
-      mustContain: asHtml(page.h1),
+      // id="pricing" is asserted because lib/routes.js keeps '#pricing' in
+      // SERVICE_LOCAL_ANCHORS — if ServicePage ever stops rendering <Pricing/>
+      // that nav link starts pointing at an anchor this page doesn't have.
+      mustContain: [asHtml(page.h1), /id="pricing"/],
+      mustStyle: ['.service-h1', '.navbar'],
       changefreq: 'monthly',
       priority: '0.9',
     }
   }),
-  { path: '', out: 'index.html', assetPrefix: './', mustContain: /faq|FAQPage/i, changefreq: 'monthly', priority: '1.0' },
+  // The home page's guard used to be /faq|FAQPage/i, which the CSS class
+  // "faq-list" satisfies on its own — so a render that lost the hero, the
+  // services ledger and the pricing bands would still have passed and shipped,
+  // on the site's most valuable URL. Assert real content from the same data
+  // the page renders, the way the service routes derive theirs from page.h1.
+  {
+    path: '',
+    out: 'index.html',
+    assetPrefix: './',
+    mustContain: [asHtml(hero.titleTop), asHtml(explorer.title), asHtml(pricing.bands[0].range), /FAQPage/],
+    mustStyle: ['.hero-title', '.navbar'],
+    changefreq: 'monthly',
+    priority: '1.0',
+  },
 ]
 
 // ── Sitemap <lastmod> ────────────────────────────────────────────────────────
@@ -477,6 +494,17 @@ try {
         throw new Error(`prerender: critical CSS for /${route.path} is missing the @font-face for ${font} — the preload would be wasted`)
       }
     }
+    // The length/:root pair above is a smoke test, not a guarantee: the last
+    // extraction bug shipped a critical CSS that had both and still dropped
+    // .hero-title — the LCP element (see the note further up). Assert the
+    // selectors that actually decide first paint on each route.
+    for (const selector of route.mustStyle || []) {
+      if (!criticalCssResolved.includes(selector)) {
+        throw new Error(
+          `prerender: critical CSS for /${route.path} is missing '${selector}' — the element it styles would paint unstyled at LCP`,
+        )
+      }
+    }
     // Anything still pointing at ./<file> rather than ./assets/<file> was missed
     // by the rewrite above and would 404.
     if (/url\((["']?)\.\/(?!assets\/)/.test(criticalCssResolved)) {
@@ -576,7 +604,7 @@ try {
     }
 
     // Sanity check before overwriting anything.
-    if (!html.includes('id="root"') || !route.mustContain.test(html)) {
+    if (!html.includes('id="root"') || !route.mustContain.every((pattern) => pattern.test(html))) {
       throw new Error(`prerendered HTML for /${route.path} is missing expected content — aborting without overwriting dist`)
     }
     if (/127\.0\.0\.1|\blocalhost\b/.test(html)) {
@@ -618,6 +646,39 @@ try {
     `prerender: wrote sitemap.xml with ${routes.length} URLs — ` +
       routes.map((route) => `/${route.path} ${lastmodFor(route)}`).join(', '),
   )
+
+  // llms.txt — the emerging convention for telling answer engines what an
+  // entity is and which URL answers which question. Not a ranking factor, but
+  // this whole build pipeline exists to be read by AI crawlers, so its absence
+  // was an odd gap. Generated from the same content the pages render, beside
+  // the sitemap, so a seventh service appears here without anyone remembering.
+  const llms = [
+    `# ${site.name} ${site.suffix}`,
+    '',
+    `> Founder-led technology consultancy in Kolkata, India. AI integration, custom CRM and ERP`,
+    `> systems, web and API development, cloud and DevOps. Every engagement is run directly by`,
+    `> the two founders. Indicative project range ₹75,000–₹8,00,000+ INR; a fixed itemised quote`,
+    `> is prepared free after a discovery call. Clients keep 100% of the code.`,
+    '',
+    `- Contact: ${site.email} · ${site.phone}`,
+    `- Location: ${site.location}`,
+    `- Area served: India`,
+    '',
+    '## Services',
+    '',
+    ...services.map((service) => {
+      const page = servicePages[service.id]
+      return `- [${page.h1}](${site.origin}/services/${service.id}/): ${page.metaDescription}`
+    }),
+    '',
+    '## Other pages',
+    '',
+    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in under a minute.`,
+    `- [Privacy policy](${site.origin}/privacy/): what the site collects (cookieless analytics only) and what it does not.`,
+    '',
+  ].join('\n')
+  await writeFile(join(dist, 'llms.txt'), llms)
+  console.log(`prerender: wrote llms.txt (${services.length} services indexed)`)
 } finally {
   await browser.close()
   server.close()
