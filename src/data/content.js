@@ -32,12 +32,10 @@ export const site = {
   // a knowledge graph or an answer engine to tell apart from any other
   // "Revora". Add the LinkedIn company page here the day it exists, and to
   // `sameAs` in index.html at the same time.
+  // Deliberately NOT listing the repository this site is built from: visitors
+  // should not be pointed at the source. (Note that omitting the link does not
+  // make the repo private — that is a GitHub setting, not a content one.)
   socials: [
-    // The site's own source. For a dev consultancy with no permissioned case
-    // studies yet, a public repository is the cheapest verifiable claim
-    // available — and it makes the teardown's "view the source" invitation
-    // literally actionable instead of rhetorical.
-    { label: 'GitHub', icon: 'github', url: 'https://github.com/Abhinav00711/TechConsultancy' },
     // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
   ],
 }
