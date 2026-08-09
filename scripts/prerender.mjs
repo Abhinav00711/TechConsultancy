@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { services, site } from '../src/data/content.js'
+import { explorer, hero, pricing, roadmap, services, servicesHub, site } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
@@ -33,6 +33,92 @@ const today = new Date().toISOString().slice(0, 10)
 const asHtml = (text) =>
   new RegExp(text.replace(/&/g, '&amp;').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 
+// ── Content integrity ────────────────────────────────────────────────────────
+// Adding a service means adding its id in seven places. Only two of them used
+// to be checked, and three of the remaining failures were SILENT:
+//
+//   roadmap.plans[id]      missing → buildPlan() throws inside an event
+//                          handler, where React error boundaries do not catch.
+//                          "Generate my roadmap" — the site's central
+//                          conversion instrument — does nothing, forever, with
+//                          an error only in the console.
+//   SCENES / FIT / FRAME /
+//   GROUND[id]             missing → the row renders another service's diagram
+//                          (the maps fall back to `ai`), so the page is
+//                          confidently wrong rather than broken.
+//   icons[id]              missing → the ledger row loses its glyph.
+//
+// None of these are visible in a build log or a smoke test of the home page,
+// and all of them ship. Assert the whole fan-out here instead, where the build
+// can refuse. Runs before Chromium is even looked for, so it fails in seconds.
+
+// Pull a `const NAME = { … }` object literal out of a source file by counting
+// braces — the maps in ShowcaseScenes.jsx are a mix of single- and multi-line,
+// so a line-based regex would only catch some of them. Source text rather than
+// import because these modules are JSX and pull in three.js.
+const objectLiteral = (source, name) => {
+  const start = source.indexOf(`const ${name} = {`)
+  if (start === -1) return null
+  let depth = 0
+  for (let i = source.indexOf('{', start); i < source.length; i += 1) {
+    if (source[i] === '{') depth += 1
+    else if (source[i] === '}') {
+      depth -= 1
+      if (depth === 0) return source.slice(source.indexOf('{', start) + 1, i)
+    }
+  }
+  return null
+}
+
+const assertContent = async () => {
+  const problems = []
+  const idPattern = /^[a-z0-9-]+$/
+
+  const read = async (rel) => readFile(join(repoRoot, rel), 'utf8')
+  const scenesSrc = await read('src/components/three/ShowcaseScenes.jsx')
+  const iconsSrc = await read('src/components/ui/Icons.jsx')
+
+  // The four id-keyed maps in ShowcaseScenes plus the icon set. A map this
+  // check cannot find is itself a failure — silently skipping it would make
+  // the guard worthless the day one is renamed.
+  const maps = { SCENES: null, FIT: null, FRAME: null, GROUND: null }
+  for (const name of Object.keys(maps)) {
+    maps[name] = objectLiteral(scenesSrc, name)
+    if (maps[name] === null) problems.push(`ShowcaseScenes.jsx: cannot find the '${name}' map — this guard needs updating`)
+  }
+  const iconMap = objectLiteral(iconsSrc, 'icons')
+  if (iconMap === null) problems.push("Icons.jsx: cannot find the 'icons' map — this guard needs updating")
+
+  const hasKey = (literal, key) => literal !== null && new RegExp(`(^|[{,\\s])${key}\\s*:`).test(literal)
+
+  for (const service of services) {
+    const { id } = service
+    // Ids reach the URL (/services/<id>/) and the #services-<id> deep link,
+    // both of which match SERVICE_ID in lib/routes.js.
+    if (!idPattern.test(id)) problems.push(`service '${id}': id must match ${idPattern} to be routable`)
+    if (!servicePages[id]) problems.push(`service '${id}': no entry in src/data/service-pages.js`)
+    if (!roadmap.plans[id]) problems.push(`service '${id}': no roadmap.plans entry — the Generate button will throw`)
+    else if (!Array.isArray(roadmap.plans[id].phases) || roadmap.plans[id].phases.length === 0)
+      problems.push(`service '${id}': roadmap.plans.${id}.phases is empty`)
+    if (!roadmap.problems.some((p) => p.id === id))
+      problems.push(`service '${id}': no roadmap.problems entry — it cannot be picked in the generator`)
+    for (const [name, literal] of Object.entries(maps))
+      if (!hasKey(literal, id)) problems.push(`service '${id}': missing from ${name} in ShowcaseScenes.jsx`)
+    if (!hasKey(iconMap, service.icon)) problems.push(`service '${id}': icon '${service.icon}' is not in Icons.jsx`)
+  }
+
+  // Cross-links between service pages: a 'related' id that no longer exists
+  // renders a card linking to a URL that 404s.
+  const ids = new Set(services.map((s) => s.id))
+  for (const [id, page] of Object.entries(servicePages))
+    for (const rel of page.related || [])
+      if (!ids.has(rel)) problems.push(`service-pages.js '${id}': related id '${rel}' is not a service`)
+
+  if (problems.length) {
+    throw new Error(`prerender: content integrity check failed\n  - ${problems.join('\n  - ')}`)
+  }
+}
+
 // Routes to snapshot. assetPrefix replaces the build's './' asset references
 // so nested pages still resolve ../assets/… correctly on GitHub Pages.
 // Order matters: dist/index.html is the SPA shell every route loads from, so
@@ -43,7 +129,7 @@ const asHtml = (text) =>
 // They are generated from the same content the app renders, so adding a
 // seventh service creates its page without touching this file.
 const routes = [
-  { path: 'privacy/', out: 'privacy/index.html', assetPrefix: '../', mustContain: /What we collect/i, changefreq: 'yearly', priority: '0.2' },
+  { path: 'privacy/', out: 'privacy/index.html', assetPrefix: '../', mustContain: [/What we collect/i], mustStyle: ['.legal-page'], changefreq: 'yearly', priority: '0.2' },
   ...services.map((service) => {
     const page = servicePages[service.id]
     // A service without page copy would render an empty page and still be
@@ -53,12 +139,41 @@ const routes = [
       path: `services/${service.id}/`,
       out: `services/${service.id}/index.html`,
       assetPrefix: '../../',
-      mustContain: asHtml(page.h1),
+      // id="pricing" is asserted because lib/routes.js keeps '#pricing' in
+      // SERVICE_LOCAL_ANCHORS — if ServicePage ever stops rendering <Pricing/>
+      // that nav link starts pointing at an anchor this page doesn't have.
+      mustContain: [asHtml(page.h1), /id="pricing"/],
+      mustStyle: ['.service-h1', '.navbar'],
       changefreq: 'monthly',
       priority: '0.9',
     }
   }),
-  { path: '', out: 'index.html', assetPrefix: './', mustContain: /faq|FAQPage/i, changefreq: 'monthly', priority: '1.0' },
+  // The hub the six service pages hang off. Must come AFTER them in this
+  // array: the static server below strips route prefixes from asset requests,
+  // and 'services/' is a prefix of 'services/<id>/' (see the sort there).
+  {
+    path: 'services/',
+    out: 'services/index.html',
+    assetPrefix: '../',
+    mustContain: [asHtml(servicesHub.h1), /class="hub-table"/],
+    mustStyle: ['.service-h1', '.navbar'],
+    changefreq: 'monthly',
+    priority: '0.8',
+  },
+  // The home page's guard used to be /faq|FAQPage/i, which the CSS class
+  // "faq-list" satisfies on its own — so a render that lost the hero, the
+  // services ledger and the pricing bands would still have passed and shipped,
+  // on the site's most valuable URL. Assert real content from the same data
+  // the page renders, the way the service routes derive theirs from page.h1.
+  {
+    path: '',
+    out: 'index.html',
+    assetPrefix: './',
+    mustContain: [asHtml(hero.titleTop), asHtml(explorer.title), asHtml(pricing.bands[0].range), /FAQPage/],
+    mustStyle: ['.hero-title', '.navbar'],
+    changefreq: 'monthly',
+    priority: '1.0',
+  },
 ]
 
 // ── Sitemap <lastmod> ────────────────────────────────────────────────────────
@@ -128,6 +243,10 @@ function findChromium() {
   return null
 }
 
+// Before anything expensive: refuse to publish a build whose service ids do
+// not line up across the data files and the components that key off them.
+await assertContent()
+
 // This script rewrites dist/index.html — the very shell it loads every route
 // from. Running it twice therefore snapshots an already-snapshotted page and
 // inlines a second copy of the critical CSS into it. Cheap to detect, and
@@ -156,8 +275,15 @@ const server = createServer(async (req, res) => {
     let urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
     // The shell's asset URLs are relative ('./assets/…'), so under /privacy/
     // the browser requests /privacy/assets/… — serve those from the root.
-    for (const r of routes) {
-      if (r.path && urlPath.startsWith(`/${r.path}`)) urlPath = urlPath.slice(r.path.length)
+    // Longest path first, then stop at the first match. Without both, adding
+    // the 'services/' hub silently broke the six 'services/<id>/' routes:
+    // '/services/ai/assets/x.js' matched the shorter prefix, became
+    // '/ai/assets/x.js', and every asset 404'd during their snapshot.
+    for (const r of [...routes].sort((a, b) => b.path.length - a.path.length)) {
+      if (r.path && urlPath.startsWith(`/${r.path}`)) {
+        urlPath = urlPath.slice(r.path.length)
+        break
+      }
     }
     let filePath = normalize(join(dist, urlPath === '/' ? 'index.html' : urlPath))
     if (!filePath.startsWith(dist)) throw new Error('out of root')
@@ -387,6 +513,17 @@ try {
         throw new Error(`prerender: critical CSS for /${route.path} is missing the @font-face for ${font} — the preload would be wasted`)
       }
     }
+    // The length/:root pair above is a smoke test, not a guarantee: the last
+    // extraction bug shipped a critical CSS that had both and still dropped
+    // .hero-title — the LCP element (see the note further up). Assert the
+    // selectors that actually decide first paint on each route.
+    for (const selector of route.mustStyle || []) {
+      if (!criticalCssResolved.includes(selector)) {
+        throw new Error(
+          `prerender: critical CSS for /${route.path} is missing '${selector}' — the element it styles would paint unstyled at LCP`,
+        )
+      }
+    }
     // Anything still pointing at ./<file> rather than ./assets/<file> was missed
     // by the rewrite above and would 404.
     if (/url\((["']?)\.\/(?!assets\/)/.test(criticalCssResolved)) {
@@ -486,7 +623,7 @@ try {
     }
 
     // Sanity check before overwriting anything.
-    if (!html.includes('id="root"') || !route.mustContain.test(html)) {
+    if (!html.includes('id="root"') || !route.mustContain.every((pattern) => pattern.test(html))) {
       throw new Error(`prerendered HTML for /${route.path} is missing expected content — aborting without overwriting dist`)
     }
     if (/127\.0\.0\.1|\blocalhost\b/.test(html)) {
@@ -528,6 +665,40 @@ try {
     `prerender: wrote sitemap.xml with ${routes.length} URLs — ` +
       routes.map((route) => `/${route.path} ${lastmodFor(route)}`).join(', '),
   )
+
+  // llms.txt — the emerging convention for telling answer engines what an
+  // entity is and which URL answers which question. Not a ranking factor, but
+  // this whole build pipeline exists to be read by AI crawlers, so its absence
+  // was an odd gap. Generated from the same content the pages render, beside
+  // the sitemap, so a seventh service appears here without anyone remembering.
+  const llms = [
+    `# ${site.name} ${site.suffix}`,
+    '',
+    `> Founder-led technology consultancy in Kolkata, India. AI integration, custom CRM and ERP`,
+    `> systems, web and API development, cloud and DevOps. Every engagement is run directly by`,
+    `> the two founders. Indicative project range ₹75,000–₹8,00,000+ INR; a fixed itemised quote`,
+    `> is prepared free after a discovery call. Clients keep 100% of the code.`,
+    '',
+    `- Contact: ${site.email} · ${site.phone}`,
+    `- Location: ${site.location}`,
+    `- Area served: India`,
+    '',
+    '## Services',
+    '',
+    `- [All services](${site.origin}/services/): the six compared side by side — what each solves, its indicative ₹ range and typical duration.`,
+    ...services.map((service) => {
+      const page = servicePages[service.id]
+      return `- [${page.h1}](${site.origin}/services/${service.id}/): ${page.metaDescription}`
+    }),
+    '',
+    '## Other pages',
+    '',
+    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in under a minute.`,
+    `- [Privacy policy](${site.origin}/privacy/): what the site collects (cookieless analytics only) and what it does not.`,
+    '',
+  ].join('\n')
+  await writeFile(join(dist, 'llms.txt'), llms)
+  console.log(`prerender: wrote llms.txt (${services.length} services indexed)`)
 } finally {
   await browser.close()
   server.close()

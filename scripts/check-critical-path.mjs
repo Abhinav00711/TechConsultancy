@@ -34,6 +34,12 @@ const FORBIDDEN = ['three', 'r3f']
 // reviewed diff — never by deleting the check.
 const BUDGET_GZIP = 84 * 1024
 
+// The stylesheet had no budget at all, even though on the `build:spa` path it
+// is fully render-blocking and a slice of it is inlined into every prerendered
+// page. Same rules as above: measured 7.4 KB gzip when introduced, ~15% of
+// headroom, raise it deliberately rather than deleting it.
+const CSS_BUDGET_GZIP = 9 * 1024
+
 const fail = (msg) => {
   console.error(`\ncheck-critical-path: ${msg}\n`)
   process.exit(1)
@@ -110,8 +116,30 @@ if (totalGzip > BUDGET_GZIP) {
   )
 }
 
+// 4. The stylesheet, budgeted separately — it is not part of the entry's JS
+//    graph but it is very much part of what the first paint waits for.
+let cssRaw = 0
+let cssGzip = 0
+const cssFiles = [...present].filter((f) => f.endsWith('.css'))
+for (const f of cssFiles) {
+  const buf = await readFile(join(assets, f))
+  cssRaw += buf.length
+  cssGzip += gzipSync(buf).length
+}
+if (cssGzip > CSS_BUDGET_GZIP) {
+  fail(
+    `the stylesheet is ${(cssGzip / 1024).toFixed(1)} KB gzip — over the ${(CSS_BUDGET_GZIP / 1024).toFixed(0)} KB budget.\n` +
+      `  files: ${cssFiles.join(', ')}\n` +
+      `  Raise CSS_BUDGET_GZIP here deliberately if the growth is worth it.`,
+  )
+}
+
 console.log(
   `check-critical-path: OK — entry loads ${seen.size} chunk(s), ` +
     `${(totalRaw / 1024).toFixed(0)} KB raw / ${(totalGzip / 1024).toFixed(1)} KB gzip ` +
     `(budget ${(BUDGET_GZIP / 1024).toFixed(0)} KB), no WebGL. [${[...seen].join(', ')}]`,
+)
+console.log(
+  `check-critical-path: CSS ${(cssRaw / 1024).toFixed(0)} KB raw / ${(cssGzip / 1024).toFixed(1)} KB gzip ` +
+    `(budget ${(CSS_BUDGET_GZIP / 1024).toFixed(0)} KB).`,
 )

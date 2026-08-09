@@ -101,10 +101,26 @@ export default function Navbar() {
     const onPointerDown = (e) => {
       if (!e.target.closest('#mobile-menu') && !e.target.closest('.nav-burger')) setOpen(false)
     }
+    // The Tab trap above only constrains the keyboard. A screen reader in
+    // browse mode ignores tab order entirely, so it swiped straight out of
+    // the open menu and on through the page behind it — the sighted user was
+    // locked in, their screen-reader counterpart was not. inert removes the
+    // background from the accessibility tree as well as from focus. The
+    // header is left alone so the burger stays operable.
+    // Siblings of the menu, not children of <body>: React renders the whole
+    // app inside #root, so walking body would find only #root — which
+    // contains the burger and would therefore be skipped, inerting nothing.
+    const menuEl = document.getElementById('mobile-menu')
+    const backdrop = menuEl
+      ? [...menuEl.parentElement.children].filter((el) => el !== menuEl && !el.contains(burgerRef.current))
+      : []
+    for (const el of backdrop) el.inert = true
+
     document.addEventListener('keydown', onKey)
     document.addEventListener('pointerdown', onPointerDown)
     return () => {
       document.body.style.overflow = ''
+      for (const el of backdrop) el.inert = false
       document.removeEventListener('keydown', onKey)
       document.removeEventListener('pointerdown', onPointerDown)
     }
@@ -124,18 +140,24 @@ export default function Navbar() {
             </span>
           </a>
 
-          <ul className="nav-links">
-            {nav.map((item) => (
-              <li key={item.href}>
-                {/* aria-current="location" is the correct token for "this is
-                    where you are in the document" — not "page", which would
-                    claim the link points at the current URL. */}
-                <a href={href(item.href)} aria-current={current === item.href.slice(1) ? 'location' : undefined}>
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
+          {/* The primary nav had no landmark at all — a <ul> of links inside
+              <header> is not navigation to a screen reader, so the "skip to
+              navigation" rotor entry every other site has simply did not
+              exist here. Labelled because the page has two navs. */}
+          <nav className="nav-primary" aria-label="Primary">
+            <ul className="nav-links">
+              {nav.map((item) => (
+                <li key={item.href}>
+                  {/* aria-current="location" is the correct token for "this is
+                      where you are in the document" — not "page", which would
+                      claim the link points at the current URL. */}
+                  <a href={href(item.href)} aria-current={current === item.href.slice(1) ? 'location' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
           <div className="navbar-actions">
             <ThemeToggle />
@@ -162,7 +184,7 @@ export default function Navbar() {
           visibility flip keeps the closed menu out of the accessibility
           tree and tab order. This used to be the last motion/react call
           site — a pure CSS transition needs no animation library. */}
-      <nav id="mobile-menu" className={`mobile-menu ${open ? 'open' : ''}`}>
+      <nav id="mobile-menu" aria-label="Mobile" className={`mobile-menu ${open ? 'open' : ''}`}>
         {nav.map((item) => (
           <a key={item.href} href={href(item.href)} onClick={() => setOpen(false)}>
             {item.label}

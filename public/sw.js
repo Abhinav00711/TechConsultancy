@@ -22,7 +22,17 @@
    constant; old hashed assets are additionally trimmed by count. */
 
 const VERSION = 'dev'
-const ASSET_CACHE = `assets-${VERSION}`
+/* NOT versioned, deliberately. VERSION hashes the sorted list of emitted
+   filenames, so one chunk changing renames every VERSION-keyed cache and
+   `activate` deletes the lot. Measured: a one-line source edit left three,
+   r3f, react and the CSS on byte-identical hashes, yet a returning visitor
+   re-downloaded ~325 KB gzip of them because a 12.4 KB entry chunk moved —
+   exactly the re-download this file exists to prevent. Everything under
+   assets/ is content-hashed, so a stale entry is impossible by construction:
+   a changed file is a different URL and simply misses. trim() already bounds
+   the size. Pages and runtime responses are NOT content-addressed and do
+   still need the version. */
+const ASSET_CACHE = 'assets-v1'
 const PAGE_CACHE = `pages-${VERSION}`
 const RUNTIME_CACHE = `runtime-${VERSION}`
 const CACHES = [ASSET_CACHE, PAGE_CACHE, RUNTIME_CACHE]

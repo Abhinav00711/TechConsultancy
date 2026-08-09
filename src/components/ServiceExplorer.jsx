@@ -2,11 +2,19 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'
-import { href, servicePath } from '../lib/routes.js'
+import { href, servicePath, SERVICE_ID } from '../lib/routes.js'
 import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icons.jsx'
 
-const ShowcaseCanvas = lazy(() => import('./three/ShowcaseScenes.jsx'))
+/* Named so the same import can be awaited for the load status below — module
+   caching makes the second call free. */
+const loadScenes = () => import('./three/ShowcaseScenes.jsx')
+const ShowcaseCanvas = lazy(loadScenes)
+
+/* #services-<id>, the deep link the footer and campaign links use. The id
+   pattern is imported rather than written out, so it cannot drift from the
+   /services/<id>/ route matcher — see SERVICE_ID in lib/routes.js. */
+const HASH_DEEP_LINK = new RegExp(`^#services-(${SERVICE_ID})$`)
 
 /* The services ledger: six ruled rows, one control at every width. The open
    row expands in place and shows its service's 3D diagram on the page's one
@@ -77,6 +85,20 @@ export default function ServiceExplorer() {
   // only for visitors who showed interest in the diagrams, never merely
   // because the section scrolled near the viewport.
   const [engaged, setEngaged] = useState(false)
+  // idle → loading → ready | error. Drives the live region below: pressing
+  // "Load the live demo" used to swap the control for an aria-hidden
+  // gradient and then say nothing for the ~280 KB download, so success and
+  // failure were indistinguishable to a screen reader (WCAG 4.1.3).
+  const [sceneState, setSceneState] = useState('idle')
+
+  const engageScene = () => {
+    setEngaged(true)
+    setSceneState('loading')
+    loadScenes().then(
+      () => setSceneState('ready'),
+      () => setSceneState('error'),
+    )
+  }
 
   useEffect(() => {
     if (!window.__PRERENDERING__ && !isConstrained()) setStageReady(true)
@@ -85,14 +107,20 @@ export default function ServiceExplorer() {
   // Deep links: #services-crm (footer, ads, LinkedIn posts…) opens that row.
   useEffect(() => {
     const apply = () => {
-      const match = /^#services-([a-z]+)$/.exec(window.location.hash)
+      const match = HASH_DEEP_LINK.exec(window.location.hash)
       if (!match) return
       const i = services.findIndex((s) => s.id === match[1])
       if (i === -1) return
       setActive(i)
       setCollapsed(false)
-      // Arriving on a service deep link is as deliberate as a toggle.
+      // Arriving on a service deep link is an explicit request for that
+      // service's diagram, so this one still loads the scenes.
       setEngaged(true)
+      setSceneState('loading')
+      loadScenes().then(
+        () => setSceneState('ready'),
+        () => setSceneState('error'),
+      )
       document.getElementById('services')?.scrollIntoView()
     }
     apply()
@@ -113,7 +141,14 @@ export default function ServiceExplorer() {
       setActive(i)
       setCollapsed(false)
     }
-    setEngaged(true)
+    // Deliberately NOT setEngaged(true). Opening a row is a request to read
+    // the copy, not to load a 3D scene — and because this fired on every
+    // toggle, the "Load the live … demo" button below was only ever reachable
+    // on the first row's initial render. Measured: one plain row toggle
+    // fetched 266 KB gzip of three.js + r3f, so someone opening "Custom CRM
+    // Systems" for three paragraphs of text paid the entire WebGL cost. The
+    // deep-link path keeps its setEngaged: arriving on #services-<id> is an
+    // explicit request for that service's diagram.
     requestAnimationFrame(() => {
       const after = triggerEl.getBoundingClientRect().top
       if (after !== before) window.scrollBy({ top: after - before, behavior: 'auto' })
@@ -130,6 +165,15 @@ export default function ServiceExplorer() {
           {explorer.title} <span className="accent-text">{explorer.titleAccent}</span>
         </h2>
         <p className="section-sub">{explorer.sub}</p>
+
+        {/* Mounted from the start, not inserted with its content: a live
+            region created at the same moment as its text is not reliably
+            announced. Same pattern as the roadmap's status region. */}
+        <div role="status" className="sr-only">
+          {sceneState === 'loading' && 'Loading the interactive diagram…'}
+          {sceneState === 'ready' && 'Interactive diagram loaded.'}
+          {sceneState === 'error' && 'The interactive diagram could not be loaded. A static illustration is shown instead.'}
+        </div>
 
         <div className="services-accordion">
           {services.map((s, i) => {
@@ -222,7 +266,7 @@ export default function ServiceExplorer() {
                           type="button"
                           className="canvas-load"
                           onClick={() => {
-                            setEngaged(true)
+                            engageScene()
                             track('Scene Load Click', { service: s.title })
                           }}
                         >

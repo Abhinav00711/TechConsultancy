@@ -56,11 +56,20 @@ export default function Contact() {
       })
       if (!res.ok) throw new Error(`Form endpoint responded ${res.status}`)
       setStatus('sent')
-      track('Form Submit', { service: String(data.get('service') || '') })
+      // budget and timeline ride along so the lead-QUALITY mix is visible in
+      // Umami without opening the Formspree dashboard.
+      track('Form Submit', {
+        service: String(data.get('service') || ''),
+        budget: String(data.get('budget') || 'unspecified'),
+        timeline: String(data.get('timeline') || 'unspecified'),
+      })
       form.reset()
       setService('')
-    } catch {
+    } catch (error) {
       setStatus('error')
+      // Same reason as the roadmap's send error: an untracked catch makes a
+      // Formspree cap breach indistinguishable from a week with no enquiries.
+      track('Form Error', { reason: String(error?.message || 'unknown') })
     }
   }
 
@@ -125,7 +134,22 @@ export default function Contact() {
           </div>
 
           <div>
-            <form className="contact-form sheet" onSubmit={onSubmit}>
+            {/* action/method are load-bearing, not decoration. main.jsx
+                deliberately skips hydration when a chunk 404s (a stale HTML
+                file naming an evicted asset hash after a deploy), so onSubmit
+                is not guaranteed to exist by the time someone presses Send.
+                Without an action the browser then falls back to a native GET
+                against the current URL, putting the visitor's name, email and
+                phone into their history, into the Referer of every subsequent
+                third-party request, and into Umami's page-URL field — and
+                losing the lead silently. With these two attributes the same
+                failure degrades to a plain POST that Formspree accepts. */}
+            <form
+              className="contact-form sheet"
+              action={site.formEndpoint || undefined}
+              method="POST"
+              onSubmit={onSubmit}
+            >
               {contact.formNote && <p className="form-note">{contact.formNote}</p>}
               <div className="form-row">
                 <div className="form-field">

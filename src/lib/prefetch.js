@@ -27,6 +27,12 @@ export function setupPrefetch() {
     if (!anchor) return
     const url = new URL(anchor.href, window.location.href)
     if (url.origin !== window.location.origin || !SERVICE_URL.test(url.pathname)) return
+    // Every in-page anchor on /services/ai/ — the breadcrumb, the #contact
+    // buttons, the #roadgen CTA — resolves to that same pathname, so without
+    // this the page prefetches itself on hover: a speculative full-document
+    // request for the document already open, aimed squarely at the
+    // constrained-network audience this file exists to protect.
+    if (url.pathname === window.location.pathname) return
 
     if (!chunkWarmed) {
       chunkWarmed = true

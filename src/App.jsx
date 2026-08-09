@@ -14,7 +14,7 @@ import WhatsAppFab from './components/WhatsAppFab.jsx'
 import StickyCtaBar from './components/StickyCtaBar.jsx'
 import ErrorBoundary from './components/ui/ErrorBoundary.jsx'
 import { site } from './data/content.js'
-import { currentRoute, privacyPageComponent, servicePageComponent } from './lib/routes.js'
+import { currentRoute, privacyPageComponent, servicePageComponent, servicesHubComponent } from './lib/routes.js'
 
 /* No animation library. Under the Ledger motion doctrine only deliberate
    interactions animate — the FAQ accordion, the mobile menu, the accordion
@@ -81,9 +81,18 @@ export default function App() {
   // awaited on their URLs — see loadServicePage() for why not React.lazy.
   const PrivacyPolicy = route.name === 'privacy' ? privacyPageComponent() : null
   const ServicePage = route.name === 'service' ? servicePageComponent() : null
+  const ServicesHub = route.name === 'servicesHub' ? servicesHubComponent() : null
   return (
     <ErrorBoundary fallback={<CrashNotice />}>
-      {PrivacyPolicy ? <PrivacyPolicy /> : ServicePage ? <ServicePage service={route.service} /> : <Site />}
+      {PrivacyPolicy ? (
+        <PrivacyPolicy />
+      ) : ServicePage ? (
+        <ServicePage service={route.service} />
+      ) : ServicesHub ? (
+        <ServicesHub />
+      ) : (
+        <Site />
+      )}
     </ErrorBoundary>
   )
 }

@@ -1,8 +1,15 @@
 # Pull-request checks. Until this existed, the only workflow ran on push to
 # main — meaning the build, the critical-path budget and the prerender guards
-# all fired AFTER code had already landed. This runs the cheap, deterministic
-# half (lint + SPA build + budget) on every PR; the full prerender still runs
-# in deploy.yml where the runner's Chromium is guaranteed.
+# all fired AFTER code had already landed.
+#
+# This now runs the FULL build, prerender included. It used to stop at
+# build:spa, which left the most fragile 534 lines in the repo — headless
+# Chromium, live-DOM critical-CSS extraction, regex asset-path rewriting,
+# sitemap generation and the per-route content guards — exercised only after
+# merge. ubuntu-latest ships Chrome at /usr/bin/google-chrome, which
+# findChromium() already resolves, so the whole thing costs ~40s and catches
+# a missing roadmap plan, a missing service-pages entry or a critical-CSS
+# regression on the PR instead of in production.
 name: CI
 
 on:
@@ -17,12 +24,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history, same reason as deploy.yml: prerender.mjs dates each
+          # sitemap <lastmod> from the last commit touching that page.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
       - run: npm run lint
-      # build:spa includes scripts/check-critical-path.mjs — the WebGL and
-      # gzip-budget guards fail the PR, not the deploy.
-      - run: npm run build:spa
+      # build includes check-critical-path.mjs (WebGL + gzip budget) and
+      # prerender.mjs (content integrity, per-route render guards, critical
+      # CSS). PRERENDER_STRICT so a missing browser fails the PR rather than
+      # quietly skipping the half of the build this job exists to cover.
+      - run: npm run build
+        env:
+          PRERENDER_STRICT: '1'

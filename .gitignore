@@ -4,3 +4,6 @@ dist
 *.local
 .env
 .env.*
+
+# throwaway local scripts (screenshot/measurement/debug harnesses)
+/.*.mjs

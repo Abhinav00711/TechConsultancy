@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
-import { roadmap, services, site } from '../data/content.js'
+import { useEffect, useRef, useState } from 'react'
+import { formatBand, roadmap, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
+import { useReducedMotion } from '../lib/hooks.js'
 
 /* The hero instrument: two questions in, a scoped roadmap out, in under a
    minute. Deterministic on purpose — instant, free, works offline, and cannot
@@ -19,13 +20,6 @@ import { track, bookingHref } from '../lib/analytics.js'
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const stamp = (d) => `${String(d.getDate()).padStart(2, '0')} ${monthNames[d.getMonth()]} ${d.getFullYear()}`
 
-/* ₹ formatting for a value in lakhs: below one lakh speak in thousands
-   (₹75k, stepped in 5k), above it in lakhs (₹1.5 L, stepped in half a
-   lakh) — the units Indian SMB buyers actually think in. The band's floor
-   rounds down and its ceiling rounds up, so scaling always widens the range
-   instead of two team sizes colliding on the same rounded figure. */
-const fmtLakh = (v, roundFn) => (v < 1 ? `₹${roundFn((v * 100) / 5) * 5}k` : `₹${roundFn(v * 2) / 2} L`)
-
 function buildPlan(problemId, scaleId) {
   const plan = roadmap.plans[problemId]
   const scale = roadmap.scales.find((s) => s.id === scaleId)
@@ -41,9 +35,21 @@ function buildPlan(problemId, scaleId) {
   })
   // The band scales with the same multiplier as the schedule, so a bigger
   // team sees both a longer plan and a wider budget — one consistent story.
-  const band = `${fmtLakh(plan.baseBand[0] * scale.mult, Math.floor)}–${fmtLakh(plan.baseBand[1] * scale.mult, Math.ceil)}`
+  // formatBand lives in content.js so the services hub quotes it identically.
+  const band = formatBand(plan.baseBand, scale.mult)
   return { plan, scale, phases, total, band }
 }
+
+/* The plain-text roadmap that reaches the founders' inbox. Derived rather than
+   built inside the submit handler, because it is also rendered as a hidden
+   field so a native POST (see the form below) carries the plan, not just the
+   contact string. */
+const summaryFor = (doc) =>
+  [
+    `Generated roadmap ${doc.ref} — ${doc.plan.title}`,
+    `Team size: ${doc.scale.label} · ~${doc.total} weeks · indicative ${doc.band}`,
+    ...doc.phases.map((p) => `${p.label}: ${p.title}`),
+  ].join('\n')
 
 /* defaultProblem lets each /services/<id>/ page mount the generator with its
    own service preselected (plan ids match service ids). */
@@ -55,6 +61,22 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
   const [sendState, setSendState] = useState('idle')
   const seq = useRef(0)
   const docRef = useRef(null)
+  const contactRef = useRef(null)
+  const reducedMotion = useReducedMotion()
+
+  /* Pressing "send" swaps the button out for this field, which unmounts the
+     element that had focus — focus falls back to <body>, so a keyboard user
+     is dumped at the top of the document and a screen-reader user is never
+     told a new field appeared. Move focus onto the field the press asked
+     for. (WCAG 2.4.3 Focus Order.) */
+  useEffect(() => {
+    if (sendState === 'asking') contactRef.current?.focus()
+  }, [sendState])
+  // Captured after mount, like Contact's: reading window during render would
+  // disagree with the prerendered snapshot and break hydration.
+  const [pageContext, setPageContext] = useState('')
+
+  useEffect(() => setPageContext(window.location.href), [])
 
   const generate = (e) => {
     e.preventDefault()
@@ -71,17 +93,20 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
     const service = services.find((s) => s.id === problem)
     if (service) window.dispatchEvent(new CustomEvent('revora:service', { detail: service.formOption }))
     track('Roadmap Generated', { service: built.plan.title, scale: built.scale.label })
-    requestAnimationFrame(() => docRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+    // behavior:'smooth' overrides the CSS scroll-behavior reset, so this was
+    // the one animation on the site that ignored prefers-reduced-motion.
+    requestAnimationFrame(() =>
+      docRef.current?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest' }),
+    )
   }
 
   const send = async (e) => {
     e.preventDefault()
+    // aria-disabled rather than disabled on the button (see below), so the
+    // handler has to refuse a second submit itself.
+    if (sendState === 'sending') return
     const contact = new FormData(e.target).get('contact')
-    const summary = [
-      `Generated roadmap ${doc.ref} — ${doc.plan.title}`,
-      `Team size: ${doc.scale.label} · ~${doc.total} weeks · indicative ${doc.band}`,
-      ...doc.phases.map((p) => `${p.label}: ${p.title}`),
-    ].join('\n')
+    const summary = summaryFor(doc)
 
     if (!site.formEndpoint) {
       const subject = encodeURIComponent(`Roadmap enquiry — ${doc.plan.title}`)
@@ -105,8 +130,13 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
       if (!res.ok) throw new Error(`Form endpoint responded ${res.status}`)
       setSendState('sent')
       track('Roadmap Sent', { service: doc.plan.title })
-    } catch {
+    } catch (error) {
       setSendState('error')
+      // Formspree's free tier caps at 50 submissions/month. At the cap every
+      // POST 4xx's and this branch runs — but it used to track nothing, so
+      // 'Roadmap Sent' simply stopped appearing, which looks exactly like a
+      // quiet week. Silence and failure must not be the same signal.
+      track('Roadmap Send Error', { service: doc.plan.title, reason: String(error?.message || 'unknown') })
     }
   }
 
@@ -233,23 +263,71 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
             ))}
           </ul>
 
+          {/* action/method on the send form below, for the same reason as the
+              contact form: if the bundle never hydrates, a native POST still
+              delivers the lead instead of a GET spraying it into the URL. The
+              plan and page travel as hidden fields so that fallback carries
+              the whole document, not just the contact string. */}
           {sendState === 'asking' || sendState === 'sending' || sendState === 'error' ? (
-            <form className="roadgen-actions" onSubmit={send}>
+            <form
+              className="roadgen-actions"
+              action={site.formEndpoint || undefined}
+              method="POST"
+              onSubmit={send}
+            >
               <div className="form-field" style={{ flex: '1 1 220px' }}>
                 <label htmlFor="rg-contact">Email or WhatsApp number</label>
                 {/* type="text" on purpose: the field accepts an email or a
                     phone number, so no autoComplete hint — a wrong one
                     autofills emails into what may be a phone answer. */}
-                <input id="rg-contact" name="contact" type="text" required placeholder="you@company.com or +91 …" />
+                <input
+                  ref={contactRef}
+                  id="rg-contact"
+                  name="contact"
+                  type="text"
+                  required
+                  placeholder="you@company.com or +91 …"
+                />
               </div>
-              <button type="submit" className="btn btn-primary" disabled={sendState === 'sending'}>
+              <input type="hidden" name="roadmap" value={summaryFor(doc)} />
+              <input type="hidden" name="page" value={pageContext} />
+              {/* aria-disabled, not disabled: a `disabled` button is removed
+                  from the accessibility tree, so disabling the element that
+                  currently has focus mid-submit drops the user's place. The
+                  handler guards the double submit instead. */}
+              <button
+                type="submit"
+                className="btn btn-primary"
+                aria-disabled={sendState === 'sending' || undefined}
+              >
                 {sendState === 'sending' ? 'Sending…' : 'Send'}
+              </button>
+              {/* Without this the send was a one-way door: asking for the
+                  email unmounted Book and Download, and the error state never
+                  returns to idle — so a failed send permanently removed the
+                  two zero-friction actions from the hottest lead on the site. */}
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setSendState('idle')}
+              >
+                Cancel
               </button>
             </form>
           ) : (
             <div className="roadgen-actions">
               {sendState === 'idle' && (
-                <button type="button" className="btn btn-primary" onClick={() => setSendState('asking')}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setSendState('asking')
+                    // Without this, generated → abandoned-at-the-email-field
+                    // is invisible: 'Roadmap Generated' and 'Roadmap Sent'
+                    // bracket the funnel's leakiest step without measuring it.
+                    track('Roadmap Send Start', { service: doc.plan.title })
+                  }}
+                >
                   {roadmap.send}
                 </button>
               )}
@@ -285,6 +363,14 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
 
           <p className="roadmap-foot">
             {`Prepared ${doc.date} · ${site.name} ${site.suffix}, Kolkata · ${roadmap.disclaimer}`}
+          </p>
+          {/* The whole premise of this document is that the visitor keeps it
+              and forwards it. Printed, it used to carry no way of reaching
+              Revora at all — so a partner reading the PDF had nothing to act
+              on. This line is the only part of the document that survives
+              being detached from the site. */}
+          <p className="roadmap-colophon">
+            {`${site.origin.replace(/^https?:\/\//, '')} · ${site.email} · ${site.phone}`}
           </p>
         </div>
       )}
