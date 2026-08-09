@@ -12,7 +12,7 @@ A consultancy website built around one idea: **everything Revora sells is a docu
 - **The Revora Guarantee** — the four commitments (100% code ownership, 24h response, 7-day first demo, zero lock-in) as a signed, dated document instead of an animated stats band.
 - **Scoping teardown** — the honest replacement for case studies we don't have yet: this site itself scoped week by week (verifiable), plus two clearly-labeled illustrative engagements.
 - **Pricing bands** — Pilot (₹75k–1.5 L, ~2 weeks) / Build (₹1.5–8 L, 4–10 weeks) / Platform (₹8 L+, phased) — wide indicative ranges; the fixed itemised quote stays the real number. The roadmap generator computes its per-service band from the same scale, so no two parts of the site quote different figures.
-- **A landing page per service** — `/services/ai/`, `/crm/`, `/erp/`, `/web/`, `/api/`, `/cloud/`: long-form copy, deliverables, phase plan, per-service FAQ, own `<title>`/OG/schema. They exist because one URL cannot rank for six different searches.
+- **A landing page per service** — `/services/ai/`, `/crm/`, `/erp/`, `/web/`, `/api/`, `/cloud/`: long-form copy, deliverables, phase plan, per-service FAQ, own `<title>`/OG/schema. They exist because one URL cannot rank for six different searches. `/services/` is their hub: a comparison table of what each solves, its indicative ₹ range and typical duration — every figure derived from the same `roadmap.plans` data the generator quotes, so the two can never disagree.
 - **Responsive & accessible** — mobile menu with focus trap, skip link, visible focus styles, keyboard-operable accordions, `prefers-reduced-motion` honoured (and ambient motion cut by design: motion must carry meaning).
 - **Resilient & private** — WebGL error boundary + static fallback, constrained-device tier skips three.js entirely, self-hosted fonts, no cookies; Umami (cookieless) is the single third-party origin.
 
@@ -50,7 +50,9 @@ Details worth reviewing or replacing with your own:
 
 `npm run build` runs Vite, then `scripts/prerender.mjs` loads the built site in headless Chromium and writes the fully rendered HTML into `dist/index.html`. Crawlers that don't execute JavaScript (GPTBot, ClaudeBot, PerplexityBot, many others) see the complete content, headings, FAQ and structured data instead of an empty `<div id="root">` — without it the site is invisible to AI answer engines.
 
-Eight URLs are snapshotted: the home page, `/privacy/`, and the six `/services/<id>/` pages.
+Nine URLs are snapshotted: the home page, `/privacy/`, the `/services/` hub and the six
+`/services/<id>/` pages. `dist/llms.txt` is generated alongside the sitemap from the same
+content, so answer engines get an entity summary and a linked index of every URL.
 The service routes are generated from `services` in `src/data/content.js`, so adding a seventh
 service (with a matching key in `service-pages.js`) produces its page, its sitemap entry and its
 structured data without touching the script.

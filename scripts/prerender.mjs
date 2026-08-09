@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { explorer, hero, pricing, roadmap, services, site } from '../src/data/content.js'
+import { explorer, hero, pricing, roadmap, services, servicesHub, site } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
@@ -148,6 +148,18 @@ const routes = [
       priority: '0.9',
     }
   }),
+  // The hub the six service pages hang off. Must come AFTER them in this
+  // array: the static server below strips route prefixes from asset requests,
+  // and 'services/' is a prefix of 'services/<id>/' (see the sort there).
+  {
+    path: 'services/',
+    out: 'services/index.html',
+    assetPrefix: '../',
+    mustContain: [asHtml(servicesHub.h1), /class="hub-table"/],
+    mustStyle: ['.service-h1', '.navbar'],
+    changefreq: 'monthly',
+    priority: '0.8',
+  },
   // The home page's guard used to be /faq|FAQPage/i, which the CSS class
   // "faq-list" satisfies on its own — so a render that lost the hero, the
   // services ledger and the pricing bands would still have passed and shipped,
@@ -263,8 +275,15 @@ const server = createServer(async (req, res) => {
     let urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
     // The shell's asset URLs are relative ('./assets/…'), so under /privacy/
     // the browser requests /privacy/assets/… — serve those from the root.
-    for (const r of routes) {
-      if (r.path && urlPath.startsWith(`/${r.path}`)) urlPath = urlPath.slice(r.path.length)
+    // Longest path first, then stop at the first match. Without both, adding
+    // the 'services/' hub silently broke the six 'services/<id>/' routes:
+    // '/services/ai/assets/x.js' matched the shorter prefix, became
+    // '/ai/assets/x.js', and every asset 404'd during their snapshot.
+    for (const r of [...routes].sort((a, b) => b.path.length - a.path.length)) {
+      if (r.path && urlPath.startsWith(`/${r.path}`)) {
+        urlPath = urlPath.slice(r.path.length)
+        break
+      }
     }
     let filePath = normalize(join(dist, urlPath === '/' ? 'index.html' : urlPath))
     if (!filePath.startsWith(dist)) throw new Error('out of root')
@@ -666,6 +685,7 @@ try {
     '',
     '## Services',
     '',
+    `- [All services](${site.origin}/services/): the six compared side by side — what each solves, its indicative ₹ range and typical duration.`,
     ...services.map((service) => {
       const page = servicePages[service.id]
       return `- [${page.h1}](${site.origin}/services/${service.id}/): ${page.metaDescription}`

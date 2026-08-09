@@ -21,18 +21,23 @@ export const SERVICE_ID = '[a-z0-9-]+'
 
 const PRIVACY_PATH = /\/privacy\/?$/
 const SERVICE_PATH = new RegExp(`/services/(${SERVICE_ID})/?$`)
+/* The hub, /services/ itself. Anchored, so it cannot also match
+   /services/<id>/ — and SERVICE_PATH requires at least one id character
+   after the slash, so it cannot match the hub either. */
+const SERVICES_HUB_PATH = /\/services\/?$/
 
 /* How far up the tree the site root is from the current URL. Depth is fixed
    per route shape, so it is derived from the pathname rather than counted —
    /services/crm/ is always two levels down, whatever prefix precedes it. */
 export function rootPrefix(pathname = window.location.pathname) {
   if (SERVICE_PATH.test(pathname)) return '../../'
-  if (PRIVACY_PATH.test(pathname)) return '../'
+  if (PRIVACY_PATH.test(pathname) || SERVICES_HUB_PATH.test(pathname)) return '../'
   return ''
 }
 
 export function currentRoute(pathname = window.location.pathname) {
   if (PRIVACY_PATH.test(pathname)) return { name: 'privacy' }
+  if (SERVICES_HUB_PATH.test(pathname)) return { name: 'servicesHub' }
   const match = SERVICE_PATH.exec(pathname)
   if (match) {
     const service = services.find((s) => s.id === match[1])
@@ -46,6 +51,8 @@ export function currentRoute(pathname = window.location.pathname) {
 
 /* Path of a service's own page, relative to the site root. */
 export const servicePath = (id) => `services/${id}/`
+/* …and of the hub they all hang off. */
+export const servicesHubPath = 'services/'
 
 /* ServicePage and its copy are ~33 KB raw that only /services/<id>/ ever
    renders, so they are code-split away from the home page's critical path.
@@ -76,6 +83,18 @@ export const loadPrivacyPage = () =>
 
 export const privacyPageComponent = () => privacyPageModule
 
+/* Same again for the /services/ hub. It renders six cards and a comparison
+   table built from data the home page already ships, so its own chunk is
+   small — but the home page still has no reason to carry it. */
+let servicesHubModule = null
+
+export const loadServicesHub = () =>
+  import('../components/ServicesHub.jsx').then((mod) => {
+    servicesHubModule = mod.default
+  })
+
+export const servicesHubComponent = () => servicesHubModule
+
 /* Which of the home page's nav anchors a sub-page renders for ITSELF. A link
    to one of these must stay local; every other in-page anchor has to travel
    back to the home page first, and '#home' is simply the home page.
@@ -90,6 +109,8 @@ export const privacyPageComponent = () => privacyPageModule
    route's prerender guard asserts id="pricing" is present for exactly this
    reason (scripts/prerender.mjs), so the two cannot drift silently. */
 const SERVICE_LOCAL_ANCHORS = new Set(['#contact', '#pricing'])
+// The hub renders its own Contact section, but not Pricing.
+const HUB_LOCAL_ANCHORS = new Set(['#contact'])
 // PrivacyPolicy renders none of the nav sections — it hand-rolls its own shell.
 const PRIVACY_LOCAL_ANCHORS = new Set()
 
@@ -97,6 +118,10 @@ export function href(target, pathname = window.location.pathname) {
   const root = rootPrefix(pathname)
   if (!root) return target
   if (target === '#home') return root
-  const local = SERVICE_PATH.test(pathname) ? SERVICE_LOCAL_ANCHORS : PRIVACY_LOCAL_ANCHORS
+  const local = SERVICE_PATH.test(pathname)
+    ? SERVICE_LOCAL_ANCHORS
+    : SERVICES_HUB_PATH.test(pathname)
+      ? HUB_LOCAL_ANCHORS
+      : PRIVACY_LOCAL_ANCHORS
   return local.has(target) ? target : `${root}${target}`
 }

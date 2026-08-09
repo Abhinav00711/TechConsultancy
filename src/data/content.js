@@ -190,6 +190,25 @@ export const roadmap = {
 }
 
 // Section meta for the merged "Services + Live Demos" section.
+/* ₹ formatting for a value in lakhs: below one lakh speak in thousands
+   (₹75k, stepped in 5k), above it in lakhs (₹1.5 L, stepped in half a lakh) —
+   the units Indian SMB buyers actually think in. A band's floor rounds down
+   and its ceiling rounds up, so scaling always widens the range instead of
+   two team sizes collapsing onto the same rounded figure.
+
+   Lives here rather than in RoadmapGenerator because the services hub quotes
+   the same bands: two formatters would eventually disagree about the same
+   number, which is the one thing a page of prices cannot do. */
+const fmtLakh = (v, roundFn) => (v < 1 ? `₹${roundFn((v * 100) / 5) * 5}k` : `₹${roundFn(v * 2) / 2} L`)
+
+export const formatBand = ([low, high], mult = 1) =>
+  `${fmtLakh(low * mult, Math.floor)}–${fmtLakh(high * mult, Math.ceil)}`
+
+/* Weeks a plan's phases add up to at a given team-size multiplier — the same
+   arithmetic buildPlan() does per phase, totalled. */
+export const planWeeks = (plan, mult = 1) =>
+  plan.phases.reduce((total, [, , baseWeeks]) => total + Math.max(1, Math.round(baseWeeks * mult)), 0)
+
 export const explorer = {
   tag: 'Services · Live Demos',
   title: 'What We Build,',
@@ -202,6 +221,34 @@ export const explorer = {
 // The long-form copy for each service's own page (/services/<id>/) lives in
 // src/data/service-pages.js — split out only because it is ~28 KB of prose the
 // home page would otherwise download and never render.
+/* /services/ — the hub the six service pages hang off. It exists for three
+   reasons: the six pages were siblings with no parent, the breadcrumb's
+   middle rung pointed at a homepage fragment (so rungs 1 and 2 resolved to
+   the same URL), and /services/ is a URL people and agents simply guess —
+   it used to 404.
+
+   Every figure on the page is derived from data elsewhere in this file
+   (roadmap.plans baseBand and phases, servicePages idealFor), so nothing
+   here can quote a number the rest of the site contradicts. */
+export const servicesHub = {
+  metaTitle: 'Software Development Services in Kolkata — AI, CRM, ERP, Web, API & Cloud | Revora Consultancy',
+  metaDescription:
+    'Six founder-led software services from Kolkata: AI integration, custom CRM and ERP, web and API development, cloud and DevOps. Indicative ₹ ranges and typical timelines for each.',
+  tag: 'All Services · Kolkata, India',
+  h1: 'Software development services for Indian businesses',
+  lede: 'Six services, one two-person team. Every engagement is run directly by the founders — no account managers, no hand-offs — and every one ends with you holding the code, the credentials and the documentation.',
+  compareTitle: 'Which one do you need?',
+  compareSub:
+    'Indicative ranges and durations for a small team (1–10 people); both scale with team size. The fixed itemised quote is still prepared free after a discovery call — these are the figures that tell you whether it is worth having.',
+  compareHead: ['Service', 'You probably need this if…', 'Indicative range', 'Typical duration'],
+  detailTitle: 'The six in detail',
+  detailSub: 'Each has its own page: what is included, who it suits, the stack, the phase plan and the questions we get asked most.',
+  unsureTitle: 'Still not sure?',
+  unsureText:
+    'Answer two questions and the roadmap generator scopes a dated plan with phases, a ₹ band and a stack — on screen, in about forty seconds, with no email required. Or book a call and we will tell you which of the six you actually need, including when the answer is none of them.',
+  unsureCta: 'Scope it in 40 seconds',
+}
+
 export const services = [
   {
     id: 'ai',

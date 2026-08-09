@@ -1,5 +1,5 @@
 import { site, services } from '../data/content.js'
-import { href, servicePath } from '../lib/routes.js'
+import { href, servicePath, servicesHubPath } from '../lib/routes.js'
 import Icon, { Logo } from './ui/Icons.jsx'
 
 export default function Footer() {
@@ -43,6 +43,11 @@ export default function Footer() {
                   <a href={href(servicePath(s.id))}>{s.title}</a>
                 </li>
               ))}
+              {/* The hub the six hang off — also the site-wide link that
+                  stops /services/ being reachable only by guessing. */}
+              <li>
+                <a href={href(servicesHubPath)}>All services</a>
+              </li>
             </ul>
           </div>
 

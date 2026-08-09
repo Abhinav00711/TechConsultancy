@@ -3,7 +3,7 @@ import { roadmap, services, site, waLink } from '../data/content.js'
 import { servicePages } from '../data/service-pages.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { setMeta } from '../lib/head.js'
-import { href, servicePath } from '../lib/routes.js'
+import { href, servicePath, servicesHubPath } from '../lib/routes.js'
 import Navbar from './Navbar.jsx'
 import CtaBand from './CtaBand.jsx'
 import Contact from './Contact.jsx'
@@ -74,7 +74,10 @@ function jsonLd(service) {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: `${ORIGIN}/` },
-          { '@type': 'ListItem', position: 2, name: 'Services', item: `${ORIGIN}/#services` },
+          // A real URL, not `${ORIGIN}/#services`: a fragment canonicalises to
+          // the home page, so positions 1 and 2 resolved to the same item and
+          // Google drops breadcrumbs whose rungs don't resolve distinctly.
+          { '@type': 'ListItem', position: 2, name: 'Services', item: `${ORIGIN}/${servicesHubPath}` },
           { '@type': 'ListItem', position: 3, name: service.title, item: url },
         ],
       },
@@ -130,7 +133,7 @@ export default function ServicePage({ service }) {
                   <a href={href('#home')}>Home</a>
                 </li>
                 <li>
-                  <a href={href('#services')}>Services</a>
+                  <a href={href(servicesHubPath)}>Services</a>
                 </li>
                 <li>
                   <span aria-current="page">{service.title}</span>

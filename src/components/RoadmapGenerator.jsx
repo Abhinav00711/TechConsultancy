@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { roadmap, services, site } from '../data/content.js'
+import { formatBand, roadmap, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { useReducedMotion } from '../lib/hooks.js'
 
@@ -20,13 +20,6 @@ import { useReducedMotion } from '../lib/hooks.js'
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const stamp = (d) => `${String(d.getDate()).padStart(2, '0')} ${monthNames[d.getMonth()]} ${d.getFullYear()}`
 
-/* ₹ formatting for a value in lakhs: below one lakh speak in thousands
-   (₹75k, stepped in 5k), above it in lakhs (₹1.5 L, stepped in half a
-   lakh) — the units Indian SMB buyers actually think in. The band's floor
-   rounds down and its ceiling rounds up, so scaling always widens the range
-   instead of two team sizes colliding on the same rounded figure. */
-const fmtLakh = (v, roundFn) => (v < 1 ? `₹${roundFn((v * 100) / 5) * 5}k` : `₹${roundFn(v * 2) / 2} L`)
-
 function buildPlan(problemId, scaleId) {
   const plan = roadmap.plans[problemId]
   const scale = roadmap.scales.find((s) => s.id === scaleId)
@@ -42,7 +35,8 @@ function buildPlan(problemId, scaleId) {
   })
   // The band scales with the same multiplier as the schedule, so a bigger
   // team sees both a longer plan and a wider budget — one consistent story.
-  const band = `${fmtLakh(plan.baseBand[0] * scale.mult, Math.floor)}–${fmtLakh(plan.baseBand[1] * scale.mult, Math.ceil)}`
+  // formatBand lives in content.js so the services hub quotes it identically.
+  const band = formatBand(plan.baseBand, scale.mult)
   return { plan, scale, phases, total, band }
 }
 
