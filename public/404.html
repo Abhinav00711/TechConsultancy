@@ -7,6 +7,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Page not found — Revora Consultancy</title>
     <meta name="theme-color" content="#e6e8e1" />
+    <script>
+      // Honor the theme chosen on the main site; default light.
+      ;(function () {
+        var t
+        try { t = localStorage.getItem('theme') } catch (e) {}
+        if (t === 'dark') {
+          document.documentElement.dataset.theme = 'dark'
+          var m = document.querySelector('meta[name="theme-color"]')
+          if (m) m.setAttribute('content', '#0f1316')
+        }
+      })()
+    </script>
     <style>
       /* Standalone Ledger page — no app bundle loads here, so the tokens are
          declared inline. Keep in step with src/index.css. */
@@ -21,17 +33,17 @@
         --mark: #b03a20;
         color-scheme: light;
       }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #0f1316;
-          --bg-soft: #171c20;
-          --text: #e3e5de;
-          --text-dim: #99a2a6;
-          --border: rgba(227, 229, 222, 0.15);
-          --border-strong: rgba(227, 229, 222, 0.32);
-          --mark: #e2735a;
-          color-scheme: dark;
-        }
+      /* Dark only when the visitor explicitly chose it on the main site —
+         light is the default, matching index.html. */
+      :root[data-theme='dark'] {
+        --bg: #0f1316;
+        --bg-soft: #171c20;
+        --text: #e3e5de;
+        --text-dim: #99a2a6;
+        --border: rgba(227, 229, 222, 0.15);
+        --border-strong: rgba(227, 229, 222, 0.32);
+        --mark: #e2735a;
+        color-scheme: dark;
       }
       body {
         min-height: 100vh;

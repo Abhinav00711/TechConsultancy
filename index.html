@@ -30,9 +30,9 @@
       ;(function () {
         var t
         try { t = localStorage.getItem('theme') } catch (e) {}
-        if (t !== 'light' && t !== 'dark') {
-          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        }
+        // Default is light (paper is the Ledger baseline); dark only when the
+        // visitor has explicitly chosen it via the toggle.
+        if (t !== 'light' && t !== 'dark') t = 'light'
         document.documentElement.dataset.theme = t
         var m = document.querySelector('meta[name="theme-color"]')
         if (m) m.setAttribute('content', t === 'light' ? '#e6e8e1' : '#0f1316')
