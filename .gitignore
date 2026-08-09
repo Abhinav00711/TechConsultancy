@@ -5,5 +5,5 @@ dist
 .env
 .env.*
 
-# throwaway local scripts (screenshot/debug harnesses)
-.shot.mjs
+# throwaway local scripts (screenshot/measurement/debug harnesses)
+/.*.mjs
