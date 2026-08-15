@@ -51,13 +51,14 @@ function jsonLd(service) {
         // citation hook in a market where competitors all say "contact us".
         ...(roadmap.plans[service.id]?.baseBand
           ? {
+              // Just the band: offerCount would claim N distinct priced
+              // offers (the deliverables are inclusions, not offers) and
+              // InStock availability is meaningless for a service.
               offers: {
                 '@type': 'AggregateOffer',
                 priceCurrency: 'INR',
                 lowPrice: Math.round(roadmap.plans[service.id].baseBand[0] * 100000),
                 highPrice: Math.round(roadmap.plans[service.id].baseBand[1] * 100000),
-                offerCount: page.deliverables.length,
-                availability: 'https://schema.org/InStock',
               },
             }
           : {}),

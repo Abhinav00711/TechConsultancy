@@ -56,6 +56,12 @@ export default defineConfig({
   plugins: [react(), stampServiceWorker(), stripLegacyWoff()],
   build: {
     chunkSizeWarningLimit: 1600,
+    // Never inline fonts as data URIs. The 2.7 KB signature-italic subset
+    // sits under the default 4 KB limit, and inlined it rides the
+    // render-blocking stylesheet (+2.8 KB gzip on the critical path) for a
+    // face only the below-fold Guarantee uses — as a file it downloads
+    // lazily when first painted, which is the point of font-display: swap.
+    assetsInlineLimit: (filePath) => (/\.woff2?$/.test(filePath) ? false : undefined),
     rollupOptions: {
       output: {
         // Rolldown's advancedChunks, NOT Rollup-style manualChunks. Vite 8

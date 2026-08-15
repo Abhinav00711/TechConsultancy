@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { contact, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import Icon from './ui/Icons.jsx'
@@ -13,9 +13,17 @@ export default function Contact() {
   // Page URL (with any utm_* params) + referrer, captured after mount and
   // submitted as a hidden field — tells us which channel produced each lead.
   const [pageContext, setPageContext] = useState('')
+  // Once the visitor has picked a service themselves, prefill events must not
+  // clobber it — generating a roadmap for "ai" after manually selecting "ERP
+  // Solution" used to silently replace the choice. Mount-time prefills (the
+  // service pages, the showcase CTAs) fire before any interaction, so they
+  // still land.
+  const serviceTouched = useRef(false)
 
   useEffect(() => {
-    const onPrefill = (e) => setService(e.detail)
+    const onPrefill = (e) => {
+      if (!serviceTouched.current) setService(e.detail)
+    }
     window.addEventListener('revora:service', onPrefill)
     return () => window.removeEventListener('revora:service', onPrefill)
   }, [])
@@ -27,6 +35,9 @@ export default function Contact() {
 
   const onSubmit = async (e) => {
     e.preventDefault()
+    // aria-disabled rather than disabled on the button (see below), so the
+    // handler has to refuse a second submit itself.
+    if (status === 'sending') return
     const form = e.target
     const data = new FormData(form)
     // Honeypot tripped: show success so a false-positive human isn't punished
@@ -168,7 +179,16 @@ export default function Contact() {
                 </div>
                 <div className="form-field">
                   <label htmlFor="cf-service">Service Needed</label>
-                  <select id="cf-service" name="service" value={service} onChange={(e) => setService(e.target.value)} required>
+                  <select
+                    id="cf-service"
+                    name="service"
+                    value={service}
+                    onChange={(e) => {
+                      serviceTouched.current = true
+                      setService(e.target.value)
+                    }}
+                    required
+                  >
                     <option value="" disabled>
                       Select a service…
                     </option>
@@ -254,11 +274,15 @@ export default function Contact() {
                   </div>
                 )}
               </div>
+              {/* aria-disabled, not disabled: a `disabled` button is removed
+                  from the accessibility tree, so disabling the element that
+                  currently has focus mid-submit drops the user's place. The
+                  handler guards the double submit instead. */}
               <button
                 type="submit"
                 className="btn btn-primary"
                 style={{ justifyContent: 'center' }}
-                disabled={status === 'sending'}
+                aria-disabled={status === 'sending' || undefined}
               >
                 {/* The button sells the formNote's offer, not a generic verb. */}
                 {status === 'sending' ? 'Sending…' : contact.submitLabel} <span aria-hidden>→</span>

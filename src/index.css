@@ -9,6 +9,27 @@
    The old four-stop gradient is retired. The six per-service accents
    survive demoted: a margin mark and a tint, never a glow. */
 
+/* The Guarantee signatures' italic — a real italic, not a synthesized
+   oblique of the 600 upright, which reads as a fake signature. Subset to
+   exactly the glyphs of the two signature strings (2.7 KB vs 22.9 KB for
+   the full @fontsource latin file), because nothing else on the site sets
+   this face. If `guarantee.signedBy` in src/data/content.js ever changes,
+   regenerate with the new letters (a missing glyph falls back to the next
+   serif in the stack, which is exactly the fake-oblique look this avoids):
+
+   pip install fonttools brotli && pyftsubset \
+     node_modules/@fontsource/fraunces/files/fraunces-latin-400-italic.woff2 \
+     --text="<every letter used in signedBy> " --flavor=woff2 \
+     --layout-features="kern,liga" \
+     --output-file=src/assets/fonts/fraunces-signature-400-italic.woff2 */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets/fonts/fraunces-signature-400-italic.woff2') format('woff2');
+}
+
 /* ───────────────────────── Design tokens ───────────────────────── */
 :root {
   /* Paper first. Cool bone with a green-grey bias — a ledger sheet,
@@ -17,9 +38,13 @@
   --bg-soft: #f3f5ef;
   --surface-strong: #dcdfd6;
   --border: rgba(20, 25, 28, 0.14);
-  --border-strong: rgba(20, 25, 28, 0.3);
+  /* 0.5 alpha, not less: form-field and button boundaries must clear the
+     3:1 non-text contrast floor (WCAG 1.4.11) on both --bg and --bg-soft. */
+  --border-strong: rgba(20, 25, 28, 0.5);
   --text: #14191c;
-  --text-dim: #5a6367;
+  /* 4.99:1 on --verify-wash-over-bg, 5.7:1 on bare paper — dim text keeps
+     AA even when a tint sits under it (booking card, form note). */
+  --text-dim: #525a5e;
   --text-faint: #5f676c;
   /* Oxide red — hairline rules, numerals, the stamp. Never a fill. */
   --mark: #b03a20;
@@ -42,7 +67,7 @@
   --bg-soft: #171c20;
   --surface-strong: #0a0d0f;
   --border: rgba(227, 229, 222, 0.15);
-  --border-strong: rgba(227, 229, 222, 0.32);
+  --border-strong: rgba(227, 229, 222, 0.4);
   --text: #e3e5de;
   --text-dim: #99a2a6;
   --text-faint: #828c8f;
@@ -563,7 +588,10 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
 .sa-quicklink {
   display: none;
   flex-shrink: 0;
-  margin-right: 18px;
+  margin-right: 14px;
+  /* Padding brings the ~18px text line up to a ≥24px hit target
+     (WCAG 2.5.8) — it sits flush against the 64px accordion trigger. */
+  padding: 8px 4px;
   font-family: var(--font-mono); font-weight: 600; font-size: 0.68rem;
   letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--text-dim);
@@ -729,6 +757,7 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
 .showcase-detail { font-size: 0.72rem; padding: 12px 18px; }
 .showcase-wa {
   color: var(--text-dim); font-size: 0.84rem;
+  padding-block: 6px;
   text-decoration: underline; text-underline-offset: 3px;
   text-decoration-color: var(--border-strong);
 }
@@ -958,9 +987,26 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
 }
 
 /* ───────────────────────── Pricing ───────────────────────── */
+/* The three figures on one line, for viewports where the grid stacks and
+   the bands can never share a screen. Hidden everywhere else — the cards
+   already carry the numbers. */
+.pricing-compare {
+  display: none;
+  margin-top: 32px;
+  font-family: var(--font-mono); font-size: 0.74rem;
+  color: var(--text-dim);
+}
+.pricing-compare strong { color: var(--text); font-weight: 600; }
+@media (max-width: 560px) {
+  .pricing-compare { display: block; }
+}
+
 .pricing-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
   gap: 18px; margin-top: 48px;
+}
+@media (max-width: 560px) {
+  .pricing-grid { margin-top: 20px; }
 }
 .pricing-band {
   padding: 28px 28px 26px;
@@ -1317,6 +1363,8 @@ thead .hub-num, tbody .hub-num { text-align: right; }
 .breadcrumb ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .breadcrumb li { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); }
 .breadcrumb li + li::before { content: '/'; margin-right: 8px; opacity: 0.5; }
+/* Same 2.5.8 treatment as .sa-quicklink: pad the ~17px text line to ≥24px. */
+.breadcrumb a { display: inline-block; padding: 6px 2px; margin: -6px -2px; }
 .breadcrumb a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 .breadcrumb [aria-current='page'] { color: var(--text); }
 

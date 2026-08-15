@@ -19,6 +19,13 @@ import { services } from '../data/content.js'
    #services-crm-migration lands on the wrong service with no error anywhere. */
 export const SERVICE_ID = '[a-z0-9-]+'
 
+/* GitHub Pages serves every snapshot at both /services/crm/ and
+   /services/crm/index.html. Unnormalised, the explicit form matched no route,
+   so the app hydrated the HOME tree over the service snapshot — React throws
+   the mismatched DOM away and the visitor sees the home page at a service
+   URL, with every relative href mis-resolved on top. */
+const normalize = (pathname) => pathname.replace(/\/index\.html$/, '/')
+
 const PRIVACY_PATH = /\/privacy\/?$/
 const SERVICE_PATH = new RegExp(`/services/(${SERVICE_ID})/?$`)
 /* The hub, /services/ itself. Anchored, so it cannot also match
@@ -30,12 +37,14 @@ const SERVICES_HUB_PATH = /\/services\/?$/
    per route shape, so it is derived from the pathname rather than counted —
    /services/crm/ is always two levels down, whatever prefix precedes it. */
 export function rootPrefix(pathname = window.location.pathname) {
+  pathname = normalize(pathname)
   if (SERVICE_PATH.test(pathname)) return '../../'
   if (PRIVACY_PATH.test(pathname) || SERVICES_HUB_PATH.test(pathname)) return '../'
   return ''
 }
 
 export function currentRoute(pathname = window.location.pathname) {
+  pathname = normalize(pathname)
   if (PRIVACY_PATH.test(pathname)) return { name: 'privacy' }
   if (SERVICES_HUB_PATH.test(pathname)) return { name: 'servicesHub' }
   const match = SERVICE_PATH.exec(pathname)
@@ -115,6 +124,7 @@ const HUB_LOCAL_ANCHORS = new Set(['#contact'])
 const PRIVACY_LOCAL_ANCHORS = new Set()
 
 export function href(target, pathname = window.location.pathname) {
+  pathname = normalize(pathname)
   const root = rootPrefix(pathname)
   if (!root) return target
   if (target === '#home') return root

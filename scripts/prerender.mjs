@@ -270,6 +270,16 @@ if (!executablePath) {
 // Tiny static server for dist — module scripts won't load over file://.
 // Extensionless paths fall back to the SPA shell (dist/index.html), which is
 // how /privacy/ loads before its own snapshot exists.
+//
+// The shell is read into memory ONCE, before the loop starts. It used to be
+// re-read from disk per request, so a concurrent writer (a second build in
+// the same workspace, a stale build process from a resumed container) that
+// landed an already-prerendered shell mid-loop poisoned every later route
+// with a second critical-CSS block whose double-rewritten
+// url(assets/assets/…) references 404 in production — and every output
+// guard passed on the result. Serving a fixed buffer makes the loop immune
+// to whatever happens to dist/index.html while it runs.
+const shellHtml = await readFile(join(dist, 'index.html'))
 const server = createServer(async (req, res) => {
   try {
     let urlPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
@@ -285,9 +295,14 @@ const server = createServer(async (req, res) => {
         break
       }
     }
-    let filePath = normalize(join(dist, urlPath === '/' ? 'index.html' : urlPath))
+    const filePath = normalize(join(dist, urlPath === '/' ? 'index.html' : urlPath))
     if (!filePath.startsWith(dist)) throw new Error('out of root')
-    if (!extname(filePath)) filePath = join(dist, 'index.html')
+    // Every extensionless path — '/' included — gets the in-memory shell.
+    if (!extname(filePath) || filePath === join(dist, 'index.html')) {
+      res.writeHead(200, { 'Content-Type': mime['.html'] })
+      res.end(shellHtml)
+      return
+    }
     const body = await readFile(filePath)
     res.writeHead(200, { 'Content-Type': mime[extname(filePath)] ?? 'application/octet-stream' })
     res.end(body)
@@ -620,6 +635,21 @@ try {
       if (!reference.includes(`="${route.assetPrefix}assets/`)) {
         throw new Error(`prerender: /${route.path} references an asset outside ${route.assetPrefix}assets/ — ${reference}`)
       }
+    }
+
+    // Belt to the in-memory shell's braces: if a poisoned shell ever reaches
+    // this point anyway (double-prerendered by some other path), it carries a
+    // second __PRERENDERED__ marker, a second deferred stylesheet, and
+    // double-rewritten url(assets/assets/…) references that 404 in
+    // production. None of the checks above notice any of the three.
+    if (html.split('window.__PRERENDERED__').length !== 2) {
+      throw new Error(`prerendered HTML for /${route.path} does not carry exactly one prerender marker — the shell was already prerendered`)
+    }
+    if (html.split('rel="stylesheet" media="print"').length !== 2) {
+      throw new Error(`prerendered HTML for /${route.path} does not carry exactly one inlined critical-CSS block`)
+    }
+    if (html.includes('assets/assets/')) {
+      throw new Error(`prerendered HTML for /${route.path} contains double-rewritten assets/assets/ URLs — aborting`)
     }
 
     // Sanity check before overwriting anything.
