@@ -40,6 +40,13 @@ const BUDGET_GZIP = 84 * 1024
 // headroom, raise it deliberately rather than deleting it.
 const CSS_BUDGET_GZIP = 9 * 1024
 
+// Fonts are the third leg — for a while they were the LARGEST payload on a
+// cold load (84 KB across four woff2 files, more than the entire entry JS)
+// and nothing measured them, so subsetting wins could silently regress.
+// Measured 64.4 KB after the signature-italic subset landed; ~10% headroom.
+// woff2 is already compressed, so raw bytes are what ships.
+const FONT_BUDGET = 71 * 1024
+
 const fail = (msg) => {
   console.error(`\ncheck-critical-path: ${msg}\n`)
   process.exit(1)
@@ -134,6 +141,23 @@ if (cssGzip > CSS_BUDGET_GZIP) {
   )
 }
 
+// 5. Every font file in the build. Not all four download on every page, but
+//    the set is small enough that budgeting the total is simpler and stricter
+//    than modelling which routes pull which faces.
+let fontBytes = 0
+const fontFiles = [...present].filter((f) => f.endsWith('.woff2') || f.endsWith('.woff'))
+for (const f of fontFiles) {
+  fontBytes += (await readFile(join(assets, f))).length
+}
+if (fontBytes > FONT_BUDGET) {
+  fail(
+    `the built fonts total ${(fontBytes / 1024).toFixed(1)} KB — over the ${(FONT_BUDGET / 1024).toFixed(0)} KB budget.\n` +
+      `  files: ${fontFiles.join(', ')}\n` +
+      `  A new face or un-subset file landed in the build. Subset it (see the\n` +
+      `  signature @font-face in src/index.css), or raise FONT_BUDGET here deliberately.`,
+  )
+}
+
 console.log(
   `check-critical-path: OK — entry loads ${seen.size} chunk(s), ` +
     `${(totalRaw / 1024).toFixed(0)} KB raw / ${(totalGzip / 1024).toFixed(1)} KB gzip ` +
@@ -142,4 +166,8 @@ console.log(
 console.log(
   `check-critical-path: CSS ${(cssRaw / 1024).toFixed(0)} KB raw / ${(cssGzip / 1024).toFixed(1)} KB gzip ` +
     `(budget ${(CSS_BUDGET_GZIP / 1024).toFixed(0)} KB).`,
+)
+console.log(
+  `check-critical-path: fonts ${(fontBytes / 1024).toFixed(1)} KB across ${fontFiles.length} file(s) ` +
+    `(budget ${(FONT_BUDGET / 1024).toFixed(0)} KB).`,
 )

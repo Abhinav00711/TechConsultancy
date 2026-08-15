@@ -15,7 +15,10 @@ export function webglSupported() {
   return webglChecked
 }
 
-/* Rough low-end heuristic: few cores or little memory → smaller DPR, no floor */
+/* Rough low-end heuristic: few cores or little memory → smaller DPR, no floor.
+   Deliberately a HIGHER bar than perf.js isConstrained() (≤4 vs ≤2): devices
+   between the two get the reduced-quality scene instead of either extreme —
+   see the tier note in src/lib/perf.js. */
 export function isLowEnd() {
   const mem = navigator.deviceMemory
   const cores = navigator.hardwareConcurrency

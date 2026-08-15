@@ -15,8 +15,12 @@ import { currentRoute, loadPrivacyPage, loadServicePage, loadServicesHub, rootPr
 // @font-face blocks, and one stray glyph (the ₹ in the pricing bands sits in
 // latin-ext) would pull a whole extra file. latin-only imports drop those
 // files from the build; ₹, →, ✓ and friends come from the system stack.
+//
+// The 400 italic is NOT imported from @fontsource: its only use is the two
+// signature strings in the Guarantee, so the shipped file is a 2.7 KB subset
+// (vs 22.9 KB for full latin) declared in index.css — see the @font-face
+// there for the regeneration command.
 import '@fontsource/fraunces/latin-600.css'
-import '@fontsource/fraunces/latin-400-italic.css' // the Guarantee signatures — a real italic, not a synthesized oblique
 import '@fontsource/jetbrains-mono/latin-400.css'
 import '@fontsource/jetbrains-mono/latin-600.css'
 

@@ -100,6 +100,15 @@ export default function ServiceExplorer() {
     )
   }
 
+  // Hover/focus on the load button is intent enough to start the ~270 KB
+  // download early — measured click→canvas was ~2.5-4 s, mostly fetch time
+  // the hover window can absorb. Same intent pattern as lib/prefetch.js.
+  // Module caching makes repeat calls free; a failed warm fetch stays
+  // silent because the click path reports errors through sceneState.
+  const warmScenes = () => {
+    loadScenes().catch(() => {})
+  }
+
   useEffect(() => {
     if (!window.__PRERENDERING__ && !isConstrained()) setStageReady(true)
   }, [])
@@ -265,6 +274,8 @@ export default function ServiceExplorer() {
                         <button
                           type="button"
                           className="canvas-load"
+                          onPointerOver={warmScenes}
+                          onFocus={warmScenes}
                           onClick={() => {
                             engageScene()
                             track('Scene Load Click', { service: s.title })
