@@ -36,7 +36,11 @@ export const site = {
   // should not be pointed at the source. (Note that omitting the link does not
   // make the repo private — that is a GitHub setting, not a content one.)
   socials: [
-    // { label: 'LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/company/…' },
+    // Add the LinkedIn *company* page here the day it exists. Until then the
+    // founders' own profiles are the corroborating identity — real, active
+    // profiles beat an empty social block for a firm selling founder-led work.
+    { label: 'Abhinav Rathi on LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/in/rathiabhinav01' },
+    { label: 'Abhishek Rathi on LinkedIn', icon: 'linkedin', url: 'https://www.linkedin.com/in/rathiabhishek26' },
   ],
 }
 
@@ -64,7 +68,9 @@ export const hero = {
   badge: 'Founder-Led Tech Consultancy · Kolkata, India',
   titleTop: 'Software that',
   titleAccent: 'pays for itself,',
-  titleBottom: 'on paper first.',
+  // "proven", not bare "on paper" — first-time readers took "on paper" as
+  // "theoretical", the opposite of "scoped and costed before you commit".
+  titleBottom: 'proven on paper first.',
   subtitle:
     'We build the AI, CRM and custom systems that run Indian businesses. Try the roadmap generator — you’re holding a scoped plan in under a minute.',
   ctaPrimary: 'Start Your Project',
@@ -229,7 +235,9 @@ export const explorer = {
    (roadmap.plans baseBand and phases, servicePages idealFor), so nothing
    here can quote a number the rest of the site contradicts. */
 export const servicesHub = {
-  metaTitle: 'Software Development Services in Kolkata — AI, CRM, ERP, Web, API & Cloud | Revora Consultancy',
+  // ≤60 chars so SERPs keep the brand; the description carries the
+  // six-service enumeration.
+  metaTitle: 'Software Development Services in Kolkata — Revora Consultancy',
   metaDescription:
     'Six founder-led software services from Kolkata: AI integration, custom CRM and ERP, web and API development, cloud and DevOps. Indicative ₹ ranges and typical timelines for each.',
   tag: 'All Services · Kolkata, India',
@@ -278,7 +286,7 @@ export const services = [
     sceneLabel: 'CRM Pipeline',
     accent: '#818cf8',
     description:
-      'Customer platforms built around the way you actually sell — watch leads pour into the funnel and come out as customers, with automation nudging every deal forward so nothing slips through the cracks.',
+      'Customer platforms built around the way you actually sell — every lead lands in one pipeline, and automation nudges each deal forward so nothing slips through the cracks.',
     points: [
       'Pipeline stages built around how you sell',
       'Auto follow-ups, reminders & lead scoring',
@@ -297,7 +305,7 @@ export const services = [
     sceneLabel: 'ERP Modules',
     accent: '#c084fc',
     description:
-      'Finance, inventory, HR and operations orbiting a single source of truth — data pulsing between modules in real time, instead of spreadsheets fighting each other.',
+      'Finance, inventory, HR and operations around a single source of truth — modules that stay in sync in real time, instead of spreadsheets fighting each other.',
     points: [
       'Modular: start small, add departments later',
       'Live inventory, accounting & payroll sync',
@@ -335,7 +343,7 @@ export const services = [
     sceneLabel: 'API Network',
     accent: '#34d399',
     description:
-      'Payments, logistics, marketplaces, government portals — packets of data racing between services on secure, documented highways. We build the connective tissue of your digital business.',
+      'Payments, logistics, marketplaces, government portals — data moving between your services securely, documented end-to-end. We build the connective tissue of your digital business.',
     points: [
       'REST & GraphQL APIs, documented end-to-end',
       'Payment gateways, ERPs & marketplace sync',
@@ -451,14 +459,16 @@ export const pricing = {
   bands: [
     {
       name: 'Pilot',
-      range: '₹75k – ₹1.5 L',
+      // Unspaced en dash, matching formatBand — one ₹-range notation
+      // everywhere (these strings appear beside generated bands).
+      range: '₹75k–₹1.5 L',
       duration: '~2 weeks',
       text: 'One painful workflow, automated or rebuilt, fixed price. You keep everything we build and judge us on something low-risk.',
       includes: ['One workflow, end to end', 'Fixed price agreed upfront', 'All code and credentials yours'],
     },
     {
       name: 'Build',
-      range: '₹1.5 L – ₹8 L',
+      range: '₹1.5 L–₹8 L',
       duration: '4–10 weeks',
       text: 'A complete system — a CRM, a website, an automation layer or an API — scoped, built and handed over with training.',
       includes: ['Weekly demos from week one', 'Milestone payments', 'Free stabilisation period'],
@@ -507,7 +517,7 @@ export const work = {
       tag: 'AI Integration · Manufacturing',
       title: 'Sales-ops automation',
       text: 'Quotes, purchase orders and emails parsed and entered into the ERP automatically — humans approve only the edge cases.',
-      target: 'Target: cut manual data entry by more than half.',
+      target: 'How we’d measure it: manual data entry cut by more than half.',
       scope: 'Workflow audit & data mapping (week 1) → parsing + ERP integration (weeks 2–5) → approval flows, testing & rollout (weeks 6–8).',
       accent: '#22d3ee',
     },
@@ -515,7 +525,7 @@ export const work = {
       tag: 'Custom CRM · D2C Brand',
       title: 'One pipeline instead of three tools',
       text: 'A CRM shaped around the brand’s real sales stages, with WhatsApp, email and call tracking unified in one dashboard.',
-      target: 'Target: zero leads lost between tools, faster follow-ups.',
+      target: 'How we’d measure it: zero leads lost between tools, faster follow-ups.',
       scope: 'Sales-process mapping (week 1) → pipeline + WhatsApp & email integrations (weeks 2–5) → dashboards, training & handover (weeks 6–7).',
       accent: '#818cf8',
     },
@@ -579,12 +589,17 @@ export const contact = {
   headingAccent: 'Slowing You Down',
   text: 'Tell us about your project — a quick call is free, and so is the first roadmap. We reply within 24 hours.',
   // Mid-funnel promise shown above the form — the "no call required" path.
+  // "Founder-written plan", not "roadmap": the generator already hands over
+  // "a roadmap" instantly, so the form must offer a distinct, better artefact
+  // rather than the same word slower.
   formNote:
-    'Not ready for a call? Three lines about your problem gets you a one-page roadmap within 48 hours — no call required.',
+    'Not ready for a call? Three lines about your problem gets you a founder-written plan — specific to your business, not a template — within 48 hours. No call required.',
   // The submit button sells the formNote's offer, not a generic "send".
-  submitLabel: 'Send — get my roadmap in 48h',
+  submitLabel: 'Send — get a founder-written plan in 48h',
   // Deliberately anchored to the same ranges as `pricing.bands` — no two
   // parts of the site may quote different numbers.
-  budgets: ['Under ₹1 lakh', '₹1–5 lakh', '₹5–15 lakh', '₹15 lakh+', 'Not sure yet'],
+  // Same "L" notation as every other ₹ figure on the site — the budget
+  // dropdown was the one place still spelling out "lakh".
+  budgets: ['Under ₹1 L', '₹1–5 L', '₹5–15 L', '₹15 L+', 'Not sure yet'],
   timelines: ['As soon as possible', 'This quarter', 'Just exploring for now'],
 }

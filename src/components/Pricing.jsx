@@ -15,6 +15,19 @@ export default function Pricing() {
         </h2>
         <p className="section-sub">{pricing.sub}</p>
 
+        {/* On phones the grid stacks and each ~450px card pushes the next
+            band's figure off screen — the comparison the section exists for
+            takes three screens of scrolling. This one line keeps all three
+            figures in view together; CSS shows it only ≤560px. */}
+        <p className="pricing-compare" aria-hidden="true">
+          {pricing.bands.map((band, i) => (
+            <span key={band.name}>
+              {i > 0 && ' · '}
+              {band.name} <strong>{band.range}</strong>
+            </span>
+          ))}
+        </p>
+
         <div className="pricing-grid">
           {pricing.bands.map((band) => (
             <article key={band.name} className="pricing-band sheet">
