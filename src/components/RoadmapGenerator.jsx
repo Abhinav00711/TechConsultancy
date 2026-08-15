@@ -146,10 +146,14 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
     const cleanup = () => {
       document.body.classList.remove('print-roadmap')
       window.removeEventListener('afterprint', cleanup)
+      // Tracked here, not after window.print() returns: that counted
+      // environments where the dialog never opened. afterprint still can't
+      // distinguish save from cancel, so the event name says what it
+      // measures — the dialog was opened, not that a PDF exists.
+      track('Roadmap Print Dialog', { service: doc.plan.title })
     }
     window.addEventListener('afterprint', cleanup)
     window.print()
-    track('Roadmap Print', { service: doc.plan.title })
   }
 
   const bookLink = site.bookingUrl && (
