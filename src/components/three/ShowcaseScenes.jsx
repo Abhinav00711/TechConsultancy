@@ -1301,7 +1301,12 @@ export default function ShowcaseCanvas({ scene }) {
           camera={{ position: [0, 1.05, 6.5], fov: 42 }}
           dpr={[1, lowEnd ? 1.25 : 1.75]}
           frameloop={frameloop}
-          onCreated={guardContextLoss}
+          onCreated={(state) => {
+            guardContextLoss(state)
+            // Debug-only: lets a console (or the perf harness) read
+            // renderer.info across scene switches. No-op in normal visits.
+            if (window.__STAGE_DEBUG__) (window.__STAGE_RENDERERS__ ||= []).push(state.gl)
+          }}
           shadows={false}
           gl={{
             // Native MSAA for everyone — the multisampled EffectComposer
@@ -1327,12 +1332,22 @@ export default function ShowcaseCanvas({ scene }) {
                 it is not, and the first-open compile hitch is one frame. */}
             <Scene key={scene} />
 
-            {/* The stage. Keyed to the scene so a tab switch re-bakes rather
-                than leaving the previous scene's shadow behind. */}
-            {!lowEnd && <Floor key={`floor-${scene}`} y={ground} />}
+            {/* The stage. Deliberately NOT keyed to the scene: drei's
+                MeshReflectorMaterial and ContactShadows allocate their render
+                targets, blur materials and plane geometry in a useMemo with
+                no unmount disposal, so remounting them per switch leaked
+                ~15 textures / ~17 programs / ~12 framebuffers every time a
+                visitor changed rows (round 4's measurement). Mounted once per
+                canvas, they follow the scene via props instead: the reflector
+                re-renders its reflection every frame anyway, and
+                ContactShadows re-bakes on any re-render because its frame
+                counter is a render-scope `let` — a scene switch re-renders
+                this component, so the new scene's shadow bakes fresh. If a
+                drei upgrade ever memoizes ContactShadows, the symptom would
+                be a stale (cosmetic) shadow after a switch — not a leak. */}
+            {!lowEnd && <Floor y={ground} />}
             {!lowEnd && (
               <ContactShadows
-                key={`shadow-${scene}`}
                 position={[0, ground + 0.004, 0]}
                 opacity={0.8}
                 scale={11}

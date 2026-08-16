@@ -217,6 +217,13 @@ export const explorer = {
   tag: 'Services · Live Demos',
   title: 'What We Build,',
   titleAccent: 'Shown Live',
+  /* Rendered instead of titleAccent whenever no live scene is mounted: the
+     prerendered snapshot, constrained devices (which get the static SVG
+     sketches, never WebGL), and the resting state before a visitor loads a
+     demo. "Shown Live" was an overpromise everywhere the stage is not
+     actually running (round 6 §3.5) — and this panel does not fib, so the
+     static accent claims exactly what the stage shows: diagrams. */
+  titleAccentStatic: 'Shown as Diagrams',
   sub: 'Six services, each paired with a live diagram of the kind of system we ship.',
 }
 
