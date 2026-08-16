@@ -119,37 +119,55 @@ export default function ServicesHub() {
             <h2 className="section-title">{servicesHub.compareTitle}</h2>
             <p className="section-sub">{servicesHub.compareSub}</p>
 
+            {/* Explicit ARIA roles on every table element, redundant with the
+                HTML at desktop on purpose: below 720px the table is laid out
+                as stacked blocks (display:block), and browsers strip a
+                table's IMPLICIT row/column semantics once its display type
+                stops being table-*. Explicit roles survive any display value,
+                so a screen reader gets the same six-row, four-column grid at
+                every width. The thead is likewise never display:none on
+                mobile — it is visually clipped (.hub-table-clip-head, end of
+                index.css) so all four columnheaders stay in the accessibility
+                tree and every cell keeps its column association. */}
             <div className="hub-table-wrap">
-              <table className="hub-table">
+              <table className="hub-table" role="table">
                 <caption className="sr-only">
                   Revora’s six services compared by what they solve, indicative price range and typical duration.
                 </caption>
-                <thead>
-                  <tr>
+                <thead role="rowgroup">
+                  <tr role="row">
                     {servicesHub.compareHead.map((heading, i) => (
-                      <th key={heading} scope="col" className={i > 1 ? 'hub-num' : undefined}>
+                      <th key={heading} role="columnheader" scope="col" className={i > 1 ? 'hub-num' : undefined}>
                         {heading}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody role="rowgroup">
                   {services.map((service) => {
                     const plan = roadmap.plans[service.id]
                     const weeks = planWeeks(plan)
                     return (
-                      <tr key={service.id}>
-                        <th scope="row">
+                      <tr key={service.id} role="row">
+                        <th role="rowheader" scope="row">
                           <a href={href(servicePath(service.id))}>{service.title}</a>
                         </th>
-                        <td>{servicePages[service.id].idealFor[0]}</td>
-                        {/* data-label surfaces the column name below 720px,
-                            where the header row is display:none — see the
-                            .hub-num::before rule. */}
-                        <td className="hub-num" data-label={servicesHub.compareHead[2]}>
+                        <td role="cell">{servicePages[service.id].idealFor[0]}</td>
+                        {/* .hub-cell-label surfaces the column name visually
+                            below 720px, where the header row is clipped.
+                            aria-hidden because the clipped columnheader
+                            already announces it — a visible label AND the
+                            association would read every figure twice. */}
+                        <td role="cell" className="hub-num">
+                          <span className="hub-cell-label" aria-hidden="true">
+                            {servicesHub.compareHead[2]}
+                          </span>
                           {formatBand(plan.baseBand)}
                         </td>
-                        <td className="hub-num" data-label={servicesHub.compareHead[3]}>
+                        <td role="cell" className="hub-num">
+                          <span className="hub-cell-label" aria-hidden="true">
+                            {servicesHub.compareHead[3]}
+                          </span>
                           {`~${weeks} weeks`}
                         </td>
                       </tr>
