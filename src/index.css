@@ -102,9 +102,9 @@
      token, not var(--text) inline: in dark those four rules inverted to
      near-white bands — the brightest elements on the page. */
   --rule-heavy: var(--text);
-  /* Section rhythm. The rail's overshoot is derived from the same number,
-     so sections with compressed padding (service pages) keep the rail
-     exactly on their boundaries instead of overshooting by the difference. */
+  /* Section rhythm. (The rail no longer derives an overshoot from this —
+     it is drawn once per page on #main::before and spans every boundary
+     by construction.) */
   --section-pad: 96px;
   /* Spacing scale. ~40 distinct hand-typed margins/paddings/gaps clustered
      onto thirteen steps (each existing value moved ≤4px to its nearest
@@ -218,12 +218,17 @@ html { scroll-padding-top: calc(var(--nav-h) + 12px); }
 }
 
 body {
+  /* The containing block for .ambient — its inset: 0 must resolve against
+     the full document, not the first viewport. */
+  position: relative;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  line-height: 1.62;
+  /* 1.6, not 1.62: the ambient ruling's 3.2rem pitch is then exactly two
+     lines of 1rem body text — ruled paper, aligned, instead of almost. */
+  line-height: 1.6;
 }
 
 ::selection { background: var(--mark-wash); }
@@ -289,22 +294,48 @@ section[id] { scroll-margin-top: calc(var(--nav-h) + 16px); }
   }
 }
 
-/* The ledger rail — a continuous oxide hairline down the left margin of
-   every section, the page's structural signature. Wide screens only:
-   below 1240px the rail would collide with content. */
+/* The ledger rail — ONE continuous oxide hairline down the whole sheet,
+   the page's structural signature (DESIGN_DIRECTION_2026-08-08's
+   .doc::before). It used to be drawn per-section-container with a
+   ±--section-pad overshoot stitching the segments together — this draws it
+   once on the page shell, masthead to contact, and can't misalign at
+   section boundaries by construction. #main, not main: the crash notice
+   and the legal page have no rail to hang content from. Wide screens only:
+   below 1240px the rail would collide with content. The left offset is the
+   centered 1140px container's left edge (the media query guarantees
+   min(1140px, 92vw) has resolved to 1140px) minus the same 2.6rem the
+   section eyebrows hang from. */
 @media (min-width: 1240px) {
-  .section > .container { position: relative; }
-  .section > .container::before {
+  #main { position: relative; counter-reset: section; }
+  #main::before {
     content: '';
     position: absolute;
-    /* Derived from the section's own padding: hard-coded ±96px overshot
-       every 84px service-page section boundary by 12px, crossing the
-       border rules the rail is supposed to hang from. */
-    top: calc(-1 * var(--section-pad)); bottom: calc(-1 * var(--section-pad));
-    left: -2.6rem;
+    top: 0; bottom: 0;
+    left: calc(50% - 570px - 2.6rem);
     width: 1px;
     background: var(--mark);
     opacity: 0.4;
+    pointer-events: none;
+  }
+  /* Filed-section numerals on the rail (the direction doc's .num). They sit
+     just INSIDE the rule, in the 2.6rem gutter between rail and content:
+     the doc's outside-the-rule placement needs its 4.75rem rail column,
+     and here anything left of the rail clips at the viewport edge below
+     ~1330px (at 1240px the rail is only 8px from the edge). Same
+     ink-on-paper pair as .section-tag, so the AA math is already done. */
+  .section { counter-increment: section; }
+  .section > .container { position: relative; }
+  .section > .container::after {
+    content: counter(section, decimal-leading-zero);
+    position: absolute;
+    top: 0.2em;
+    left: -2.6rem;
+    padding-left: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-3xs);
+    letter-spacing: 0.14em;
+    font-variant-numeric: tabular-nums;
+    color: var(--mark);
     pointer-events: none;
   }
 }
@@ -1523,9 +1554,13 @@ thead .hub-num, tbody .hub-num { text-align: right; }
 .breadcrumb [aria-current='page'] { color: var(--text); }
 
 /* ───────────────────────── Ambient background ───────────────────────── */
-/* The paper's faint ruled grid — ledger stock, not a tech-glow field. */
+/* The paper's faint ruled grid — ledger stock, not a tech-glow field.
+   Absolute (anchored to the positioned body), not fixed: the ruling is
+   printed ON the paper, so it must scroll with the text that sits on it —
+   fixed ruling slid the lines under the copy on every scroll. With body
+   line-height 1.6, the 3.2rem pitch is exactly two lines of 1rem body. */
 .ambient {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background: var(--bg);
 }
 .ambient::after {
