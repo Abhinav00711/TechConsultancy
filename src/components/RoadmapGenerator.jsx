@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { formatBand, roadmap, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { useReducedMotion } from '../lib/hooks.js'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* The hero instrument: two questions in, a scoped roadmap out, in under a
    minute. Deterministic on purpose — instant, free, works offline, and cannot
@@ -165,6 +166,7 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
       onClick={() => track('Booking Click', { placement: 'roadmap' })}
     >
       {roadmap.book}
+      <NewTabHint />
     </a>
   )
 

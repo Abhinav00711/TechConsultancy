@@ -1,6 +1,7 @@
 import { hero, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import RoadmapGenerator from './RoadmapGenerator.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* The masthead. The first screen does work instead of performing: headline and
    commitments on the left, the roadmap generator — the site's central act of
@@ -34,7 +35,7 @@ export default function Hero() {
                 rel="noopener noreferrer"
                 onClick={() => track('Booking Click', { placement: 'hero' })}
               >
-                {hero.ctaBooking} <span aria-hidden>→</span>
+                {hero.ctaBooking} <NewTabHint /> <span aria-hidden>→</span>
               </a>
             ) : (
               <a href="#contact" className="btn btn-primary">

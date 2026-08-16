@@ -1611,3 +1611,44 @@ thead .hub-num, tbody .hub-num { text-align: right; }
   body.print-roadmap .roadmap-doc [role='status'],
   body.print-roadmap .roadmap-doc [role='status'] * { visibility: hidden; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APPENDED 2026-08-16 (accessibility round, hub-table mobile semantics).
+   Overrides for the .hub-table @media (max-width: 720px) block above — kept
+   here as an appended block so the parallel index.css refactor merges
+   cleanly. Safe to fold into the original block once that refactor lands.
+
+   Below 720px the table keeps its stacked-blocks visual layout, but its
+   SEMANTICS no longer degrade: the thead is clipped off-screen (sr-only
+   technique) instead of display:none, so its four columnheaders stay in the
+   accessibility tree and every cell keeps its row/column association — the
+   explicit roles in ServicesHub.jsx guarantee the table grid itself survives
+   display:block. The visible per-cell column label moves from ::before
+   pseudo-content (which was read as part of the cell's value) to a real
+   aria-hidden .hub-cell-label span, so nothing is announced twice.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* Desktop: the real header row is visible, so the per-cell labels are not. */
+.hub-cell-label { display: none; }
+
+@media (max-width: 720px) {
+  /* Overrides `.hub-table thead { display: none }`: same clip pattern as
+     .sr-only, minus position:absolute's margin collapse concerns — the
+     header contributes no layout but stays in the accessibility tree. */
+  .hub-table thead {
+    display: block;
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  /* The data-label attribute is gone from the markup; make sure the old
+     pseudo-label can never render even while both rules coexist. */
+  .hub-table td.hub-num::before { content: none; }
+  /* Same visual treatment the ::before label had. */
+  .hub-cell-label {
+    display: inline;
+    margin-right: 0.4em;
+    color: var(--text-faint); letter-spacing: 0.1em;
+    text-transform: uppercase; font-size: 0.66rem;
+  }
+}

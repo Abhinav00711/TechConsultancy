@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import Icon from './ui/Icons.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* Mobile-only persistent conversion path. Below 820px the navbar's booking
    CTA disappears into the burger menu, which left one CTA at the top of the
@@ -39,6 +40,7 @@ export default function StickyCtaBar() {
           onClick={() => track('Booking Click', { placement: 'sticky-mobile' })}
         >
           Book a Free Call
+          <NewTabHint />
         </a>
       )}
       {/* Same accessible name as the FAB this bar replaces below 820px — the

@@ -4,17 +4,15 @@ import { servicePages } from '../data/service-pages.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { setMeta } from '../lib/head.js'
 import { href, servicePath, servicesHubPath } from '../lib/routes.js'
-import Navbar from './Navbar.jsx'
 import CtaBand from './CtaBand.jsx'
 import Contact from './Contact.jsx'
-import Footer from './Footer.jsx'
-import WhatsAppFab from './WhatsAppFab.jsx'
-import StickyCtaBar from './StickyCtaBar.jsx'
+import PageShell from './ui/PageShell.jsx'
 import Pricing from './Pricing.jsx'
 import Guarantee from './Guarantee.jsx'
 import RoadmapGenerator from './RoadmapGenerator.jsx'
 import { FaqItem } from './Faq.jsx'
 import Icon from './ui/Icons.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 const ORIGIN = site.origin
 
@@ -116,15 +114,8 @@ export default function ServicePage({ service }) {
   }, [service.formOption])
 
   return (
-    <>
-      <a href="#main" className="skip-link">
-        Skip to content
-      </a>
-      <div className="ambient" />
-      <Navbar />
-      {/* tabIndex so the skip link reliably MOVES focus here, not just scroll */}
-      <main id="main" tabIndex={-1} style={{ '--accent': service.accent }}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(service) }} />
+    <PageShell mainStyle={{ '--accent': service.accent }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(service) }} />
 
         <header className="service-hero">
           <div className="container">
@@ -158,7 +149,7 @@ export default function ServicePage({ service }) {
                   rel="noopener noreferrer"
                   onClick={() => track('Booking Click', { placement: `service-page-${service.id}` })}
                 >
-                  Book a Free Discovery Call <span aria-hidden>→</span>
+                  Book a Free Discovery Call <NewTabHint /> <span aria-hidden>→</span>
                 </a>
               ) : (
                 <a href="#contact" className="btn btn-primary">
@@ -181,6 +172,7 @@ export default function ServicePage({ service }) {
                   onClick={() => track('WhatsApp Click', { placement: `service-page-${service.id}` })}
                 >
                   {`or WhatsApp us about ${service.short}`}
+                  <NewTabHint />
                 </a>
               )}
             </div>
@@ -350,10 +342,6 @@ export default function ServicePage({ service }) {
         </section>
 
         <Contact />
-      </main>
-      <Footer />
-      <WhatsAppFab />
-      <StickyCtaBar />
-    </>
+    </PageShell>
   )
 }

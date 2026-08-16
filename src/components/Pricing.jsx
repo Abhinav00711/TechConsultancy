@@ -1,5 +1,6 @@
 import { pricing, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* Price bands — flagged missing by all three panel reviews. Wide ranges
    qualify leads and stop the silent "expensive and evasive" bounce; the
@@ -55,6 +56,7 @@ export default function Pricing() {
                       widget — this one opens a 30-minute calendar. Name the
                       action, not the aspiration. */}
                   {`Book a call about a ${band.name.toLowerCase()}`}
+                  <NewTabHint />
                 </a>
               )}
             </article>
