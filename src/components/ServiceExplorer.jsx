@@ -6,6 +6,7 @@ import { track } from '../lib/analytics.js'
 import { href, servicePath, SERVICE_ID } from '../lib/routes.js'
 import ErrorBoundary from './ui/ErrorBoundary.jsx'
 import Icon from './ui/Icons.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 import StageDiagram from './StageDiagram.jsx'
 
 /* Named so the same import can be awaited for the load status below — module
@@ -68,6 +69,7 @@ function ServiceActions({ item }) {
           onClick={() => track('WhatsApp Click', { placement: `service-${item.id}` })}
         >
           {`or WhatsApp us about ${item.short}`}
+          <NewTabHint />
         </a>
       )}
     </>
