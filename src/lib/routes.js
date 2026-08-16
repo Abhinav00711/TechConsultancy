@@ -38,7 +38,12 @@ const SERVICES_HUB_PATH = /\/services\/?$/
    /services/crm/ is always two levels down, whatever prefix precedes it. */
 export function rootPrefix(pathname = window.location.pathname) {
   pathname = normalize(pathname)
-  if (SERVICE_PATH.test(pathname)) return '../../'
+  const match = SERVICE_PATH.exec(pathname)
+  // Only a slug that resolves counts as a service page. currentRoute() renders
+  // the HOME tree for /services/nope/ (dev-server fallback; production 404s at
+  // the host), so agreeing with it here keeps every relative href on that
+  // rendered home tree correctly rooted instead of pointing two levels up.
+  if (match) return services.some((s) => s.id === match[1]) ? '../../' : ''
   if (PRIVACY_PATH.test(pathname) || SERVICES_HUB_PATH.test(pathname)) return '../'
   return ''
 }

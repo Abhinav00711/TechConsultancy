@@ -33,7 +33,7 @@ export default function StickyCtaBar() {
       {site.bookingUrl && (
         <a
           href={bookingHref('sticky-mobile')}
-          className="btn btn-primary"
+          className="btn btn-primary btn-sm"
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => track('Booking Click', { placement: 'sticky-mobile' })}
@@ -41,13 +41,16 @@ export default function StickyCtaBar() {
           Book a Free Call
         </a>
       )}
+      {/* Same accessible name as the FAB this bar replaces below 820px — the
+          same function announcing differently at a breakpoint reads as a
+          different control (WCAG 3.2.4). */}
       {site.whatsappLink && (
         <a
           className="sticky-cta-wa"
           href={site.whatsappLink}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Chat with us on WhatsApp"
+          aria-label="WhatsApp us — opens a chat in a new tab"
           onClick={() => track('WhatsApp Click', { placement: 'sticky-mobile' })}
         >
           <Icon name="whatsapp" />

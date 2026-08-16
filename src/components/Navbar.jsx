@@ -162,7 +162,7 @@ export default function Navbar() {
           <div className="navbar-actions">
             <ThemeToggle />
 
-            <NavCta className="btn btn-primary nav-cta" />
+            <NavCta className="btn btn-primary btn-sm nav-cta" />
 
             <button
               ref={burgerRef}

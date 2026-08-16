@@ -11,7 +11,9 @@ export default function Hero() {
     <section id="home" className="hero">
       <div className="container hero-inner">
         <div>
-          <p className="hero-badge">{hero.badge}</p>
+          {/* The section-tag device in the dim register — .hero-badge only
+              recolors it. */}
+          <p className="section-tag hero-badge">{hero.badge}</p>
 
           <h1 className="hero-title">
             {hero.titleTop}

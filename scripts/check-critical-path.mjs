@@ -43,9 +43,10 @@ const CSS_BUDGET_GZIP = 9 * 1024
 // Fonts are the third leg — for a while they were the LARGEST payload on a
 // cold load (84 KB across four woff2 files, more than the entire entry JS)
 // and nothing measured them, so subsetting wins could silently regress.
-// Measured 64.4 KB after the signature-italic subset landed; ~10% headroom.
+// Measured 64.4 KB after the signature-italic subset landed, 53.3 KB after
+// the JetBrains Mono unicode subsets (see src/index.css); ~10% headroom.
 // woff2 is already compressed, so raw bytes are what ships.
-const FONT_BUDGET = 71 * 1024
+const FONT_BUDGET = 59 * 1024
 
 const fail = (msg) => {
   console.error(`\ncheck-critical-path: ${msg}\n`)

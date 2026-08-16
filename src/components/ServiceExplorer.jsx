@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'
@@ -40,7 +40,7 @@ function ServiceActions({ item }) {
     <>
       <a
         href="#contact"
-        className="btn btn-primary showcase-cta"
+        className="btn btn-primary btn-sm showcase-cta"
         onClick={() => {
           prefillService(item.formOption)
           track('Service CTA Click', { service: item.title })
@@ -51,7 +51,7 @@ function ServiceActions({ item }) {
       {/* The ledger is a summary; this is the page that can actually rank for
           the service. Descriptive anchor text on purpose. */}
       <a
-        className="btn btn-ghost showcase-detail"
+        className="btn btn-ghost btn-sm showcase-detail"
         href={href(servicePath(item.id))}
         onClick={() => track('Service Page Click', { service: item.title })}
       >
@@ -91,14 +91,14 @@ export default function ServiceExplorer() {
   // failure were indistinguishable to a screen reader (WCAG 4.1.3).
   const [sceneState, setSceneState] = useState('idle')
 
-  const engageScene = () => {
+  const engageScene = useCallback(() => {
     setEngaged(true)
     setSceneState('loading')
     loadScenes().then(
       () => setSceneState('ready'),
       () => setSceneState('error'),
     )
-  }
+  }, [])
 
   // Hover/focus on the load button is intent enough to start the ~270 KB
   // download early — measured click→canvas was ~2.5-4 s, mostly fetch time
@@ -123,19 +123,23 @@ export default function ServiceExplorer() {
       setActive(i)
       setCollapsed(false)
       // Arriving on a service deep link is an explicit request for that
-      // service's diagram, so this one still loads the scenes.
-      setEngaged(true)
-      setSceneState('loading')
-      loadScenes().then(
-        () => setSceneState('ready'),
-        () => setSceneState('error'),
-      )
+      // service's diagram, so this one still loads the scenes — but only on
+      // devices where the stage can mount. A constrained device keeps
+      // stageReady false forever, so engaging here made it fetch ~270 KB
+      // gzip of WebGL for a canvas that never renders, then announce
+      // "Interactive diagram loaded." over an empty spot.
+      if (!isConstrained()) engageScene()
+      // #services-<id> matches no element id, so the browser never moves the
+      // sequential-focus start point on its own; without this, a keyboard
+      // visitor following the link is looking at the open row while their
+      // Tab position is still wherever the link was.
+      document.getElementById(`sa-trigger-${match[1]}`)?.focus({ preventScroll: true })
       document.getElementById('services')?.scrollIntoView()
     }
     apply()
     window.addEventListener('hashchange', apply)
     return () => window.removeEventListener('hashchange', apply)
-  }, [])
+  }, [engageScene])
 
   /* Opening a row further down the list closes a taller one above it, which
      would yank the tapped row up the screen. Measure the trigger before and

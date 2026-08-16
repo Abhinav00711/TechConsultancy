@@ -19,6 +19,12 @@ on:
 permissions:
   contents: read
 
+# A force-push or rapid follow-up commit to the same PR should cancel the
+# now-obsolete run instead of queueing a second full Chromium build behind it.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -41,3 +47,8 @@ jobs:
       - run: npm run build
         env:
           PRERENDER_STRICT: '1'
+      # Hydration smoke test over the freshly prerendered dist/: every route
+      # must boot with zero console/page errors, hydrate, keep exactly one H1,
+      # parse its JSON-LD, and keep the contact form, roadmap generator and
+      # #services-crm deep link actually interactive (scripts/smoke.mjs).
+      - run: npm run smoke

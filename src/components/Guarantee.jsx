@@ -35,6 +35,18 @@ export default function Guarantee() {
             </div>
             <span className="guarantee-signed-note">{guarantee.signedNote}</span>
           </div>
+          {/* The filing line and stamp — the document furniture that makes
+              this read as a kept record rather than a marketing card. */}
+          <div className="filing guarantee-filing">
+            <span className="filing-fields">
+              {guarantee.filing.map(([field, value]) => (
+                <span key={field}>
+                  {field} <b>{value}</b>
+                </span>
+              ))}
+            </span>
+            <span className="stamp">{guarantee.stamp}</span>
+          </div>
         </div>
       </div>
     </section>

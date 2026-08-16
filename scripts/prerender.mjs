@@ -500,7 +500,7 @@ try {
             // either way, but declaring it here means the browser can start
             // that download at first paint instead of after the deferred
             // stylesheet arrives. Non-latin subsets stay in the deferred sheet.
-            if (/(fraunces-latin-600|jetbrains-mono-latin-400)-normal/.test(src)) extras += rule.cssText
+            if (/(fraunces-latin-600|jetbrains-mono-subset-400)-normal/.test(src)) extras += rule.cssText
           } else if (rule.constructor.name === 'CSSKeyframesRule') {
             if (new RegExp(`animation[^;}]*\\b${rule.name}\\b`).test(body)) extras += rule.cssText
           }
@@ -723,12 +723,29 @@ try {
     '',
     '## Other pages',
     '',
-    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in under a minute.`,
+    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in about 40 seconds.`,
     `- [Privacy policy](${site.origin}/privacy/): what the site collects (cookieless analytics only) and what it does not.`,
     '',
   ].join('\n')
   await writeFile(join(dist, 'llms.txt'), llms)
   console.log(`prerender: wrote llms.txt (${services.length} services indexed)`)
+
+  // check-critical-path.mjs runs BEFORE this script, so its no-WebGL-preload
+  // assertion only ever sees the pre-prerender shell. The snapshots below
+  // rewrite and inject <link rel="modulepreload"> tags of their own — if a
+  // future change mounts anything three-adjacent during the snapshot, every
+  // page would ship a high-priority WebGL preload with no assertion failing.
+  // Re-run the same scan over what was actually written.
+  for (const route of routes) {
+    const written = await readFile(join(dist, route.out), 'utf8')
+    for (const [, href] of written.matchAll(/<link[^>]*rel="modulepreload"[^>]*href="([^"]+)"/g)) {
+      const name = href.split('/').pop()
+      if (name.startsWith('three-') || name.startsWith('r3f-')) {
+        throw new Error(`prerendered dist/${route.out} preloads a WebGL chunk (${name}) — the stage leaked into the snapshot`)
+      }
+    }
+  }
+  console.log(`prerender: no WebGL preloads in any of the ${routes.length} written pages`)
 } finally {
   await browser.close()
   server.close()

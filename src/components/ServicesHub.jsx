@@ -6,6 +6,7 @@ import { setMeta } from '../lib/head.js'
 import { href, servicePath } from '../lib/routes.js'
 import Navbar from './Navbar.jsx'
 import Contact from './Contact.jsx'
+import RoadmapGenerator from './RoadmapGenerator.jsx'
 import CtaBand from './CtaBand.jsx'
 import Footer from './Footer.jsx'
 import WhatsAppFab from './WhatsAppFab.jsx'
@@ -192,19 +193,19 @@ export default function ServicesHub() {
 
         {/* The exit for a visitor who read all six and still can't choose —
             the generator answers that in forty seconds without an email, and
-            a call answers it with a person. */}
+            a call answers it with a person. Mounted inline: this used to be
+            the one commercial page where reaching the site's best conversion
+            instrument required a full navigation back to the home page, for
+            a component six other pages already embed (and one the entry
+            chunk already ships — zero added bytes here). */}
         <section className="section">
           <div className="container hub-unsure">
             <h2 className="section-title">{servicesHub.unsureTitle}</h2>
             <p className="section-sub">{servicesHub.unsureText}</p>
+            <div className="service-roadgen">
+              <RoadmapGenerator />
+            </div>
             <div className="service-hero-actions">
-              <a
-                href={`${href('#home')}#roadgen`}
-                className="btn btn-primary"
-                onClick={() => track('Roadmap CTA Click', { placement: 'hub' })}
-              >
-                {servicesHub.unsureCta}
-              </a>
               {site.bookingUrl && (
                 <a
                   href={bookingHref('services-hub')}

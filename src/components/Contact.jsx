@@ -76,6 +76,11 @@ export default function Contact() {
       })
       form.reset()
       setService('')
+      // The reset starts a fresh enquiry, so prefills are welcome again — a
+      // stale `touched` here silently ignored every later service CTA and
+      // roadmap generate for the rest of the session, leaving the form stuck
+      // at "Select a service…".
+      serviceTouched.current = false
     } catch (error) {
       setStatus('error')
       // Same reason as the roadmap's send error: an untracked catch makes a
@@ -246,7 +251,9 @@ export default function Contact() {
               <div role="status" aria-live="polite">
                 {status === 'sent' && (
                   <div className="form-success">
-                    ✓ Thanks! Your message is on its way — we’ll reply within 24 hours.
+                    {/* Restates what the submit button just sold — the one
+                        moment to make the promise concrete, not drop it. */}
+                    ✓ Thanks! A founder replies within 24 hours, and your written plan follows within 48.
                     {site.whatsappLink && (
                       <>
                         {' '}
