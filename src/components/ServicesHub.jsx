@@ -4,15 +4,12 @@ import { servicePages } from '../data/service-pages.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { setMeta } from '../lib/head.js'
 import { href, servicePath } from '../lib/routes.js'
-import Navbar from './Navbar.jsx'
 import Contact from './Contact.jsx'
 import RoadmapGenerator from './RoadmapGenerator.jsx'
 import CtaBand from './CtaBand.jsx'
-import Footer from './Footer.jsx'
-import WhatsAppFab from './WhatsAppFab.jsx'
-import StickyCtaBar from './StickyCtaBar.jsx'
 import Icon from './ui/Icons.jsx'
 import NewTabHint from './ui/NewTabHint.jsx'
+import PageShell from './ui/PageShell.jsx'
 
 /* /services/ — the parent the six service pages never had.
    Three jobs, in order of how much they matter:
@@ -82,13 +79,7 @@ export default function ServicesHub() {
   }, [])
 
   return (
-    <>
-      <a href="#main" className="skip-link">
-        Skip to content
-      </a>
-      <div className="ambient" />
-      <Navbar />
-      <main id="main" tabIndex={-1}>
+    <PageShell>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd() }} />
 
         <header className="service-hero">
@@ -243,10 +234,6 @@ export default function ServicesHub() {
 
         <CtaBand />
         <Contact />
-      </main>
-      <Footer />
-      <WhatsAppFab />
-      <StickyCtaBar />
-    </>
+    </PageShell>
   )
 }
