@@ -1622,3 +1622,36 @@ thead .hub-num, tbody .hub-num { text-align: right; }
    layers just fill the row's stage panel. */
 .sa-stage-slot { position: absolute; inset: 0; }
 .sa-stage-host { position: absolute; inset: 0; }
+
+/* ═══════════ APPENDED: static SVG resting state for the stage ═══════════
+   Appended as a self-contained block — the rest of this file is being
+   refactored in parallel; appended blocks merge cleanly.
+
+   StageDiagram's hairline sketches: shown before a scene is engaged, as
+   the permanent stage on constrained devices, and when the WebGL chunk
+   fails. The stage panel is dark in BOTH themes, so the palette is pinned
+   here rather than following the page theme: the stage's own ink, and the
+   dark-palette oxide (#e2735a) — the light-theme oxide (#b03a20) all but
+   vanishes on the dark panel. Purely decorative (aria-hidden). */
+.stage-diagram {
+  position: absolute;
+  inset: 0;
+  --sd-ink: var(--stage-ink);
+  --sd-oxide: #e2735a;
+}
+.stage-diagram svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 16px 20px;
+}
+/* Under the load control the sketch is a backdrop, not the subject — dim it
+   so the button text stays the loudest thing on the stage. */
+.showcase-canvas:has(.canvas-load) .stage-diagram { opacity: 0.55; }
+/* Static-stage label: same frame as the live label, but the verify-teal
+   "live" dot becomes an oxide one — teal is reserved for things that are
+   genuinely running (see --verify's comment). */
+.showcase-canvas-label.static::before { color: #e2735a; }
+@media (prefers-reduced-motion: no-preference) {
+  .stage-diagram svg { transition: opacity 0.2s ease; }
+}
