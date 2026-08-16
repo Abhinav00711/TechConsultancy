@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { explorer, hero, pricing, roadmap, services, servicesHub, site } from '../src/data/content.js'
+import { about, explorer, hero, pricing, roadmap, services, servicesHub, site } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
@@ -748,12 +748,44 @@ try {
   // this whole build pipeline exists to be read by AI crawlers, so its absence
   // was an odd gap. Generated from the same content the pages render, beside
   // the sitemap, so a seventh service appears here without anyone remembering.
+  //
+  // The figures below used to be typed in by hand — a ₹ band, a founder
+  // count, a service count and a speed claim that were free to disagree with
+  // the site the moment content.js changed. Each is now derived from the same
+  // export the pages render from, and every derivation fails the build loudly
+  // if the copy drifts out from under it, rather than shipping a stale claim
+  // to exactly the crawlers this file exists to inform.
+
+  // '₹75k' / '₹1.5 L' / '₹8 L+' (fmtLakh's notation in pricing.bands) → a
+  // rupee amount, plus whether the band is open-ended.
+  const rupeeValue = (token) => {
+    const match = /^₹([\d.]+)\s*(k|L)(\+?)$/.exec(token)
+    if (!match) throw new Error(`prerender: cannot parse '${token}' from pricing.bands for llms.txt`)
+    return { value: Number(match[1]) * (match[2] === 'k' ? 1e3 : 1e5), open: match[3] === '+' }
+  }
+  // Full Indian digit grouping (₹8,00,000) rather than the site's lakh
+  // shorthand: this file is read by answer engines worldwide, which cannot be
+  // assumed fluent in '₹8 L'.
+  const inr = (amount) => `₹${amount.toLocaleString('en-IN')}`
+  const bandLow = rupeeValue(pricing.bands[0].range.split('–')[0])
+  const bandHigh = rupeeValue(pricing.bands.at(-1).range.split('–').at(-1))
+  const projectRange = `${inr(bandLow.value)}–${inr(bandHigh.value)}${bandHigh.open ? '+' : ''} INR`
+
+  const countWord = (n) => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][n] ?? String(n)
+  const founderCount = countWord(about.founders.length)
+  const serviceCount = countWord(services.length)
+
+  // The generator's speed claim, quoted from the hero copy that renders it
+  // ('about 40 seconds') — retiming it there retimes it here.
+  const speedClaim = /about \d+ seconds/.exec(hero.subtitle)?.[0]
+  if (!speedClaim) throw new Error("prerender: hero.subtitle no longer carries an 'about N seconds' claim — update llms.txt generation")
+
   const llms = [
     `# ${site.name} ${site.suffix}`,
     '',
     `> Founder-led technology consultancy in Kolkata, India. AI integration, custom CRM and ERP`,
     `> systems, web and API development, cloud and DevOps. Every engagement is run directly by`,
-    `> the two founders. Indicative project range ₹75,000–₹8,00,000+ INR; a fixed itemised quote`,
+    `> the ${founderCount} founders. Indicative project range ${projectRange}; a fixed itemised quote`,
     `> is prepared free after a discovery call. Clients keep 100% of the code.`,
     '',
     `- Contact: ${site.email} · ${site.phone}`,
@@ -762,7 +794,7 @@ try {
     '',
     '## Services',
     '',
-    `- [All services](${site.origin}/services/): the six compared side by side — what each solves, its indicative ₹ range and typical duration.`,
+    `- [All services](${site.origin}/services/): the ${serviceCount} compared side by side — what each solves, its indicative ₹ range and typical duration.`,
     ...services.map((service) => {
       const page = servicePages[service.id]
       return `- [${page.h1}](${site.origin}/services/${service.id}/): ${page.metaDescription}`
@@ -770,7 +802,7 @@ try {
     '',
     '## Other pages',
     '',
-    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in about 40 seconds.`,
+    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in ${speedClaim}.`,
     `- [Privacy policy](${site.origin}/privacy/): what the site collects (cookieless analytics only) and what it does not.`,
     '',
   ].join('\n')
