@@ -1611,3 +1611,14 @@ thead .hub-num, tbody .hub-num { text-align: right; }
   body.print-roadmap .roadmap-doc [role='status'],
   body.print-roadmap .roadmap-doc [role='status'] * { visibility: hidden; }
 }
+
+/* ═══════════ APPENDED: persistent 3D stage (GPU-disposal fix) ═══════════
+   Appended as a self-contained block on purpose — the rest of this file is
+   being refactored in parallel; appended blocks merge cleanly.
+
+   The one WebGL <canvas> lives inside a stable .sa-stage-host element that
+   is MOVED between accordion rows (ServiceExplorer's <StageMount>) instead
+   of remounting per row, so its GL context survives row switches. Both
+   layers just fill the row's stage panel. */
+.sa-stage-slot { position: absolute; inset: 0; }
+.sa-stage-host { position: absolute; inset: 0; }

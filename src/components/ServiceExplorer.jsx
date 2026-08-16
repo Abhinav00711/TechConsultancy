@@ -1,4 +1,5 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { explorer, services, site, waLink } from '../data/content.js'
 import { isConstrained } from '../lib/perf.js'
 import { track } from '../lib/analytics.js'
@@ -72,6 +73,27 @@ function ServiceActions({ item }) {
   )
 }
 
+/* The slot inside the open row that the persistent stage element docks into.
+   `appendChild` MOVES the host if it is already parented elsewhere, and a
+   <canvas> keeps its WebGL context across DOM reparenting — which is the
+   whole point: the previous structure mounted a fresh <Canvas> inside every
+   newly-opened row, so each row switch destroyed the GL context and built a
+   new one (measured: 14 contexts and a full ~20-program shader recompile +
+   env-map re-bake over 12 switches, 2-5 s to first frame each time, with
+   the dead scene graphs lingering until GC). One canvas, moved between
+   rows, switches scenes inside a live context instead. */
+function StageMount({ host }) {
+  const slotRef = useRef(null)
+  useLayoutEffect(() => {
+    const slot = slotRef.current
+    slot.appendChild(host)
+    return () => {
+      if (host.parentNode === slot) slot.removeChild(host)
+    }
+  }, [host])
+  return <div className="sa-stage-slot" ref={slotRef} />
+}
+
 export default function ServiceExplorer() {
   const [active, setActive] = useState(0)
   // The visitor collapsed the open row. `active` stays valid for deep links.
@@ -90,6 +112,14 @@ export default function ServiceExplorer() {
   // gradient and then say nothing for the ~280 KB download, so success and
   // failure were indistinguishable to a screen reader (WCAG 4.1.3).
   const [sceneState, setSceneState] = useState('idle')
+  // The stable DOM element the one <Canvas> lives in for the whole session.
+  // Rows dock it via <StageMount>; the canvas itself never remounts on a row
+  // switch, so its WebGL context, compiled shaders and baked env map survive.
+  const stageHost = useMemo(() => {
+    const el = document.createElement('div')
+    el.className = 'sa-stage-host'
+    return el
+  }, [])
 
   const engageScene = useCallback(() => {
     setEngaged(true)
@@ -262,11 +292,7 @@ export default function ServiceExplorer() {
                   {open && stageReady && (
                     engaged ? (
                       <div className="showcase-canvas sa-canvas" aria-hidden="true">
-                        <ErrorBoundary fallback={<div className="canvas-fallback" />}>
-                          <Suspense fallback={<div className="canvas-fallback" />}>
-                            <ShowcaseCanvas scene={s.id} />
-                          </Suspense>
-                        </ErrorBoundary>
+                        <StageMount host={stageHost} />
                         <div className="showcase-canvas-label">{s.sceneLabel}</div>
                       </div>
                     ) : (
@@ -295,6 +321,25 @@ export default function ServiceExplorer() {
             )
           })}
         </div>
+
+        {/* The one <Canvas>, rendered through a portal into the stable host
+            element the open row is currently docking. Mounted while a row is
+            open and the visitor has engaged the demos; switching rows only
+            changes the `scene` prop, so the previous scene's meshes unmount
+            (r3f disposes their geometries; Cable/Fibre dispose their own)
+            while the context, shared materials, compiled programs and the
+            baked studio env map are reused. Collapsing the open row unmounts
+            the canvas entirely — r3f then disposes the scene and force-loses
+            the context, returning the GPU to an idle page. */}
+        {stageReady && engaged && openIndex !== -1 &&
+          createPortal(
+            <ErrorBoundary fallback={<div className="canvas-fallback" />}>
+              <Suspense fallback={<div className="canvas-fallback" />}>
+                <ShowcaseCanvas scene={services[openIndex].id} />
+              </Suspense>
+            </ErrorBoundary>,
+            stageHost,
+          )}
       </div>
     </section>
   )
