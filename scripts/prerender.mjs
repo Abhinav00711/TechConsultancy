@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process'
 import { dirname, extname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
-import { explorer, hero, pricing, roadmap, services, servicesHub, site } from '../src/data/content.js'
+import { about, explorer, hero, pricing, roadmap, services, servicesHub, site } from '../src/data/content.js'
 import { servicePages } from '../src/data/service-pages.js'
 
 const dist = fileURLToPath(new URL('../dist', import.meta.url))
@@ -121,8 +121,10 @@ const assertContent = async () => {
 
 // Routes to snapshot. assetPrefix replaces the build's './' asset references
 // so nested pages still resolve ../assets/… correctly on GitHub Pages.
-// Order matters: dist/index.html is the SPA shell every route loads from, so
-// it must be overwritten LAST.
+// Order decides the write/log order only: routes render concurrently against
+// the in-memory shell (read once, below) and nothing is written to dist until
+// every route has rendered. dist/index.html — the SPA shell — still goes last
+// by convention.
 //
 // The six service routes are the site's only indexable service URLs — the home
 // page's services ledger is one URL for all six, which cannot rank for any of them.
@@ -335,7 +337,11 @@ const criticalFonts = CRITICAL_FONTS.map((pattern) => {
 
 const browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] })
 try {
-  for (const route of routes) {
+  // Render one route and RETURN its final HTML — no writes here. Keeping the
+  // render pure with respect to dist means a failure in any route (thrown by
+  // the guards below) aborts the build before a single byte is overwritten,
+  // and lets several routes render at once without racing on files.
+  const renderRoute = async (route) => {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
     // Reduced motion → sections render in their final, fully visible state
     // instead of mid-animation (the site honours prefers-reduced-motion).
@@ -659,11 +665,52 @@ try {
     if (/127\.0\.0\.1|\blocalhost\b/.test(html)) {
       throw new Error(`prerendered HTML for /${route.path} still references a local address — aborting without overwriting dist`)
     }
+    await page.close()
+    return html
+  }
+
+  // ── Concurrent render, ordered write ────────────────────────────────────
+  // The serial loop spent ~37 s of a ~39 s build in per-page waits
+  // (networkidle, the four critical-CSS passes, the reveal scroll) — nine
+  // routes, one after another. The routes are independent: each renders in
+  // its own page against the fixed in-memory shell. So a small worker pool
+  // renders up to four at once — capped at 4 because every page is a full
+  // Chromium renderer process and CI runners have ~4 cores and limited
+  // memory. Output stays byte-identical to the serial version: each route's
+  // HTML is a pure function of its own DOM, and the writes below happen in
+  // the routes array's order once ALL renders have succeeded. Any failure
+  // marks the pool aborted (no new routes are picked up) and rethrows, so a
+  // broken page still fails the build loudly — now before anything is
+  // written at all.
+  const CONCURRENCY = Math.max(1, Math.min(4, Number(process.env.PRERENDER_CONCURRENCY) || 4, routes.length))
+  const rendered = new Map()
+  let nextRoute = 0
+  let aborted = false
+  const outcomes = await Promise.allSettled(
+    Array.from({ length: CONCURRENCY }, async () => {
+      while (!aborted) {
+        const index = nextRoute
+        nextRoute += 1
+        if (index >= routes.length) return
+        const route = routes[index]
+        try {
+          rendered.set(route, await renderRoute(route))
+        } catch (error) {
+          aborted = true // let the other workers finish their current route and stop
+          throw error
+        }
+      }
+    }),
+  )
+  const failure = outcomes.find((outcome) => outcome.status === 'rejected')
+  if (failure) throw failure.reason
+
+  for (const route of routes) {
+    const html = rendered.get(route)
     const outPath = join(dist, route.out)
     await mkdir(dirname(outPath), { recursive: true })
     await writeFile(outPath, html)
     console.log(`prerender: wrote dist/${route.out} (${(html.length / 1024).toFixed(0)} KB) using ${executablePath}`)
-    await page.close()
   }
 
   // Generate the sitemap from the routes actually written, rather than
@@ -701,12 +748,44 @@ try {
   // this whole build pipeline exists to be read by AI crawlers, so its absence
   // was an odd gap. Generated from the same content the pages render, beside
   // the sitemap, so a seventh service appears here without anyone remembering.
+  //
+  // The figures below used to be typed in by hand — a ₹ band, a founder
+  // count, a service count and a speed claim that were free to disagree with
+  // the site the moment content.js changed. Each is now derived from the same
+  // export the pages render from, and every derivation fails the build loudly
+  // if the copy drifts out from under it, rather than shipping a stale claim
+  // to exactly the crawlers this file exists to inform.
+
+  // '₹75k' / '₹1.5 L' / '₹8 L+' (fmtLakh's notation in pricing.bands) → a
+  // rupee amount, plus whether the band is open-ended.
+  const rupeeValue = (token) => {
+    const match = /^₹([\d.]+)\s*(k|L)(\+?)$/.exec(token)
+    if (!match) throw new Error(`prerender: cannot parse '${token}' from pricing.bands for llms.txt`)
+    return { value: Number(match[1]) * (match[2] === 'k' ? 1e3 : 1e5), open: match[3] === '+' }
+  }
+  // Full Indian digit grouping (₹8,00,000) rather than the site's lakh
+  // shorthand: this file is read by answer engines worldwide, which cannot be
+  // assumed fluent in '₹8 L'.
+  const inr = (amount) => `₹${amount.toLocaleString('en-IN')}`
+  const bandLow = rupeeValue(pricing.bands[0].range.split('–')[0])
+  const bandHigh = rupeeValue(pricing.bands.at(-1).range.split('–').at(-1))
+  const projectRange = `${inr(bandLow.value)}–${inr(bandHigh.value)}${bandHigh.open ? '+' : ''} INR`
+
+  const countWord = (n) => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][n] ?? String(n)
+  const founderCount = countWord(about.founders.length)
+  const serviceCount = countWord(services.length)
+
+  // The generator's speed claim, quoted from the hero copy that renders it
+  // ('about 40 seconds') — retiming it there retimes it here.
+  const speedClaim = /about \d+ seconds/.exec(hero.subtitle)?.[0]
+  if (!speedClaim) throw new Error("prerender: hero.subtitle no longer carries an 'about N seconds' claim — update llms.txt generation")
+
   const llms = [
     `# ${site.name} ${site.suffix}`,
     '',
     `> Founder-led technology consultancy in Kolkata, India. AI integration, custom CRM and ERP`,
     `> systems, web and API development, cloud and DevOps. Every engagement is run directly by`,
-    `> the two founders. Indicative project range ₹75,000–₹8,00,000+ INR; a fixed itemised quote`,
+    `> the ${founderCount} founders. Indicative project range ${projectRange}; a fixed itemised quote`,
     `> is prepared free after a discovery call. Clients keep 100% of the code.`,
     '',
     `- Contact: ${site.email} · ${site.phone}`,
@@ -715,7 +794,7 @@ try {
     '',
     '## Services',
     '',
-    `- [All services](${site.origin}/services/): the six compared side by side — what each solves, its indicative ₹ range and typical duration.`,
+    `- [All services](${site.origin}/services/): the ${serviceCount} compared side by side — what each solves, its indicative ₹ range and typical duration.`,
     ...services.map((service) => {
       const page = servicePages[service.id]
       return `- [${page.h1}](${site.origin}/services/${service.id}/): ${page.metaDescription}`
@@ -723,7 +802,7 @@ try {
     '',
     '## Other pages',
     '',
-    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in about 40 seconds.`,
+    `- [${site.name} ${site.suffix} — home](${site.origin}/): services, pricing bands, the founders, the guarantee, and a roadmap generator that scopes a project in ${speedClaim}.`,
     `- [Privacy policy](${site.origin}/privacy/): what the site collects (cookieless analytics only) and what it does not.`,
     '',
   ].join('\n')
