@@ -72,7 +72,7 @@ export const hero = {
   // "theoretical", the opposite of "scoped and costed before you commit".
   titleBottom: 'proven on paper first.',
   subtitle:
-    'We build the AI, CRM and custom systems that run Indian businesses. Try the roadmap generator — you’re holding a scoped plan in under a minute.',
+    'We build the AI, CRM and custom systems that run Indian businesses. Try the roadmap generator — a scoped plan, on screen, in about 40 seconds.',
   ctaPrimary: 'Start Your Project',
   // Used instead of ctaPrimary when site.bookingUrl is set — a scheduled call
   // is lower-friction than "start a project" for a first-time visitor.
@@ -250,9 +250,11 @@ export const servicesHub = {
   detailTitle: 'The six in detail',
   detailSub: 'Each has its own page: what is included, who it suits, the stack, the phase plan and the questions we get asked most.',
   unsureTitle: 'Still not sure?',
+  // No unsureCta any more: the generator is mounted right here on the hub
+  // instead of linked back to the home page, so the text introduces the
+  // instrument below it rather than selling a navigation.
   unsureText:
-    'Answer two questions and the roadmap generator scopes a dated plan with phases, a ₹ band and a stack — on screen, in about forty seconds, with no email required. Or book a call and we will tell you which of the six you actually need, including when the answer is none of them.',
-  unsureCta: 'Scope it in 40 seconds',
+    'Answer two questions and the roadmap generator scopes a dated plan with phases, a ₹ band and a stack — on screen, in about 40 seconds, with no email required. Or book a call and we will tell you which of the six you actually need, including when the answer is none of them.',
 }
 
 export const services = [
@@ -375,9 +377,12 @@ export const services = [
 export const about = {
   heading: 'Engineering Meets',
   headingAccent: 'Business Strategy',
+  // Founder review requested: the opener now states the two-person structure
+  // as the claim (falsifiable, checkable on any call) instead of the retired
+  // capability adjectives — edit here if the framing overshoots.
   paragraphs: [
-    'Revora Consultancy pairs deep engineering capability with sharp product thinking. We design, build and scale the systems — AI, CRM, ERP, web platforms and APIs — that give ambitious businesses a measurable advantage.',
-    'Based in Kolkata and working with clients across India, every engagement is led directly by our founders: one owns the technology, the other owns the outcome. No layers of account managers, no hand-offs — senior people stay accountable for your result from kickoff to launch.',
+    'Revora is two people, on purpose. One of us writes the code, the other owns whether it moves your numbers — and both of us are on every call, every demo and every decision from kickoff to launch.',
+    'Based in Kolkata and working with clients across India, we design, build and scale the systems ambitious businesses run on — AI, CRM, ERP, web platforms and APIs — with no layers of account managers between you and the people accountable for the result.',
   ],
   founders: [
     {
@@ -440,6 +445,14 @@ export const guarantee = {
   // Rendered as the signature block under the commitments.
   signedBy: ['Abhinav Rathi', 'Abhishek Rathi'],
   signedNote: 'Co-founders, Revora Consultancy · Kolkata',
+  // The filing line + stamp under the signatures — the document devices from
+  // the design direction. No date on purpose: dating the guarantee is a
+  // founder decision (a dated document implies review and renewal).
+  filing: [
+    ['Prepared for', 'Every client'],
+    ['Ref', 'REV-G-01'],
+  ],
+  stamp: 'In force',
 }
 
 // ─── Pricing bands ──────────────────────────────────────────────────────────
@@ -537,7 +550,7 @@ export const faq = {
   tag: 'Questions',
   title: 'Straight',
   titleAccent: 'Answers',
-  // Six additive questions only. Cost, timeline, ownership, support and
+  // Seven additive questions only. Cost, timeline, ownership, support and
   // payments were cut — Pricing and the Guarantee already answer them, and a
   // FAQ that restates the page reads as padding.
   items: [
@@ -560,6 +573,13 @@ export const faq = {
     {
       q: 'Why choose you over a freelancer or a big agency?',
       a: 'You get the two founders — an engineer and an ISB-trained product manager — working on your project directly. Freelancers can be cheap but can also disappear; big agencies hand your project to juniors behind layers of account managers. We’re senior people, accountable by name, at SMB-friendly pricing.',
+    },
+    {
+      // Every metaTitle leads with Kolkata; this answers the objection that
+      // framing creates for the Pune/Bangalore visitor. States nothing not
+      // already claimed elsewhere (remote demos, own-accounts, across India).
+      q: 'We’re not in Kolkata. Does that matter?',
+      a: 'No — most of the work runs remotely anyway: weekly demo calls, WhatsApp and email, with everything built in your own accounts so you can see it live at any time. We’re based in Kolkata and work with clients across India; if a project genuinely needs us in the room, that’s a conversation, not a surcharge surprise.',
     },
     {
       q: 'What’s the smallest way to start?',
@@ -587,7 +607,10 @@ export const ctaBand = {
 export const contact = {
   heading: 'Tell Us What’s',
   headingAccent: 'Slowing You Down',
-  text: 'Tell us about your project — a quick call is free, and so is the first roadmap. We reply within 24 hours.',
+  // "written plan", not "roadmap": the generator's artifact is the roadmap,
+  // the founders' artifact is the plan the formNote below sells. Naming a
+  // third thing here re-created the collision the round-5 rename fixed.
+  text: 'Tell us about your project — a quick call is free, and so is the written plan that follows it. We reply within 24 hours.',
   // Mid-funnel promise shown above the form — the "no call required" path.
   // "Founder-written plan", not "roadmap": the generator already hands over
   // "a roadmap" instantly, so the form must offer a distinct, better artefact

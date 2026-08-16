@@ -284,7 +284,7 @@ export default function ServicePage({ service }) {
           <div className="container service-narrow">
             <div>
               <span className="section-tag">Scope It Yourself</span>
-              <h2 className="section-title">{`A first ${service.short} roadmap, in under a minute`}</h2>
+              <h2 className="section-title">{`A first ${service.short} roadmap, in about 40 seconds`}</h2>
             </div>
             <div className="service-roadgen">
               <RoadmapGenerator defaultProblem={service.id} />

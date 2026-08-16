@@ -50,7 +50,11 @@ export default function Pricing() {
                   rel="noopener noreferrer"
                   onClick={() => track('Booking Click', { placement: `pricing-${band.name.toLowerCase()}` })}
                 >
-                  {`Scope a ${band.name.toLowerCase()}`}
+                  {/* "Book a call", not "Scope": the hub's generator CTA also
+                      says "Scope", and there the same verb opens a 40-second
+                      widget — this one opens a 30-minute calendar. Name the
+                      action, not the aspiration. */}
+                  {`Book a call about a ${band.name.toLowerCase()}`}
                 </a>
               )}
             </article>

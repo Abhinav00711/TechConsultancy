@@ -216,7 +216,10 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
           <button type="submit" className="btn btn-primary">
             {roadmap.generate}
           </button>
-          <span className="roadgen-hint">No email required to see it.</span>
+          {/* The intro two lines up already says "No email required" —
+              repeating it spent the last words before the button on old
+              information. Spend them on the other objection: time. */}
+          <span className="roadgen-hint">On screen in about 40 seconds.</span>
         </div>
       </form>
 
@@ -292,6 +295,13 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
                   required
                   placeholder="you@company.com or +91 …"
                 />
+                {/* The ask-moment used to carry no reason to comply: what the
+                    visitor gets for their contact info was only revealed
+                    AFTER sending. This is the funnel's measured leakiest
+                    step — state the exchange before asking. */}
+                <span className="roadgen-hint">
+                  A founder reads it and replies within 24 hours — no calls unless you ask.
+                </span>
               </div>
               <input type="hidden" name="roadmap" value={summaryFor(doc)} />
               <input type="hidden" name="page" value={pageContext} />
@@ -304,7 +314,7 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
                 className="btn btn-primary"
                 aria-disabled={sendState === 'sending' || undefined}
               >
-                {sendState === 'sending' ? 'Sending…' : 'Send'}
+                {sendState === 'sending' ? 'Sending…' : 'Send to Revora'}
               </button>
               {/* Without this the send was a one-way door: asking for the
                   email unmounted Book and Download, and the error state never
@@ -320,7 +330,10 @@ export default function RoadmapGenerator({ defaultProblem = 'ai' }) {
             </form>
           ) : (
             <div className="roadgen-actions">
-              {sendState === 'idle' && (
+              {/* 'draft' keeps the button too: if the visitor's mail client
+                  never opened, this is otherwise a dead end where the only
+                  recovery is regenerating the plan. */}
+              {(sendState === 'idle' || sendState === 'draft') && (
                 <button
                   type="button"
                   className="btn btn-primary"

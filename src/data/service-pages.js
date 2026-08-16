@@ -303,7 +303,7 @@ export const servicePages = {
   api: {
     metaTitle: 'API Development Company in India — Revora Consultancy, Kolkata',
     metaDescription:
-      'REST and GraphQL API development, payment gateway and ERP integrations, event-driven microservices — documented, monitored and versioned. Kolkata, India.',
+      'REST and GraphQL API development, payment gateway and ERP integrations, event-driven microservices, documented and monitored. Founder-led from Kolkata — fixed itemised quote, you own everything.',
     h1: 'API Development & Systems Integration',
     lede:
       'The connective tissue between your systems: documented REST and GraphQL APIs, payment and logistics integrations, and event-driven services that stay up.',
