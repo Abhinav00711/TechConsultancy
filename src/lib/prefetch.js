@@ -7,9 +7,11 @@
    nothing at all on data-saver or 2g/3g connections: speculative bytes are the
    first thing to cut for the constrained-network audience the site targets. */
 
-import { loadServicePage } from './routes.js'
+import { loadServicePage, SERVICE_ID } from './routes.js'
 
-const SERVICE_URL = /\/services\/[a-z0-9-]+\/?$/
+/* Built from SERVICE_ID, not written out — a third literal of this pattern is
+   exactly the drift the router/deep-link dedupe existed to end. */
+const SERVICE_URL = new RegExp(`/services/${SERVICE_ID}/?$`)
 
 const constrainedNetwork = () => {
   const conn = navigator.connection
