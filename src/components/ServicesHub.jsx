@@ -12,6 +12,7 @@ import Footer from './Footer.jsx'
 import WhatsAppFab from './WhatsAppFab.jsx'
 import StickyCtaBar from './StickyCtaBar.jsx'
 import Icon from './ui/Icons.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* /services/ — the parent the six service pages never had.
    Three jobs, in order of how much they matter:
@@ -233,6 +234,7 @@ export default function ServicesHub() {
                   onClick={() => track('Booking Click', { placement: 'services-hub' })}
                 >
                   Book a Free Discovery Call
+                  <NewTabHint />
                 </a>
               )}
             </div>

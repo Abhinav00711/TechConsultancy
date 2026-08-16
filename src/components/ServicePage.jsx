@@ -15,6 +15,7 @@ import Guarantee from './Guarantee.jsx'
 import RoadmapGenerator from './RoadmapGenerator.jsx'
 import { FaqItem } from './Faq.jsx'
 import Icon from './ui/Icons.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 const ORIGIN = site.origin
 
@@ -158,7 +159,7 @@ export default function ServicePage({ service }) {
                   rel="noopener noreferrer"
                   onClick={() => track('Booking Click', { placement: `service-page-${service.id}` })}
                 >
-                  Book a Free Discovery Call <span aria-hidden>→</span>
+                  Book a Free Discovery Call <NewTabHint /> <span aria-hidden>→</span>
                 </a>
               ) : (
                 <a href="#contact" className="btn btn-primary">
@@ -181,6 +182,7 @@ export default function ServicePage({ service }) {
                   onClick={() => track('WhatsApp Click', { placement: `service-page-${service.id}` })}
                 >
                   {`or WhatsApp us about ${service.short}`}
+                  <NewTabHint />
                 </a>
               )}
             </div>

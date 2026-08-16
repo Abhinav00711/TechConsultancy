@@ -40,7 +40,10 @@ export default function About() {
                           href={f.linkedin}
                           target="_blank"
                           rel="noopener noreferrer"
-                          aria-label={`${f.name} on LinkedIn`}
+                          /* aria-label replaces content, so the new-tab
+                             warning lives in the label — same wording as
+                             ui/NewTabHint.jsx. */
+                          aria-label={`${f.name} on LinkedIn (opens in new tab)`}
                         >
                           <Icon name="linkedin" />
                         </a>

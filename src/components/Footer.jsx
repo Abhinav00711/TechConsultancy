@@ -21,8 +21,11 @@ export default function Footer() {
             <p>Founder-led. Kolkata. Fixed price, first demo in 7 days.</p>
             {site.socials.length > 0 && (
               <div className="footer-socials">
+                {/* aria-label replaces content in the accessible name, so
+                    the new-tab warning goes into the label itself — same
+                    wording as ui/NewTabHint.jsx. */}
                 {site.socials.map((s) => (
-                  <a key={s.label} href={s.url} aria-label={s.label} target="_blank" rel="noopener noreferrer">
+                  <a key={s.label} href={s.url} aria-label={`${s.label} (opens in new tab)`} target="_blank" rel="noopener noreferrer">
                     <Icon name={s.icon} />
                   </a>
                 ))}

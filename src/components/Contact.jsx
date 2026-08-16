@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { contact, services, site } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import Icon from './ui/Icons.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* Form status: idle → sending → sent | draft | error.
    With site.formEndpoint set (e.g. Formspree), submissions POST there.
@@ -114,7 +115,10 @@ export default function Contact() {
                   <Icon name="calendar" />
                 </div>
                 <div>
-                  <strong>Book a Free Discovery Call</strong>
+                  <strong>
+                    Book a Free Discovery Call
+                    <NewTabHint />
+                  </strong>
                   <span>Pick a slot that suits you — 30 minutes, no obligation</span>
                 </div>
               </a>
@@ -131,7 +135,10 @@ export default function Contact() {
                   <Icon name="whatsapp" />
                 </div>
                 <div>
-                  <strong>WhatsApp Us</strong>
+                  <strong>
+                    WhatsApp Us
+                    <NewTabHint />
+                  </strong>
                   <span>Fastest way to reach us — just say hi</span>
                 </div>
               </a>
@@ -257,7 +264,7 @@ export default function Contact() {
                     {site.whatsappLink && (
                       <>
                         {' '}
-                        In a hurry? <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">WhatsApp us</a> for a faster reply.
+                        In a hurry? <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">WhatsApp us<NewTabHint /></a> for a faster reply.
                       </>
                     )}
                   </div>
@@ -274,7 +281,7 @@ export default function Contact() {
                     <a href={`mailto:${site.email}`}>{site.email}</a>
                     {site.whatsappLink && (
                       <>
-                        {' '}or <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">message us on WhatsApp</a>
+                        {' '}or <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer">message us on WhatsApp<NewTabHint /></a>
                       </>
                     )}
                     .
@@ -299,6 +306,7 @@ export default function Contact() {
                   Prefer chat?{' '}
                   <a href={site.whatsappLink} target="_blank" rel="noopener noreferrer" onClick={() => track('WhatsApp Click', { placement: 'form-footer' })}>
                     Message us on WhatsApp
+                    <NewTabHint />
                   </a>{' '}
                   — it’s the fastest way to get a reply.
                 </p>

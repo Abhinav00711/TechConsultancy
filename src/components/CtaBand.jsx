@@ -1,6 +1,7 @@
 import { site, ctaBand, about } from '../data/content.js'
 import { track, bookingHref } from '../lib/analytics.js'
 import { rootPrefix } from '../lib/routes.js'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* Founder photos are stored as root-relative paths; this band also renders
    on /services/<id>/ pages, two directories down, so they need the same
@@ -23,7 +24,7 @@ export default function CtaBand() {
             rel="noopener noreferrer"
             onClick={() => track('Booking Click', { placement: 'cta-band' })}
           >
-            {ctaBand.button} <span aria-hidden>→</span>
+            {ctaBand.button} <NewTabHint /> <span aria-hidden>→</span>
           </a>
         ) : (
           <a href="#contact" className="btn btn-primary">

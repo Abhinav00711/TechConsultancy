@@ -4,6 +4,7 @@ import { track, bookingHref } from '../lib/analytics.js'
 import { href } from '../lib/routes.js'
 import { Logo } from './ui/Icons.jsx'
 import ThemeToggle from './ui/ThemeToggle.jsx'
+import NewTabHint from './ui/NewTabHint.jsx'
 
 /* One primary verb everywhere: the free call. The quote-form ask lives in
    the contact section itself. */
@@ -15,6 +16,7 @@ function NavCta({ className, style, onDone }) {
   return site.bookingUrl ? (
     <a href={bookingHref('nav')} className={className} style={style} target="_blank" rel="noopener noreferrer" onClick={onClick}>
       Book a Free Discovery Call
+      <NewTabHint />
     </a>
   ) : (
     <a href="#contact" className={className} style={style} onClick={onDone}>
