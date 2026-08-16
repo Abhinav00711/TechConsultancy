@@ -42,6 +42,11 @@ jobs:
       - run: npm run build
         env:
           PRERENDER_STRICT: '1'
+      # Last gate before publish: load every prerendered route in a real
+      # (hydrating) browser and refuse to deploy a build whose pages error,
+      # lose their H1/JSON-LD, or hydrate without working interactivity
+      # (scripts/smoke.mjs).
+      - run: npm run smoke
       - uses: actions/configure-pages@v5
         with:
           # Enables GitHub Pages for the repo on first run (source: GitHub Actions)

@@ -20,9 +20,13 @@ import { currentRoute, loadPrivacyPage, loadServicePage, loadServicesHub, rootPr
 // signature strings in the Guarantee, so the shipped file is a 2.7 KB subset
 // (vs 22.9 KB for full latin) declared in index.css — see the @font-face
 // there for the regeneration command.
+//
+// JetBrains Mono 400/600 are likewise NOT imported from @fontsource: mono
+// only ever renders UI strings (badges, labels, numerals, generator legends —
+// never user-typed text), so index.css declares unicode-subset files
+// (~16.5 KB each vs ~21.5 KB full latin) — see the @font-face pair there for
+// the glyph set and regeneration command.
 import '@fontsource/fraunces/latin-600.css'
-import '@fontsource/jetbrains-mono/latin-400.css'
-import '@fontsource/jetbrains-mono/latin-600.css'
 
 import './index.css'
 
